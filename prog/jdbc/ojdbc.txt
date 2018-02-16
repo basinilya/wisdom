@@ -1,0 +1,28 @@
+Q: cast TIMESTAMP to DATE
+A: (ts+0), not TO_DATE(ts)
+
+
+setTimestamp:
+
+1)
+setTimestamp(int, TimeStamp) != setTimestamp(int, TimeStamp, (Calendar)null)
+
+2)
+prepareStatement("select ? from dual")
+!=
+prepareStatement("select (?+0) from dual")
+
+
+prepareStatement("select dump(?) from dual");
+setTimestamp(1, ts);
+->
+Typ=180 (internal TIMESTAMP)
+
+prepareStatement("select dump(?+0) from dual");
+setTimestamp(1, ts);
+->
+Typ=13 (DATE ?)
+
+3)
+date - date = java.math.BigDecimal
+timestamp - timestamp = oracle.sql.INTEVALDS

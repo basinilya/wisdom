@@ -1,0 +1,27 @@
+install
+- pentaho bi server
+- schema workbench
+
+copy missing jdbc driver jars to tomcat/lib
+
+edit pentaho-solutions/system/publisher_config.xml
+  <publisher-password>password</publisher-password>
+
+start server
+http://localhost:8080/pentaho/
+login:    joe
+password: password
+
+File/Manage/Data Sources "+"
+  Source type: database
+    Connection "+"
+      Connection Name "testconn"
+      Test
+      OK
+    Cancel
+
+schema workbench
+  open schema
+  publish
+    Pentaho or JNDI Data Souce "testconn"
+

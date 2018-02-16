@@ -1,0 +1,66 @@
+Q: compare numbers
+A: 
+
+Q: cast to number
+A: No way, even 0+$s don't work
+
+Q: array size
+A: @a in scalar context
+
+Q: pass array
+A: 
+    mysub(@a);
+    is the same thing as
+    mysub($a[0], $a[1], $a[2], ...);
+
+    use references, if want to pass two arrays
+
+: ?
+A:
+use Data::Dumper;
+print Dumper($foo, $bar);
+
+Q: replace
+A:
+$x = "Time to feed the cat!";
+$x =~ s/cat/hacker/;   # $x contains "Time to feed the hacker!"
+
+Q: break
+A: last
+
+Q   interactive mode
+A:
+    perl -d -e 1
+    or even
+    rlwrap perl -d -e 1
+
+
+Q: exact match regex
+A:
+set -- perl -e 'my $word = $ARGV[1]; my $exact = qr/\Q$word\E/; $exact = substr($exact,index($exact,":")+1, -1); print $exact;' x x 'obj.method()'
+
+    \Q quote (disable) pattern metacharacters till \E or
+    end of string
+    \E	end either case modification or quoted section
+    (whichever was last seen)
+
+Q:
+A:
+ ѕроблемы с LWP::Useragent протокола https и ошибка "501 Not Implemented"
+Ќу вот и € нарвалс€ на странную работу модул€ LWP::Useragent через прокси, а именно по https запросу, проксик выдал "501 Not Implemented"
+но это если объ€вить работу через прокси
+
+$ua->proxy(['http', 'https'], 'http://xxxxx.xxx.xxx:3128/');
+
+¬се начинает работать, только если закоментировать объ€вление proxy и определить пр€мо в скрипте переменную среды дл€ прокси:
+
+$ENV{HTTPS_PROXY} = $proxy;
+$ENV{HTTPS_PROXY_USERNAME} = user;
+$ENV{HTTPS_PROXY_PASSWORD} = pass;
+
+”читыва€, что дл€ работы требуетс€ внешн€€ библиотека OpenSSL это вполне логично, откуда ей знать о проксиках объ€вленных в Userageny, но все же это насто€щие грабли! 
+
+
+Q:
+^sub ([^ ]*) \{
+sub \1 {\n  ::mytrace_wrapper("\1", \\&_real_\1, @_);\n}\n\nsub _real_\1 {

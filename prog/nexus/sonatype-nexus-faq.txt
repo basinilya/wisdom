@@ -1,0 +1,10 @@
+sonatype-nexus-faq
+
+Q: default password
+A: admin/admin123
+
+Q: proxy settings
+A: nexus/nexus-2.2-01/bin/jsw/conf/wrapper.conf
+
+wrapper.java.additional.1=-DsocksProxyHost=proxy.acme.com
+wrapper.java.additional.2=-DsocksProxyPort=1080

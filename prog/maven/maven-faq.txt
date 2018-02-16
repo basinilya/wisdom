@@ -1,0 +1,75 @@
+Q: Changes detected - recompiling the module
+A: `mvn -X` look for "Stale source detected"
+
+Q: dependency scope transitive, but not to package to .war
+A: there is no such.
+    <scope>provided</scope> & <optional>true<optional> are similar (known difference in generated MANIFEST.MF)
+    they are both non-transitive
+
+workarounds:
+- In the root project explicitly depend with <scope>provided</scope> (no need to use exclusions)
+or
+- make a meta pom and make every artifact depend on it with <scope>provided</scope>
+
+
+Q: non-standard source and resources location
+A:
+		<sourceDirectory>src</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>resources</directory>
+			</resource>
+		</resources>
+
+
+
+Q: what's so bad about dependency scope system?
+A: 
+- cannot mark test dependencies
+- transitive dependencies (if any) will not be available
+
+
+Q: Is <groupId>org.apache.maven.plugins</groupId> mandatory?
+A: The groupId is optional since org.apache.maven.plugins is the default groupID
+
+Q: dependency tree
+A: mvn dependency:tree
+
+Q: effective pom
+A: mvn help:effective-pom
+
+Q: javax.net.ssl.trustStore
+A: 
+-Djavax.net.ssl.trustStore=C:\BACKUP\USBHDD\Docs\prog\custom.keystore -Djavax.net.ssl.trustStorePassword=password
+Warning! not merged
+
+Q: <skip>true</skip> cannot be overridden using mvn -Dmaven.test.skip=false test
+A:
+<properties>
+<maven.test.skip>true</maven.test.skip>
+</properties>
+
+<plugin>
+<groupId>org.apache.maven.plugins</groupId>
+<artifactId>maven-surefire-plugin</artifactId>
+<configuration>
+<skip>${maven.test.skip}</skip>
+</configuration>
+</plugin>
+
+Q: download artifact to local repo
+
+mvn org.apache.maven.plugins:maven-dependency-plugin:2.1:get -DrepoUrl=http://repo.jenkins-ci.org/public -Dartifact=com.atlassian.jira:jira-rest-api:6.0-OD-09-3
+
+Q: install artifact to local repo
+A: 
+mvn install:install-file -DgroupId=javax.activation -DartifactId=activation -Dversion=1.0.2 -Dpackaging=jar -Dfile=activation-1.0.2.jar
+
+
+Q: install artifact to remote repo
+A: 
+mvn   deploy:deploy-file -Durl=file://///win2008-jira/c$/jira/m2repo -DrepositoryId=foobar -Dpackaging=jar -DgroupId=ru.mikuloff.jira -DartifactId=jira-soap-library -Dversion=3.13.4.1-SNAPSHOT -Dfile=jira-soap-library-3.13.4.1-SNAPSHOT.jar
+
+
+Q: get sources
+A: mvn dependency:sources

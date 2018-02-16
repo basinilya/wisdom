@@ -1,0 +1,17 @@
+*************************************
+Q: list all included makefiles
+A:
+make -n -p | sed -e 's/^\(# makefile (from `\)\(.*\)\(., line .*\)/\2/;t;D' | sort -u
+*************************************
+Q: macros
+A:
+$@ expands to target
+*************************************
+Q: Command substitution
+A: $(shell <cmd>)
+*************************************
+Q: Escape right parenthesis
+A: 
+_RPAR = )
+AAA = $(shell case a in a$(_RPAR) echo b;; esac)
+*************************************
