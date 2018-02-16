@@ -1,0 +1,85 @@
+Q: Stop standby
+A:
+	$ db2haicu -disable
+	You will need to run db2haicu again to enable the instance for HA. Disable HA for the instance 'db2inst1'? [1]
+	1. Yes
+	2. No
+	1
+
+	$ db2 deactivate db PROD_DB
+
+	$ db2stop
+
+
+	To start:
+	startrpnode <standby node> (as root)
+	db2start
+	db2 activate db PROD_DB
+	(wait)
+	db2haicu
+
+Q: determine current primary node
+A: select * FROM TABLE(SYSPROC.ENV_GET_SYS_INFO()) T;
+
+
+
+
+
+
+
+If haicu goes nuts:
+reboot all servers with runlevel 1
+start db2 and hadr manually
+for all servers ONE BY ONE reboot with runlevel 3 and wait for sane hadr status
+
+
+
+Q:
+A: Warning: Cannot uninstall IBM Tivoli System Automation for Multiplatforms (SA MP) when the node is not in "Offline" state or "IW" mode. Please use "stoprpnode" or "stoprpdomain" to change the node state to "Offline".
+
+
+
+Q: uninstall db2haicu
+A: db2haicu -delete
+
+Q: ?
+A:
+
+Added:
+    ps -f $$ $PPID | logger -p notice -t $0
+in /usr/sbin/rsct/sapolicies/db2/*_start.ksh
+
+
+May 22 12:38:40 oktest-prod-db-2 hatsd[1552]: hadms: Using SETTIMEOUT to set timeout to 16 succeeded.
+May 22 12:38:40 oktest-prod-db-2 /usr/sbin/rsct/sapolicies/db2/db2V105_start.ksh: UID        PID  PPID  C STIME TTY      STAT   TIME CMD
+May 22 12:38:40 oktest-prod-db-2 /usr/sbin/rsct/sapolicies/db2/db2V105_start.ksh: root      2232   947  1 12:38 ?        Sl     0:00 /usr/sbin/rsct/bin/IBM.GblResRMd
+May 22 12:38:40 oktest-prod-db-2 /usr/sbin/rsct/sapolicies/db2/db2V105_start.ksh: root      2358  2232  0 12:38 ?        Ss     0:00 /bin/ksh -p /usr/sbin/rsct/sapolicies/db2/db2V105_start.ksh db2inst1 0
+May 22 12:38:40 oktest-prod-db-2 db2V105_start.ksh[2358]: Entered /usr/sbin/rsct/sapolicies/db2/db2V105_start.ksh, db2inst1, 0
+
+root       947     1  0 12:38 ?        Ss     0:00 /sbin/srcmstr
+
+
+
+Q: HADR shuts down due to validation rejection
+A: possible solution: drop standby db before restoring
+
+Q: http://www.ibm.com/support/knowledgecenter/SSEPGG_10.5.0/com.ibm.db2.luw.messages.sql.doc/doc/msql01776n.html
+
+
+Q: SQL1768N  Unable to start HADR. Reason code = "4".
+A: Invalid configuration parameter HADR_LOCAL_HOST.
+
+Q: SQL1770N  Takeover HADR cannot complete. Reason code = "4".
+A: already primary
+
+Q: SQL1770N  Takeover HADR cannot complete. Reason code = "10".
+A: ?
+
+Q: SQL1769N  Stop HADR cannot complete. Reason code = "2".
+A: The user should deactivate the database and then reissue the command.
+
+Q: SQL1767N  Start HADR cannot complete. Reason code = "2".
+A: START HADR AS PRIMARY cannot be issued on an HADR standby database.
+
+Q: SQL1776N  The command cannot be issued on an HADR database. Reason code = "6".
+A: This database is an old primary database. It cannot be started because the standby has become the new primary through forced takeover.

@@ -1,0 +1,58 @@
+Q: source not found
+A: add seemingly unrelated projects to source path
+
+Q: The superclass "javax.servlet.http.HttpServlet" was not found on the Java Build Path	index.jsp	/myweb/src/main/webapp	line 1	JSP Problem
+A: 
+    Maven
+
+    <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.1.0</version>
+        <scope>provided</scope>
+    </dependency>
+
+
+Q: error(s)_during_the_evaluation for watch expression
+A: possibly incomplete classpath. Put a conditional breakpoint and see the error
+
+Q: Alter $PATH at .launch
+A: ${system_property:path.separator}${env_var:PATH}
+
+
+Q: access restriction in rt.jar
+A:
+    Go to the Build Path settings in the project properties.
+    Remove the JRE System Library
+    Add it back; Select "Add Library" and select the JRE System Library. The default worked for me.
+********************************************************************************
+Q: Attribute 'attrname' is not allowed to appear in element 'elem', XML Catalog
+A: 
+  1) Eclipse is right, fix your XML
+  2) download the xsd, add missing attr into it, go to preferences, XML Catalog, 
+     add your modified xsd to it
+     key type: Schema location
+     key     : the original xsd url (if xsi:schemaLocation="a b", use "b" or try both)
+********************************************************************************
+Q: m2eclipse plugin gives NPEs when importing projects
+A: don't use m2eclipse, use mvn eclipse:eclipse
+********************************************************************************
+Q: organize imports, do not expand asterisks
+A:
+    Choose 'Window -> Preferences...' menu.
+    Choose 'Java -> Code Style -> Organize Imports' in the left pane.
+    Set the 'Number of static imports needed for .*' to '1' in the right pane.
+    Click 'OK' button.
+********************************************************************************
+Q: strip javadocs from .java files
+A:
+select projects
+Search->File
+Containing text:
+((?<!\\)"([^"]|(?<=\\)")*")|(/\*\*(?s:(?!\*/).)*\*/)
+Regular expression: checked
+File name patterns: *.java
+Scope: Selected resources
+Replace...
+\1
+********************************************************************************

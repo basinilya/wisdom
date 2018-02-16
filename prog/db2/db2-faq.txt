@@ -1,0 +1,368 @@
+Q: list tables
+A: SYSIBM.SYSTABLES
+    NAME, CREATOR
+
+Q: checkpoint
+A: >>-ARCHIVE LOG FOR--+-DATABASE-+--database-alias
+
+Q: ?
+A: -Ddb2.jcc.propertiesFile=C:/3/temp/jcc.properties
+
+
+Q: drop index
+A: drop index [<schema_name>.]index_name
+
+Q: SQL20054N is in an invalid state for the ... Reason code="23"
+A: "reorg table <tablename>"
+
+
+
+grep -B6 'START   : Automatic' ~/sqllib/db2dump/db2diag*
+
+
+Q: force archive logs
+A: db2 archive log for db prod_db
+
+Q: execution plan
+A: visual "explain"
+
+Q: explain_instance does not exist
+A:
+    db2 connect to STAGE_DB
+    db2 -tvf /opt/IBM/db2/V10.5/misc/EXPLAIN.DDL
+
+Q: sleep
+A: since 9.7: call DBMS_ALERT.WAITONE('SLEEP_BY_SECONDS_NOT_REAL_ALERT',?,?,10);
+
+Q: break
+A: leave L1
+
+Q: automatic maintenance not working
+A:
+    I'm not sure what was wrong, but I got around the problem by re-creating the instance:
+    
+    db2cfexp backupconfig.txt backup
+    db2 stop dbm force
+    db2idrop db2
+    db2icrt db2
+    db2cfimp backupconfig.txt
+    
+    Health evaluation is now working...all my databases and configurations are as they were.
+    
+    Norm
+
+
+Q: get node of a database
+A: db2 list db directory | sed '/^ Database alias *= PROD_DB/,/^$/!d;s/ Node name *= //;t;d'
+
+Q: notification list
+A:
+    db2 get contacts
+    db2 get notification list
+
+    db2 update notification list drop contact contact_name
+
+Q:  1476
+A:  transaction rolled back
+
+Q:  911
+A:  rolled back because of a deadlock or timeou
+
+Q:  see deadlocks
+A:  
+    https://archive.is/i7y8g http://www.dbatodba.com/db2/problem-resolution/locks/applications-getting-lock-timeout-errors/
+
+    db2 update monitor switches using BUFFERPOOL ON
+    db2 update monitor switches using       LOCK ON
+    db2 update monitor switches using       SORT ON
+    db2 update monitor switches using  STATEMENT ON
+    db2 update monitor switches using      TABLE ON
+    db2 update monitor switches using        UOW ON
+    #db2 update monitor switches using  TIMESTAMP ON
+    
+    db2 get snapshot for locks     on PROD_DB >~/my_db_locks
+
+    Application handle                         = 3293
+    Application ID                             = 10.3.2.71.33782.150522093220
+    Sequence number                            = 01792
+    Application name                           = db2jcc_application
+    CONNECT Authorization ID                   = DB2INST1
+    Application status                         = UOW Executing
+    Status change time                         = 05/22/2015 15:20:29.077324
+    Application code page                      = 1208
+    Locks held                                 = 153727
+    Total wait time (ms)                       = 0
+
+    lock...
+
+    db2 get snapshot for application agentid 3293 >~/my_app_snapshot
+
+    
+
+
+Q:  backup history
+A:  db2 list history backup all for STAGE_DB | less -i
+
+Q:  DBI20081E  The installer detected that there is not enough free disk space in
+    "1799408". Free space detected in "2000000" is: "" (measured in kilobytes).
+    Space needed is: "" (measured in kilobytes).
+A:  
+    mkdir -p /opt/tmp
+    chmod 777 /opt/tmp
+    export DB2TMPDIR=/opt/tmp
+
+Q: indexof
+A: LOCATE
+
+Q:
+    IMPORT FROM ... CREATE INTO
+    A row from the input file was not inserted into the table.  SQLCODE "-302" was returned.
+
+A:  LOB column size in created table is the size from the first record and may be too small.
+
+Q:  db2 => RESTORE DATABASE STAGE_DB FROM "/home/db2inst1/backup" TAKEN AT 20150505191608 WITHOUT PROMPTING
+    SQL1035N  The operation failed because the specified database cannot be connected to in the mode requested.  SQLSTATE=57019
+A:  Someone else is also connected to DB
+
+Q: dynamic select
+A:
+    CREATE PROCEDURE xtestarr_proc () DYNAMIC RESULT SETS 1 READS SQL DATA
+    F1: BEGIN
+    	DECLARE SELECT_STATEMENT VARCHAR(8000);
+    	DECLARE cursor1 CURSOR WITH RETURN FOR SQL_STATEMENT;
+    	  
+    	SET SELECT_STATEMENT = 'select NAME FROM SYSIBM.SYSCOLUMNS WHERE 1=1 AND TBNAME = ''CMFILE'' AND TBCREATOR = CURRENT_SCHEMA  ORDER BY COLNO';
+    	PREPARE SQL_STATEMENT FROM SELECT_STATEMENT;
+    	OPEN cursor1;
+    END
+
+Q: receive result set from stored procedure
+A:
+	DECLARE LOC1 RESULT_SET_LOCATOR VARYING;
+	CALL P1();
+	ASSOCIATE RESULT SET LOCATORS (LOC1) WITH PROCEDURE P1;
+	ALLOCATE CUR1 CURSOR FOR RESULT SET LOC1;
+
+Q: xml
+A:
+  SELECT * from
+        XMLTABLE('$po/*/*' PASSING XMLPARSE( DOCUMENT '<r><x>a</x><x>b</x></r>' ) AS "po"
+                 COLUMNS 
+                         "x"        CHAR(10)      PATH '.'
+                 ) AS U
+      ;
+
+
+
+    select X , count(*)
+    FROM (
+    select XMLSERIALIZE(  XMLGROUP(lang, val ORDER BY lang OPTION AS ATTRIBUTES)  AS VARCHAR(32000)) X 
+    from (
+    values
+     (          1,  'fr',    'Rouge'   )
+    ,(          1,  'de',    'Rouge'   )
+    ,(          1,  'it',    'Rosso'   )
+    ,(          2,  'fr',    'Rouge'   )
+    ,(          2,  'de',    'Rouge'   )
+    ,(          2,  'it',    'Rosso'   )
+    ,(          3,  'fr',    'Rouge'   )
+    ,(          3,  'de',    'Rouge'   )
+    ,(          3,  'it',    'Rosso'   )
+    ,(          4,  'fr',    'Rouge'   )
+    ,(          4,  'de',    'Rouge'   )
+    ,(          4,  'pl',    'Czerwony')
+    ) T (item_id  , lang  , val)
+    group by item_id
+    ) T
+    group by X
+    ;
+
+Q: db2 9.5 docs
+A: http://www-01.ibm.com/support/knowledgecenter/SSEPGG_9.5.0/com.ibm.db2.luw.kc.doc/welcome.html
+
+Q: SQLCA has been built and saved in component specific control block.
+A: ?
+
+Q: TOLOWER
+A: LOWER()
+
+Q: The DB2 installer detects the DAS is using the current DB2 copy to be uninstalled
+A: /opt/IBM/db2/V10.5/instance/dasdrop
+
+Q: db2 log
+A: /home/db2inst1/sqllib/db2dump/db2diag.log
+
+Q: list databases
+A: db2 LIST DATABASE DIRECTORY
+
+Q: alter column
+A: alter table t alter column a set data type varchar(100)
+
+Q: rename table
+A: rename A to B;
+
+Q: rename column
+A: ALTER TABLE org RENAME COLUMN deptnumb TO deptnum
+
+Q: set data type CLOB
+A: EXPORT + DROP TABLE + CREATE TABLE + IMPORT
+
+Q: export/import
+A:
+CALL SYSPROC.ADMIN_CMD( 'EXPORT TO "/tmp/ccc" OF IXF METHOD N( STGRFNBR, STGSTMP, STGTABLE, STGOP, STGMENBRNAME, STGMENBR, STGPKEYNAME, STGPKEY, STGKEY1NAME, STGKEY2NAME, STGKEY3NAME, STGKEY4NAME, STGKEY5NAME, STGOKEY1, STGOKEY2, STGOKEY3, STGOKEY4, STGOKEY5, STGNKEY1, STGNKEY2, STGNKEY3, STGNKEY4, STGNKEY5, STGPROCESSED, STGRESERVED1, STGLDPTH, STGLDCOLS, OPTCOUNTER, STGFILTER )  MESSAGES ON SERVER SELECT * FROM DB2INST1.STAGLOG' )
+
+CALL SYSPROC.ADMIN_CMD( 'IMPORT FROM "" OF IXF MESSAGES ON SERVER INSERT INTO DB2ADMIN.STAGLOG' );
+
+Q: timestamp format
+A: just '2015-01-30 18:00:00.0'
+
+Q: database manager parameters
+A: db2 get dbm cfg
+
+Q: db2diag rotate
+A: 9.7+: db2 update dbm cfg using diagsize 50
+immediately starts writing to ~/sqllib/db2dump/db2diag.0.log
+
+Q: lock timeout
+A:
+db2 get db cfg FOR PROD_DB | grep -i locktimeout
+#db2 update db cfg FOR PROD_DB using locktimeout 123
+
+
+Q: db2 get ALTERNATE SERVER FOR DATABASE PROD_DB
+A:
+db2 list db directory | less -i
+look for Alternate server hostname
+
+
+Q: create table as Select / select into
+A:
+Create table new_table like old_table;
+db2 "CREATE TABLE xtest1 AS (select * from sysibm.sysdummy1) WITH NO DATA"
+db2 "CREATE TABLE xtest2 AS ( select * from orders where timeplaced > current_timestamp - (30 days) ) WITH NO DATA"
+The "WITH DATA" is not supported.
+
+Q: estimate database size
+A:
+db2 "connect to STAGE_DB"
+db2 "call GET_DBSIZE_INFO (?,?,?, 0 )"
+
+Q: show current schema
+A: values current_schema;
+
+Q: cast to varchar
+A: RTRIM(CAST(x as CHAR(100)))
+
+Q: db2 version
+A: select * from SYSIBM.SYSVERSIONS
+
+Q:
+DB2 SQL Error: SQLCODE=-585, SQLSTATE=42732
+THE COLLECTION collection-id APPEARS MORE THAN ONCE IN THE SET special-register STATEMENT
+A: duplicate schema in currentFunctionPath in jdbc url
+
+
+Q: FOR BIT DATA constant
+A: x'0123456789ABCDEF'
+
+Q: ???
+A:
+db2cmd -i -w db2clpsetcp
+echo CONNECT TO OASI_DEV | db2
+db2 -tnm
+
+Q: clp command line options
+A: http://www.ibm.com/developerworks/data/library/techarticle/dm-0503melnyk/
+
+'-' enables '+' disables
+
+-s Stop processing if errors occur while executing a command scrip (OFF)
+-t Use a semicolon (;) as the statement termination character. This option disables the backslash (\) line continuation character. (OFF)
+-n Preserve any trailing blank space characters. The -n option must be used with the -t option. (OFF)
+-m Display Number of Rows Affected Option (-m)
+-p- 	Display a prompt when in CLP interactive mode. (ON)
+
+-c	Commit SQL statements automatically. (ON)
+
+-x  return data without any headers, including column names
+
+-v  This option tells the command line processor to echo command text to standard output.
+
+Q: ???
+A:
+clp, Control Center:
+--#SET TERMINATOR ;
+
+data studio:
+--<ScriptOptions statementTerminator=";"/>
+
+
+Q: IBMIM repositories
+A:
+http://www.ibm.com/software/repositorymanager/com.ibm.datatools.aqt.im.offering/repository.xml
+https://www.ibm.com/software/repositorymanager/com.ibm.datastudio.int.e42/
+
+Q: Analog of Oracle anonymous block?
+A: up to 9.5 there's "compound statement":
+    BEGIN ATOMIC
+    DECLARE @RES INTEGER;
+    CALL DB2INST1.CREATE_DOC_ARCH_USER_SCAN_TEMP(191029, 'basin',@RES);
+    INSERT INTO T1 VALUES 'a';
+    END^
+
+limitations: no "EXECUTE IMMEDIATE", even in called SPs
+
+After 9.7 there's "compiled compound statement":
+    BEGIN
+    END^
+
+no limitations
+
+
+
+jdbc: jdbc:db2://tramdepot:50000/oasi_dev:currentSchema=DB2INST1;currentFunctionPath=DB2INST1, current_path;
+:retrieveMessagesFromServerOnGetMessage=true; 
+
+currentRefreshAge=99999999999999
+
+?
+
+
+hadr jdbc:
+jdbc:db2://ec-prod-db-1:50000/PROD_DB:clientRerouteAlternateServerName=ec-prod-db-2;clientRerouteAlternatePortNumber=50000;
+jdbc:db2://ec-prod-db-1:50000/PROD_DB:enableClientAffinitiesList=1;clientRerouteAlternateServerName=ec-prod-db-2;clientRerouteAlternatePortNumber=50000;
+jdbc:db2://ec-prod-db-1:50002/PROD_DB:clientRerouteAlternateServerName=ec-prod-db-2;clientRerouteAlternatePortNumber=50000;
+
+PROD_DB:enableClientAffinitiesList=1;clientRerouteAlternateServerName=ec-prod-db-2;clientRerouteAlternatePortNumber=50000;affinityFailbackInterval=3600;enableSeamlessFailover=1;maxRetriesForClientReroute=3;retryIntervalForClientReroute=2;
+
+
+
+taskkill -IM db2systray.exe
+
+net stop db2mgmtsvc_db2copy1
+net stop db2remotecmd_db2copy1
+net stop db2das00
+net stop DB2-0
+net stop db2
+
+
+C:\\1\\SERVER\\db2\\Windows\\wininst.exe -e exp -i en
+C:\\1\\SERVER\\db2\\Windows\\wininst.exe -e ese -i en
+
+
+[20.06.2014 17:09:36] Ilya Basin:
+--<ScriptOptions statementTerminator="^"/>
+BEGIN ATOMIC
+DECLARE @RES INTEGER;
+CALL DB2INST1.CREATE_DOC_ARCH_USER_SCAN_TEMP(191029, 'basin',@RES);
+END^
+--<ScriptOptions statementTerminator=";"/>
+[20.06.2014 17:10:17] Ilya Basin: А ещё так
+CALL DB2INST1.CREATE_DOC_ARCH_USER_SCAN_TEMP(191029, 'basin',?);
+
+
+
+this only works in studio
+--<ScriptOptions statementTerminator=";"/> 
+
+in control center there's a special text box at the bottom

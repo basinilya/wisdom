@@ -1,0 +1,74 @@
+Q: cvs server: Couldn't open default trigger library: No such file or directory
+A: The server component is not installed
+
+Q: Tray icons flood by cvs lock server
+A: cvs lock server can't start.
+  For diagnostics C:\>
+    cvslock -test
+
+  Possibly, the "cvslock" service prevents another instance from starting.
+  C:\>
+    net stop cvslock
+    sc config cvslock start= disabled
+    rem start "CVSNT Lockserver debug window" /MIN cvslock -systray && cmdow "CVSNT Lockserver debug window" /HID
+    cmdow /RUN /HID cvslock -systray
+
+Q: Ads in commit messages (CVSNT 2.5.05.3744 and later)
+A:
+    Windows Registry Editor Version 5.00
+    
+    [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\CVS\Pserver]
+    "HaveBoughtSuite"="yes"
+
+
+Q:  C:\>cvs server
+    Root C:\foo
+    : no such repositoryd]: C:\foo
+    error
+
+A: 
+- Repo not registered:
+
+    Windows Registry Editor Version 5.00
+    
+    [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\CVS\Pserver]
+    "Repository0"="C:\\foo"
+    "Repository0Name"="C:\\foo"
+    "Repository1"="C:\\bar"
+    "Repository1Name"="C:\\bar"
+
+ or erase the repo directory and recreate it with `cvs init` without the '-n' flag
+
+- CRLF fed to cvs server stdin. Change to LF
+
+Q: local repo
+A:
+    rmdir /S /Q cvs_repository empty_dir work_dir
+    
+    mkdir cvs_repository
+    set CVSROOT=:local:%CD%\cvs_repository
+    cvs init -n
+    
+    mkdir empty_dir
+    cd empty_dir
+    cvs import -mroot myprojects vtag rtag
+    cd ..
+    
+    mkdir work_dir
+    cd work_dir
+    cvs co myprojects
+    cd myprojects
+    
+    type nul>a && type nul>b && type nul>c
+    cvs add a b c
+    
+    cvs commit -mabc
+    
+    echo %date% >d
+    echo %date% >a
+    del b
+    
+    cvs add d
+    cvs rm b
+    
+    cvs commit -macd
