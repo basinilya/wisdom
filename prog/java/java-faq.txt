@@ -1,0 +1,139 @@
+Q: good db for unit tests
+A: hsqldb
+
+Q: xml to DOM
+A:
+    final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    final DocumentBuilder builder = factory.newDocumentBuilder();
+    final Document doc = builder.parse(sUrl);
+
+
+Q: base64
+A: javax.xml.bind.DatatypeConverter.parseBase64Binary
+
+Q: hex string
+A: javax.xml.bind.DatatypeConverter.printHexBinary
+
+Q: md5
+A:
+    hasher = MessageDigest.getInstance("MD5");
+    hasher.update(buf, 0, len);
+    ...
+    final byte[] hash = new byte[16];
+    hasher.digest(hash, 0, 16);
+
+Q: volatile
+A: in java volatile is like c++11 atomics.
+It generates memory barriers and is protected against hardware instruction reordering and cache incoherence
+********************************************************************************
+Q: java.net.useSystemProxies
+A: 
+Eventually it calls the native DefaultProxySelector.getSystemProxy() with parameters:
+"http", "<host>"
+"https", "<host>"
+"ftp", "<host>"
+"socks", "<host>"
+
+Settings are taken from Internet Explorer, but Proxy Auto Configuration script is not used.
+For "socks" scheme to work, "Use the same proxy server for all protocols" should be cleared and a SOCKS server should be filled.
+
+In Proxy Exceptions the wildcards in IP addresses are not supported:
+bad: 192.168.*
+good: 192.168.
+
+
+********************************************************************************
+Q: <T super Foo> vs <T extends Foo>
+A: 
+<T extends Foo>: T is Foo or extends Foo
+
+<? super Foo>: Foo is ? or extends ? or implements ?
+
+super cannot be used in a generic class or generic method declaration. It can only be used in a variable or return type declaration.
+
+
+see: java.util.Collections.copy(List<? super T> dest, List<? extends T> src)
+
+
+********************************************************************************
+Q: socks or http proxy
+A:
+-DsocksProxyHost=proxy -DsocksProxyPort=1080
+-Dhttp.proxyHost=proxy -Dhttp.proxyPort=3128
+********************************************************************************
+Q: 
+A: -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog -Dorg.apache.commons.logging.simplelog.log.com.company=all
+********************************************************************************
+Q: get jar of class
+A: MyClass.class.getProtectionDomain().getCodeSource().getLocation()
+********************************************************************************
+Q: remove lines from string matching pattern
+A: s.replaceAll("(?m)" + pattern + "(\r\n?|\n)", "");
+********************************************************************************
+Q: get .class file java version
+A: 
+javap -v -classpath . ClassFileWithoutExtension | grep "major version"
+    Java 1.2 uses major version 46
+    Java 1.3 uses major version 47
+    Java 1.4 uses major version 48
+    Java 5 uses major version 49
+    Java 6 uses major version 50
+    Java 7 uses major version 51
+    Java 8 uses major version 52
+
+********************************************************************************
+Q: WARNING: Unable to find required classes (javax.activation.DataHandler and javax.mail.internet.MimeMultipart). Attachment support is disabled.
+A: 
+1. download activation.jar http://java.sun.com/javase/technologies/desktop/javabeans/jaf/downloads/index.html
+2. download mail.jar http://java.sun.com/products/javamail/downloads/index.html
+3. add these two jar’s to the project
+********************************************************************************
+Q: Where do I get the correct JNDI names for just deployed beans?
+A: 
+1) Search the file <jboss-instance-location>\log\server.log for the occurance of the string '<Bean-name> in JNDI at ' i.g. 'MyBean in JNDI at '
+2) Alternatively search the JBoss standard output for the occurance of 'to JNDI name' but this will work only for old non-annotated beans
+********************************************************************************
+Q: How do I set a JNDI path for my bean?
+A: 
+1) For annotated, use annotations @RemoteBinding(jndiBinding="<jndi-path>") and @LocalBinding(jndiBinding="<jndi-path>")
+2) For old-format, non-annotated beans, add the element <jndi-name> to jboss.xml:
+<jboss>
+  <enterprise-beans>
+    <session>
+      <ejb-name>MyBean</ejb-name>
+      <jndi-name>AAABBBCCC</jndi-name>
+    </session>
+  </enterprise-beans>
+</jboss> 
+********************************************************************************
+Q: What are the default JNDI paths for beans?
+A: 
+1) For annotated, they are [<ear-name>/]<bean-name>/local and [<ear-name>/]<bean-name>/remote
+2) For old beans, the remote interface binds to just <bean-name>
+********************************************************************************
+Q: EJB3 Message Driven Bean created with NetBeans causes deployment errors. The deployer says something about the 'destination' property
+A: Add annotation: @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/<quename>.queue")
+********************************************************************************
+Q: The @EJB annotation does not work in my client-side app.
+A: It shouldn't and won't. The @EJB annotation uses the resource injection mechanism which works only on EJB containers. Use InitialContext.lookup() method instead.
+********************************************************************************
+Q: Where are the Home interfaces? How do I get the instance of a bean?
+A: Just cast the lookup() method result to the remote interface or better to the common base interface. However you still need the remote interface to be in the classpath.
+********************************************************************************
+Q: Why Netbeans create non-annotated beans via Enterprise Beans->New ?
+A: Your EJB module version might be J2EE1.4. Create a new EJB module with Java EE version 1.5 and add it to the EAR project
+********************************************************************************
+Q: Enterprise Beans->New have two options: Entity Bean and Entity Class. What's the difference? 
+A: It's just a terminology case. Most likely you want the 'Entity Class' which is actually called the 'Entity Bean' by the Jboss users. What's the 'Entity Bean' in respect to Netbeans is not really clear.
+********************************************************************************
+Q: They say that the "same interface" OR "single interface" cannot be both remote and local, but it seems to work
+A: In this case objects returned either by lookup() or set by @EJB resource injection will always be remote. You either should extend a local interface from a remote one, or vise versa, or use one base interface for both of them.
+********************************************************************************
+Q: how to learn wsdl url 
+A: Search the file <jboss-instance-location>\log\server.log for the occurance of the string 'Replace service endpoint address'
+********************************************************************************
+Q: ServiceFactory.createService fails with 'Cannot obtain java type mapping for'
+A: check endpoint interface @SOAPBinding(style=SOAPBinding.Style.RPC)
+********************************************************************************
+Q: debug VM options
+A: -Xrunjdwp:transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n

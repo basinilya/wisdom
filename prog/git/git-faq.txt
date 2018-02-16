@@ -1,0 +1,129 @@
+Q: git diff -w crlf ^M 
+A: git config --global core.pager "tr -d '\r' | less"
+
+Q: which branch contains commit
+A: git branch --contains <commit>
+
+Q: current branch
+A: git rev-parse --abbrev-ref HEAD
+
+Q: set default branch in bare repo
+A: git symbolic-ref HEAD refs/heads/mybranch
+
+Q: crlf on windows
+A: 
+recommended:
+
+[core]
+autocrlf = true
+safecrlf = true
+
+# on cygwin:
+#  autocrlf makes git checkout files in CRLF
+#  despite man page, 'safecrlf true' triggers error even if conversion
+#  reversible, but working copy differs from current eol mode
+
+git config --global core.autocrlf true
+
+.gitattributes
+
+.classpath text
+.project text
+.settings/** text
+*.launch text
+
+
+Q: opposite of --assume-unchanged
+A: git update-index --no-assume-unchanged
+
+Q: How to switch current git branch without updating the working tree?
+A: git symbolic-ref HEAD refs/heads/otherbranch
+
+Q: How do I create a commit without a parent in Git?
+A:
+git checkout --orphan ptrace
+git rm -rf .
+
+
+Q: shared repo
+A:
+git config core.sharedRepository group
+chgrp -R gitwriters .
+
+chmod -R g+rwX .
+# X means set executable only if it's already executable
+
+# setgid bit enforces new files to inherit parent dir's group 
+find . -type d -exec chmod g+rws {} +
+
+********************************************************************************
+Q: run build command for every commit with ability to fix error and continue
+A:
+(
+set -e
+git -c core.editor="sed -i 's/^pick/e/' " rebase -i 100c78517105a572c9dda920d4c1d253447382b5~
+
+while true; do
+    make
+    git rebase --continue
+done
+)
+
+make
+
+(
+set -e
+
+while true; do
+    make
+    git rebase --continue
+done
+)
+
+********************************************************************************
+Q: empty ident not allowed
+A: both GIT_AUTHOR_NAME and GIT_COMMITTER_NAME must be set.
+Git sets them automatically when the filter command runs.
+If not, it's a bug
+
+********************************************************************************
+Q: How to substitute text from files in git history?
+A: ???
+-    applog(PITS_WARN, "%s: caught TAF error, retrying", func_name);
++    oralog(PITS_ERR, "%s: caught TAF error, retrying", func_name);
+
+
+CMD="find c -name '*.c' -o -name '*.pc' | xargs grep -l 'applog(PITS_WARN, \"%s: caught TAF' | \
+    xargs sed -i 's|applog(PITS_WARN, \"%s: caught TAF|oralog(PITS_ERR, \"%s: caught TAF|' "
+sh -c "$CMD"
+
+git filter-branch \
+    --tree-filter "$CMD" b416b9bfc5e71531f2f05af4c396bb0ba7560741..HEAD
+********************************************************************************
+Q: reveal lost commits
+A: gitk --all $(git log -g --pretty=format:%h)
+********************************************************************************
+Q: git delete remote branch
+A: git push origin :somebranch
+********************************************************************************
+Q: replace committer
+A:
+# fix committer, replace konoplianlo@me.com with Igor.Konoplyanko@asteros.ru since 9f0d166403a30f00083f63ffee34e7dee935c1ea
+git filter-branch -f --env-filter '
+        if [ "$GIT_COMMITTER_EMAIL" = "konoplianlo@me.com" ]; then
+          GIT_COMMITTER_EMAIL="Igor.Konoplyanko@asteros.ru"
+          GIT_AUTHOR_EMAIL="Igor.Konoplyanko@asteros.ru"
+          GIT_COMMITTER_NAME="Igor Konoplyanko"
+          GIT_AUTHOR_NAME="Igor Konoplyanko"
+        fi' 9f0d166403a30f00083f63ffee34e7dee935c1ea..HEAD
+********************************************************************************
+Q: what branches contain this commit?
+A:
+h=83fe65dd806aad7dbe15eed6145633b26f597401
+
+echo $h
+for b in `git branch -r | grep upstream/`; do
+git log --pretty=format:%H $b -- | grep $h >/dev/null && echo $b
+done
+echo
+********************************************************************************

@@ -1,0 +1,193 @@
+********************************************************************************
+Q: mdx object not found in cube
+when there's a MDX WHERE clause
+and no rows in table.
+
+Can be set
+1) In UI (working): login as superuser, go to
+    admin home/manage the app/analyse options
+    check both:
+        During schema load, invalid members are ignored and will be treated as a null
+        During query validation, invalid members are ignored and will be treated as a null
+    save
+2) In mondrian.properties (not tested)
+    mondrian.rolap.ignoreInvalidMembers=true
+    mondrian.rolap.ignoreInvalidMembersDuringQuery=true
+********************************************************************************
+Q: log SQL
+A: uncomment in log4j.properties
+log4j.logger.net.sf.jasperreports.engine.query.JRJdbcQueryExecuter=debug
+log4j.logger.mondrian.rolap.sql.SqlQuery=debug # <-- this does not work
+********************************************************************************
+Q: get sources
+A:
+svn --username anonsvn --password anonsvn co http://jasperforge.org/svn/repos/jasperserver
+********************************************************************************
+Q: copy jrxml.data to .jrxml
+A: find . -name "*_jrxml.data" | sed 's/\(.*\)\(_jrxml.data\)/cp & \1.jrxml/' | sh
+********************************************************************************
+Q: copy .jrxml to jrxml.data
+A: find . -name "*.jrxml" | sed 's/\(.*\)\(.jrxml\)/cp & \1_jrxml.data/' | sh
+********************************************************************************
+Q: oracle repository datasource example
+A: scripts/config/js.jdbc.properties:
+metadata.hibernate.dialect=com.jaspersoft.ji.hibernate.dialect.OracleUnicodeDialect
+
+metadata.jdbc.driverClassName=oracle.jdbc.OracleDriver
+metadata.jdbc.url=jdbc:oracle:thin:@10.132.252.119:1531:DMC4V11
+metadata.jdbc.username=jasper351
+metadata.jdbc.password=jasper351
+
+********************************************************************************
+Q: How to restrict number of lines per page in iReport?
+A: 
+To have 3 results per page add group rowsperpage with expression:
+new Integer(  (int) ( ($V{REPORT_COUNT}.intValue()-1) / 3 ) )
+
+
+********************************************************************************
+Q: custom classes in reports
+A: 
+.folder.xml:
+    <folder>
+        <resource>gcreports-cst.jar</resource>
+    </folder>
+
+gcreports-002dcst.jar.xml:
+    <?xml version="1.0" encoding="UTF-8"?>
+    <fileResource dataFile="gcreports-cst.jar.data">
+        <folder>/organizations/organization_1/umb_statreports/Common</folder>
+        <name>gcreports-cst.jar</name>
+        <version>0</version>
+        <label>gcreports-cst.jar</label>
+        <description></description>
+        <creationDate>2012-09-13T07:51:28.000Z</creationDate>
+        <fileType>jar</fileType>
+    </fileResource>
+
+gcreports-002dcst.jar.data -> gcreports-cst.jar
+
+HourlyEvents.xml:
+    <reportUnit>
+        ...
+        <resource>
+            <localResource
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="fileResource">
+                <folder>/organizations/organization_1/umb_statreports/reports/HourlyEvents_files</folder>
+                <name>gcreports-cst.jar</name>
+                <version>0</version>
+                <label>gcreports-cst.jar</label>
+                <description></description>
+                <creationDate>2012-09-13T08:54:24.000Z</creationDate>
+                <referenceUri>/organizations/organization_1/umb_statreports/Common/gcreports-cst.jar</referenceUri>
+            </localResource>
+        </resource>
+    </reportUnit>
+
+********************************************************************************
+Q: java.lang.NullPointerException 	at com.jaspersoft.jasperserver.war.validation.FileResourceValidator.validateNaming(FileResourceValidator.java:119)
+A:
+http://jasperforge.org/projects/jasperserver/tracker/view.php?id=4259
+
+svn --username anonsvn --password anonsvn diff -r 15842:15843 http://jasperforge.org/svn/repos/jasperserver > fix-NPE-in-FileResourceValidator.patch
+unix2dos fix-NPE-in-FileResourceValidator.patch
+
+rm -rf js-3.5.0
+mkdir -p js-3.5.0/jasperserver-war-jar/src/main/java/com/jaspersoft/jasperserver/war/validation
+svn --username anonsvn --password anonsvn export http://jasperforge.org/svn/repos/jasperserver/tags/js-3.5.0/jasperserver-war-jar/src/main/java/com/jaspersoft/jasperserver/war/validation/FileResourceValidator.java js-3.5.0/jasperserver-war-jar/src/main/java/com/jaspersoft/jasperserver/war/validation/
+cd js-3.5.0
+patch -Np1 -i ../fix-NPE-in-FileResourceValidator.patch
+
+
+********************************************************************************
+Q: ireport custom java code
+A:
+""
+);
+System.out.println( "Hello World! Java Injection!" );
+System.out.println( "Hello World! Java Injection!" );
+System.out.println( "Hello World! Java Injection!" );
+System.out.println( "Hello World! Java Injection!" );
+System.out.println( "Hello World! Java Injection!" );
+((String)value).replaceAll("a","b"
+********************************************************************************
+Q: default mysql username password
+A:
+repo:
+mysql -u jasperdb -t -h localhost -P 3306 --password=password jasperserver
+dba:
+mysql -u root -t -h localhost -P 3306 --password=password
+********************************************************************************
+Q: soap web services
+A:
+http://localhost:8080/jasperserver-pro/services/repository?wsdl
+http://localhost:8080/jasperserver-pro/services/ReportScheduler?wsdl
+http://localhost:8080/jasperserver-pro/services/DomainServices?wsdl
+********************************************************************************
+Q: java stub
+A: com.jaspersoft.jasperserver.irplugin.JServer
+********************************************************************************
+Q: java stub classpath
+A: jasperserver-pro-3.5.1/samples/java-webapp-sample/web/WEB-INF/lib/*.jar
+******************************************************************************** 
+Q: soap web services dependencies
+A: axis
+  
+Q: axis dependencies
+A: commons-logging, commons-discovery, saaj, activation, mail
+
+********************************************************************************
+
+Q: js-import, js-export examples
+A:
+js-import --update --input-dir c:\sicap\umb\svn\STATISTICS_ETL_GLOBE\jsrepository
+
+js-export --output-dir c:\sicap\prd_dmc4\trunk\DeviceDataBaseAnalysis\etljob\dmcdda\src\main\assembly\conf\jsrepository --uris /organizations/organization_1/dmc4 /organizations/organization_1/dmc4_reports/dda/dummy
+js-export --output-dir c:\sicap\umb\svn\gc\gcstats\jsrepository --uris /organizations/organization_1/umb_statreports
+
+js-import --input-dir c:\sicap\umb\svn\gc\gcstats\jsrepository --update
+
+js-import --input-dir c:\sicap\test-js-export
+js-import --input-dir c:\sicap\prd_dmc4\trunk\DeviceDataBaseAnalysis\jasper\jsrepository
+
+js-import --input-dir c:\sicap\prd_dmc4\trunk\DeviceDataBaseAnalysis\jasper\jsrepository2
+
+
+  
+********************************************************************************
+Q: oracle jdbc
+A:
+put oracle jdbc jar to  <jasperdir>/apache-tomcat/common/lib/
+
+edit apache-tomcat/webapps/jasperserver-pro/META-INF/context.xml :
+<Context path="/jasperserver-pro" 
+            debug="5" reloadable="true" crossContext="true">
+  ...
+  <Resource name="jdbc/xxx" auth="Container"
+                type="javax.sql.DataSource"
+      factory="org.apache.commons.dbcp.BasicDataSourceFactory"
+      driverClassName="oracle.jdbc.driver.OracleDriver"
+      url="jdbc:oracle:thin:@server:1521:SID"
+      username="scott"
+      password="tiger"
+      maxActive="20"
+      maxIdle="10"
+      maxWait="-1"
+  />
+</Context>
+
+edit apache-tomcat/webapps/jasperserver-pro/WEB-INF/web.xml :
+
+<web-app ...
+  ...
+  <resource-ref>
+   <description>Oracle Datasource example</description>
+   <res-ref-name>jdbc/xxx</res-ref-name>
+   <res-type>javax.sql.DataSource</res-type>
+   <res-auth>Container</res-auth>
+  </resource-ref>
+
+  <welcome-file-list>
+  ...
+</web-app>
+********************************************************************************

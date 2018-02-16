@@ -1,0 +1,30 @@
+********************************************************************************
+********************************************************************************
+********************************************************************************
+Q: preserve preprocessor directives as comments with `gcc -E`
+A: -Wp,-dD
+********************************************************************************
+Q: Unrecognized compiler protocol for variable argument lists
+A: don't use -I/usr/include , remove it from Makefile
+********************************************************************************
+Q: get value (expand) c macro
+A:
+# usage: fn_expand_c_macro MACRO includes...
+# Example:
+# fn_expand_c_macro SIGUSR1 signal.h
+fn_expand_c_macro() {
+  set dummy `
+  (
+    macro="$1"
+    shift
+    for i in "$@"; do
+      echo "#include <$i>"
+    done
+    echo "$macro" togreptogreptogrep
+  ) | gcc -E - | grep togreptogreptogrep`
+  echo "$2"
+}
+********************************************************************************
+Q: list gcc include directories
+A: LANG=C gcc -v -E - < /dev/null 2>&1 | sed -n -e '/> search starts here/!b;:m1;n;/End of search list/b;p;b m1;'
+

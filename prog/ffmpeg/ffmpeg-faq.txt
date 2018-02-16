@@ -1,0 +1,21 @@
+======== create audio CD image with imgburn =============
+- create wav files out of mp3 files:
+ex: ffmpeg -y -i test.mp3 -ar 44100 -ac 2 -acodec pcm_s16le test.wav
+
+- in imgburn switch to write mode
+- press small button "create CUE file" in the center of the window
+- add tracks (all wav files, CD-audio format, important for mounting)
+- press ok and save
+- exit write mode
+
+Now you have a wav/cue file which is image and can be mounted with daemon tools!
+
+
+To create a single bin/cue file
+(Although in build mode ImgBurn recognizes the cue file as an image file, it then creates a data cd containing the cue file itself instead of an audio cd with the tracks.)
+Instead:
+- mount wav/cue file with daemon tools
+- in imgburn switch to read mode
+- save as *.bin (cue file created automatically)
+
+======== END create audio CD image with imgburn =============

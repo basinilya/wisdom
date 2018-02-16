@@ -1,0 +1,52 @@
+Q: WARNING: Unable to find required classes (javax.activation.DataHandler and javax.mail.internet.MimeMultipart). Attachment support is disabled.
+A: 
+1. download activation.jar http://java.sun.com/javase/technologies/desktop/javabeans/jaf/downloads/index.html
+2. download mail.jar http://java.sun.com/products/javamail/downloads/index.html
+3. add these two jar’s to the project
+********************************************************************************
+Q: Where do I get the correct JNDI names for just deployed beans?
+A: 
+1) Search the file <jboss-instance-location>\log\server.log for the occurance of the string '<Bean-name> in JNDI at ' i.g. 'MyBean in JNDI at '
+2) Alternatively search the JBoss standard output for the occurance of 'to JNDI name' but this will work only for old non-annotated beans
+********************************************************************************
+Q: How do I set a JNDI path for my bean?
+A: 
+1) For annotated, use annotations @RemoteBinding(jndiBinding="<jndi-path>") and @LocalBinding(jndiBinding="<jndi-path>")
+2) For old-format, non-annotated beans, add the element <jndi-name> to jboss.xml:
+<jboss>
+  <enterprise-beans>
+    <session>
+      <ejb-name>MyBean</ejb-name>
+      <jndi-name>AAABBBCCC</jndi-name>
+    </session>
+  </enterprise-beans>
+</jboss> 
+********************************************************************************
+Q: What are the default JNDI paths for beans?
+A: 
+1) For annotated, they are [<ear-name>/]<bean-name>/local and [<ear-name>/]<bean-name>/remote
+2) For old beans, the remote interface binds to just <bean-name>
+********************************************************************************
+Q: EJB3 Message Driven Bean created with NetBeans causes deployment errors. The deployer says something about the 'destination' property
+A: Add annotation: @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/<quename>.queue")
+********************************************************************************
+Q: The @EJB annotation does not work in my client-side app.
+A: It shouldn't and won't. The @EJB annotation uses the resource injection mechanism which works only on EJB containers. Use InitialContext.lookup() method instead.
+********************************************************************************
+Q: Where are the Home interfaces? How do I get the instance of a bean?
+A: Just cast the lookup() method result to the remote interface or better to the common base interface. However you still need the remote interface to be in the classpath.
+********************************************************************************
+Q: Why Netbeans create non-annotated beans via Enterprise Beans->New ?
+A: Your EJB module version might be J2EE1.4. Create a new EJB module with Java EE version 1.5 and add it to the EAR project
+********************************************************************************
+Q: Enterprise Beans->New have two options: Entity Bean and Entity Class. What's the difference? 
+A: It's just a terminology case. Most likely you want the 'Entity Class' which is actually called the 'Entity Bean' by the Jboss users. What's the 'Entity Bean' in respect to Netbeans is not really clear.
+********************************************************************************
+Q: They say that the "same interface" OR "single interface" cannot be both remote and local, but it seems to work
+A: In this case objects returned either by lookup() or set by @EJB resource injection will always be remote. You either should extend a local interface from a remote one, or vise versa, or use one base interface for both of them.
+********************************************************************************
+Q: how to learn wsdl url 
+A: Search the file <jboss-instance-location>\log\server.log for the occurance of the string 'Replace service endpoint address'
+********************************************************************************
+Q: ServiceFactory.createService fails with 'Cannot obtain java type mapping for'
+A: check endpoint interface @SOAPBinding(style=SOAPBinding.Style.RPC)

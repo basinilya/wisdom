@@ -1,0 +1,196 @@
+Q: reopen stdout
+A:
+p dup2(open("/tmp/reopened.stdout", 1089), 1)
+p dup2(open("/tmp/reopened.stderr", 1089), 2)
+
+# O_WRONLY | O_APPEND | O_CREAT
+
+chmod 755 /tmp/reopened.stdout /tmp/reopened.stderr
+
+
+Q: determine DWARF version
+A:
+    $ readelf --debug-dump=info ./test.o | grep -A 2 'Compilation Unit @'
+      Compilation Unit @ offset 0x0:
+       Length:        0x4a (32-bit)
+       Version:       4
+
+Q: disassemble raw binary
+A:
+    gdb true
+    
+    info file
+    Entry point: 0x401000
+    
+    b *0x401000
+    run
+    set $save_esp=$esp
+    set $buffer=LocalAlloc(0,40000)
+    set $buffer=malloc(400000)
+    print (void*)$buffer
+    restore linux6.bin binary $buffer
+    
+    x/10i $buffer
+
+
+
+Q: disable pagination
+A:
+set height 0
+ or 
+set pagination off
+
+Q: data breakpoint
+A: watch/rwatch/awatch *0xADDR
+
+Q: gdbtui disassembly
+A: layout asm
+
+disass funcname
+
+Q: amd64
+A: 
+windows: It uses registers RCX, RDX, R8, R9 for the first four integer or pointer arguments
+linux: rdi, rsi, rdx, rcx; c++: "this" pointer goes to RDI
+
+
+Q: address breakpoint
+A: break *address
+
+********************************************************************************
+Q: redirect program input
+A:
+set args < input.txt
+or
+run < input.txt
+
+(Both not working in Cygwin)
+********************************************************************************
+Q: gdb readline history
+A: set history save on
+********************************************************************************
+Q: eval
+A: 
+-eval-command command
+-ex command
+    Execute a single gdb command.
+
+
+********************************************************************************
+Q: watch
+A:
+define hook-stop
+  ...commands to be executed when execution stops
+end
+********************************************************************************
+Q: continue in hook-stop
+A: 
+********************************************************************************
+Q: handle breakpoints
+A:
+b foo
+commands
+backtrace
+continue 200
+end
+********************************************************************************
+Q: conditional breakpoint
+A: break ... if cond
+
+    break open if $_regex((char*)$rdi, "^/dev/tty")
+
+Q: string value to python
+A:
+    
+    define foo
+        # reset convenience var., or get 'Too many array elements'
+        set $foo_arg0 = 0
+        # $arg0 expanded too early, can't use it directly in python
+        set $foo_arg0 = $arg0
+        #
+        # parse_and_eval() affected by print settings, wtf?
+        #
+        # don't print address of a string
+        set print addr off
+        # print long string
+        set print elements 0
+        # get rid of '<repeats n times>'
+        set print repeats unlimited
+        #
+        # parse_and_eval() returns quoted string. Unquote with eval
+        py s = eval(str(gdb.parse_and_eval("$foo_arg0")))
+        py print s
+    end
+    
+    (gdb) foo "abc"
+    abc
+    (gdb) foo $val
+    def
+    (gdb) foo (char*)$rdi
+    /home/il/gammu-git/src/gammu/libgammu/tls/x86_64/libpthread.so.0 `
+
+********************************************************************************
+Q: gdb print truncates long strings
+A: set print elements 0
+********************************************************************************
+Q: rc file, gdbrc
+A: ./.gdbinit ~/.gdbinit
+********************************************************************************
+Q: 
+A:
+thread apply all backtrace
+********************************************************************************
+Q: step out
+A: 
+finish
+********************************************************************************
+Q: set current frame
+A: 
+frame n
+********************************************************************************
+Q: set current thread
+A: 
+thread threadno
+    Make thread number threadno the current thread
+********************************************************************************
+Q: 
+$ gdb --core=core
+(gdb) info shared
+No shared libraries loaded at this time.
+
+A:
+$ gdb --args prog
+(gdb) start
+(gdb) core core
+kill? y
+(gdb) info shared
+********************************************************************************
+Q: (gdb) print c
+   $1 = 0xffbffa34 <error reading variable>
+   (gdb) x/s c
+   0xff34c2b0 <.LLC4>:      Converting character sets: Invalid argument.
+A: gdb bug http://sourceware.org/bugzilla/show_bug.cgi?id=10908
+********************************************************************************
+Q: cast to array
+A: It's called Artificial arrays http://www.chemie.fu-berlin.de/chemnet/use/info/gdb/gdb_9.html#SEC54
+print *(short[2]*)p
+********************************************************************************
+Q: Make breakpoint pending on future shared library load?
+A: set breakpoint pending on
+********************************************************************************
+Q: define a custom command
+A:
+     define adder
+       if $argc == 2
+         print $arg0 + $arg1
+       end
+       if $argc == 3
+         print $arg0 + $arg1 + $arg2
+       end
+     end
+********************************************************************************
+Q: ignore signal
+A: handle SIGNAME ignore
+'nopass' is the synonym for 'ignore'
+See also: handle SIGNAME nostop
+********************************************************************************

@@ -1,0 +1,20 @@
+Q: No variables in 1.5
+A: use capture (Note that you cannot capture a header you just added)
+
+Q: ProxyPassReverse
+A:
+relative
+    backend xxx
+        # ProxyPassReverse
+        http-response replace-value Location (https?://domain.com(:[0-9]+)?)?(/.*) \3
+
+absolute:
+    1.5:
+        frontend xxx
+            capture request header Host len 32 # first capture statement has capture.req.hdr id 0
+        
+        backend xxx
+            # ProxyPassReverse
+            http-response replace-value Location (https?://domain.com(:[0-9]+)?)?(/.*) __proto__%[capture.req.hdr(0)]\3
+            rspirep ^Location:\ __proto__(.*) Location:\ https://\1 if { ssl_fc }
+            rspirep ^Location:\ __proto__(.*) Location:\ http://\1 unless { ssl_fc }
