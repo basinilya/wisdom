@@ -1,0 +1,244 @@
+Q: RAC / TAF / SCAN considerations
+A:
+
+Failures fall into three categories:
+- transparent (e.g. continue fetch after reconnect)
+    No error returned to client.
+- Need to re-run statement
+    Specific error returned to client. No explicit disconnect needed.
+- Need to re-run whole transaction
+    Client should explicitly disconnect and then re-connect
+    All cursors are implicitly closed, when connection closed. Attempt to close a cursor after reconnect will fail with "no such cursor"
+
+**********************************************************
+Q: predefined macros
+A: ORA_PROC
+**********************************************************
+Q:
+    #define TEST1(a,b) int b a
+    #define TEST2(b) TEST1(,b)
+    TEST2(testJ);
+    PCC-S-02201, Encountered the symbol "a"
+A:
+    Pro*C does not recognize empty macro arguments (actually gcc also warns about them)
+
+    #define NOARG
+    #define TEST1(a,b) int b a
+    #define TEST2(b) TEST1(NOARG,b)
+    
+    TEST2(testJ);
+
+Q:
+    #define DEF(foo) int i = sizeof("bar" foo)
+    DEF("bar")
+    EXEC SQL SELECT ... INTO :i ...
+    
+    PCC-S-02201, Encountered the symbol "foo" when expecting one of the following...
+A:
+    Oracle Pro*C cannot full parse concatenated strings
+
+
+Q: ?
+A: Cannot use enums.
+
+
+Q: math.h syntax error
+https://community.oracle.com/thread/56157?start=0&tstart=0
+A:
+Pro*C has broken C preprocessor concat (##). Only the left side is returned.
+__CONCAT(__DECL_SIMD_,cos) should expand to
+    __DECL_SIMD_cos
+but it expands to
+    __DECL_SIMD_
+
+__DECL_SIMD_cos defined as empty
+__DECL_SIMD_ not defined
+
+
+workaround:
+create math.h in some directory:
+    #define __DECL_SIMD_
+    #include "/usr/include/math.h"
+
+prepend that dir to sys_include
+**********************************************************
+Q: Nested header file cannot be included: PCC-S-02015, unable to open include file
+A: There's a bug in Pro*C. All paths resolved relative to .pc file
+**********************************************************
+Q: logging
+A: There are external tools working with callbacks in OCI. google ORA_OCI_UCBPKG.
+**********************************************************
+Q: sqlcud0
+A:
+see proc-logging.pc
+**********************************************************
+Q: char arrays length
+A:
+Pro*C guesses the length of a string buffer and generates:
+    11.2:
+      sqlstm.sqhstv[<n>] = (         void  *)<string>;
+      sqlstm.sqhstl[<n>] = (unsigned int  )<length>;
+    10.2:
+      sqlstm.sqhstv[<n>] = (unsigned char  *)<string>;
+      sqlstm.sqhstl[<n>] = (unsigned long )<length>;
+
+<length> includes the terminating null.
+
+Pro*C knows the length of arrays, struct members, and types created with typedef.
+It can even recognize some advanced C declarations. For example:
+  char (*s)[8] = "abc"; /* good: sqlstm.sqhstv[<n>] = s; */
+  char (*s)    = "abc"; /* bad : sqlstm.sqhstv[<n>] = &s; */
+
+
+Even when the length is known, the input string must have the terminating null
+within the known length. Otherwise a runtime error occurs:
+    char s[2] = "ab";
+    EXEC SQL SELECT :s into :s2 FROM dual;
+    ORA-01480: trailing null missing from STR bind value
+
+Even when the length is known, the library won't read past the null character:
+  char buf[100];
+  char (*s)[300] = allocGuarded(3); /* allocate 3 bytes at the end of a page */
+  char (*s3)[3] = s;
+  strcpy(s, "ab");
+  EXEC SQL SELECT :s into :buf FROM dual;
+  EXEC SQL SELECT 'abcde' into :s3 FROM dual; /* only "ab" written to variable */
+  EXEC SQL SELECT 'abcde' into :s FROM dual; /* access violation */
+
+
+If Pro*C can't guess the length, it can be explicitly defined:
+EXEC SQL VAR s IS STRING(<length>);
+(or with 'EXEC SQL TYPE, see the docs)
+
+**********************************************************
+
+Q: char arrays as C function arguments
+A:
+In C the type of array argumens decay to the pointer type:
+void foo(char s[10]) {
+    printf("%d %d\n", sizeof(s) - sizeof(void*), sizeof(*s));
+}
+output: 0 1
+
+But Pro*c uses the legth of argument array types to guess the length of host
+variables:
+
+typedef char s6_t[6+1];
+
+void foo(char s1[6+1], s6_t s2) {
+  EXEC SQL SELECT '0123456789', '0123456789' into :s1, :s2 FROM dual;
+  printf("%s %s\n", s1, s2);
+}
+
+output: 012345 012345
+
+**********************************************************
+Q: output string variables of unknown size
+A:
+variables declared like this:
+    char *s;
+have unknown size. If 'EXEC SQL VAR s IS STRING(<length>)' wasn't used, then
+Pro*C generates:
+  sqlstm.sqhstl[<n>] = (unsigned int  )0;
+
+It doesn't produce any warnings. Consider post-checking of the generated source.
+    ggrep --color=auto -B2 'sqlstm.sqhstl\[[^[]*\] = .*)0;' c/rap/rap_db.c1
+There is no known way to distinguish input and output variables in generated code.
+
+For output variables this can cause buffer overflows.
+
+**********************************************************
+Q: commands that can't fail due to server failure
+A:
+EXEC SQL DESCRIBE SELECT LIST FOR
+EXEC SQL CLOSE
+
+**********************************************************
+Q: unicode utf-8 host variables
+A: 
+env NLS_LANG=XXX.AL32UTF8
+at runtime
+**********************************************************
+Q: unicode utf-16 host variables
+A: 
+#include <sqlucs2.h>
+utext s[10];
+uvarchar v[10];
+
+don't EXEC SQL VAR s IS STRING;
+
+**********************************************************
+Q: long long
+A: 
+Supported by Pro*C/C++: Release 11.2.0.3.0
+unsupported by Pro*C/C++: Release 10.2.0.1.0
+
+**********************************************************
+Q: sys_include=()
+A:
+gcc:
+    should be correct by default: /usr/include
+    Don't use this:
+        LANG=C gcc -v -E - < /dev/null 2>&1 | sed -n -e '/> search starts here/!b;:m1;n;/End of search list/b;p;b m1;'
+vc:
+
+for %p in ("%ProgramFiles%" "%ProgramFiles(x86)%") do @for /D %f in (%p\"Microsoft Visual Studio 8\VC\*include" %p\"Microsoft Visual Studio 8\VC\PlatformSDK\*Include") do @(
+@echo long : %f
+@echo short: %~sf
+@echo _
+)
+
+C:\PROGRA~2\MI30EB~1\VC\include,C:\PROGRA~2\MI30EB~1\VC\PLATFO~1\Include
+
+**********************************************************
+
+Q: mix Pro*C with OCI
+A: #include <sql2oci.h>
+SQLEnvGet(), SQLSvcCtxGet(), etc.
+
+
+Q: get sys_refcursor from stored procedure
+A: 
+These methods don't work:
+    EXEC SQL CALL testproc(:dyn_cursor);
+    EXEC SQL EXECUTE statement_name USING :dyn_cursor;
+there's workaround: dyn_cursor.curocn++; after EXEC SQL
+
+This method works:
+- add precompiler flag sqlcheck=SEMANTICS
+this flag needed even without database access at compile time
+
+
+static void foo() {
+    SQL_CURSOR  dyn_cursor;
+
+    EXEC SQL ALLOCATE :dyn_cursor;
+
+a) have DB access at compile time:
+
+  EXEC SQL EXECUTE
+    begin
+      testproc(:dyn_cursor);
+    end;
+  END-EXEC;
+
+b) have DB access at compile time just ONCE, save generated C file
+
+c) don't have DB access at compile time:
+
+  EXEC SQL EXECUTE
+    begin
+      EXECUTE IMMEDIATE 'BEGIN testproc(:dyn_cursor); END;' using out :dyn_cursor;
+    end;
+  END-EXEC;
+
+/*
+extern void sqlcxt (void **, unsigned int *,
+                    struct sqlexd *, const struct sqlcxp *);
+static void _sqlcxt (void ** a, unsigned int * b,
+                    struct sqlexd * c, const struct sqlcxp * d) {
+  printf("%s\n", c->stmt);
+  sqlcxt(a,b,c,d);
+}
+#define  sqlcxt _sqlcxt
+*/

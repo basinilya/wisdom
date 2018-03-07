@@ -1,0 +1,415 @@
+#include "dbtools.h"
+#undef sqlcxt
+#undef sqlbuft
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+
+EXEC SQL INCLUDE sqlca;
+EXEC SQL CONTEXT USE :ctx;
+
+enum eStmtType {
+  SQLCUD0_CONTEXT_ALLOCATE = 58,
+  SQLCUD0_CONTEXT_FREE     = 59,
+  SQLCUD0_CONNECT          = 27,
+  SQLCUD0_DELETE           = 2,
+  SQLCUD0_INSERT           = 3,
+  SQLCUD0_SELECT           = 4,
+  SQLCUD0_OPEN             = 9,
+  SQLCUD0_FETCH            = 13,
+  SQLCUD0_CLOSE            = 15,
+  SQLCUD0_OPEN_PREPARED    = 45,
+  SQLCUD0_PREPARE          = 17,
+  SQLCUD0_EXECUTE          = 21,
+  SQLCUD0_EXECUTE_IMM      = 24,
+  SQLCUD0_CALL             = 122,
+  SQLCUD0_ROLLBACK         = 31,
+  SQLCUD0_ROLLBACK_RELEASE = 32
+};
+
+enum eInOrOut {
+  PARAM_IN  = 1,
+  PARAM_OUT = 2
+};
+
+struct _sqlcud0_st {
+  short offset;
+  short x1;
+  short x2;
+  short nstmt;
+  short stmt_len_lo; /* 0 - 8191; not a bit field */
+  short stmt_len_hi;
+  short stmt_type; /* eStmtType */
+#define _SQLCUD0_ST_STMT_LEN(st) ((st)->stmt_len_hi * 8192 + (st)->stmt_len_lo)
+
+  unsigned short line_lo; /* 0 - 8191; not a bit field */
+  unsigned short line_hi;
+#define _SQLCUD0_ST_LINE(st) ((st)->line_hi * 8192 + (st)->line_lo)
+
+  short x9;
+  short nparams;
+  short n_in_params;
+  short x12;
+  short x13;
+  short x14;
+  struct _sqlcud0_params_st {
+    short in_or_out; /* eInOrOut */
+    short typecode;
+    short x2;
+    short x3;
+  } params[1];
+};
+
+static void print_statement(sql_context *pctx, const char *stmt, size_t stmt_len)
+{
+  struct log_sqlbuft_findstruct *pfindstruct;
+  char *s;
+  size_t sz;
+  if (pctx == NULL || stmt_len == 0) return;
+  s = log_sqlbuft_findfirst(&pfindstruct, *pctx);
+  if (s) {
+    for(;;) {
+      sz = printf("%.*s", stmt_len, s);
+      stmt_len -= sz < stmt_len ? sz : stmt_len;
+      s = log_sqlbuft_findnext(pfindstruct);
+      if (!s) break;
+    }
+    log_sqlbuft_findclose(pfindstruct);
+  }
+  printf("%.*s", stmt_len, stmt);
+}
+
+#include <oci.h>
+
+static double cast_double(void *v, int sz)
+{
+  if (sz == sizeof(double))
+    return *(double*)v;
+  if (sz == sizeof(float))
+    return *(float*)v;
+  return 0;
+}
+
+static long long cast_ll(void *v, int sz)
+{
+  switch(sz) {
+  case 1:
+    return *(char*)v;
+  case sizeof(short):
+    return *(short*)v;
+  case sizeof(int):
+    return *(int*)v;
+  case sizeof(long long):
+    return *(long long*)v;
+  }
+  return 0;
+}
+
+void __sqlcxt (sql_context *pctx, unsigned int * psqlctx, struct sqlexd * psqlstm, const struct sqlcxp * psqlfpn)
+{
+  #define FMT_UNKNOWN_TYPE "<unknown type>: %d"
+  #define FMT_PREPARE      "PREPARE stmt_%d FROM"
+  #define FMT_EXECUTE      "EXECUTE stmt_%d"
+  #define FMT_OPEN     "OPEN stmt_%d_cur"
+  #define FMT_FETCH        "FETCH stmt_%d_cur"
+  #define FMT_CLOSE        "CLOSE stmt_%d_cur"
+
+  union {
+    char unktyp[sizeof(FMT_UNKNOWN_TYPE "-32768")];
+    char prep[sizeof(FMT_PREPARE "-32768")];
+    char execute[sizeof(FMT_EXECUTE "-32768")];
+    char open[sizeof(FMT_OPEN "-32768")];
+    char fetch[sizeof(FMT_FETCH "-32768")];
+    char close[sizeof(FMT_CLOSE "-32768")];
+  } bufs;
+  const struct _sqlcud0_st *magic = (const struct _sqlcud0_st *)(psqlstm->cud + psqlstm->offset);
+
+  if (magic->offset == psqlstm->offset) {
+    const char *stmt;
+    size_t stmt_len;
+    int line = _SQLCUD0_ST_LINE(magic);
+    const char *s_stmt_type = "";
+    short nparams = magic->nparams;
+
+    stmt_len = _SQLCUD0_ST_STMT_LEN(magic);
+    stmt = psqlstm->stmt;
+
+    switch(magic->stmt_type) {
+      case SQLCUD0_CONTEXT_ALLOCATE :
+        s_stmt_type = "CONTEXT ALLOCATE";
+        nparams = 0;
+        break;
+      case SQLCUD0_CONTEXT_FREE     :
+        s_stmt_type = "CONTEXT FREE";
+        nparams = 0;
+        log_sqlbuft_free(*(sql_context*)psqlstm->sqphsv[0]);
+        break;
+      case SQLCUD0_CONNECT          :
+        s_stmt_type = "CONNECT";
+        nparams = 0;
+        break;
+      case SQLCUD0_ROLLBACK         :
+        s_stmt_type = "ROLLBACK";
+        break;
+      case SQLCUD0_ROLLBACK_RELEASE :
+        s_stmt_type = "ROLLBACK RELEASE";
+        break;
+      case SQLCUD0_EXECUTE_IMM:
+        s_stmt_type = "EXECUTE IMMEDIATE";
+        if (magic->n_in_params == 1) {
+          stmt = psqlstm->sqphsv[0];
+          stmt_len = psqlstm->sqphsl[0];
+          if (stmt_len == 0)
+            stmt_len = (size_t)-1;
+        }
+        nparams = 0;
+        break;
+      case SQLCUD0_PREPARE:
+        sprintf(bufs.prep, FMT_PREPARE, magic->nstmt);
+        s_stmt_type = bufs.prep;
+        if (magic->n_in_params == 1) {
+          stmt = psqlstm->sqphsv[0];
+          stmt_len = psqlstm->sqphsl[0];
+          if (stmt_len == 0)
+            stmt_len = (size_t)-1;
+        }
+        nparams = 0;
+        break;
+      case SQLCUD0_EXECUTE:
+        sprintf(bufs.execute, FMT_EXECUTE, magic->nstmt);
+        s_stmt_type = bufs.execute;
+        break;
+      case SQLCUD0_OPEN:
+        printf("%s:%d EXEC SQL DECLARE stmt_%d_cur CURSOR FOR ", psqlfpn->filnam, line, magic->nstmt);
+        print_statement(pctx, psqlstm->stmt, stmt_len);
+        printf(";\n");
+        stmt_len = 0;
+        goto L1;
+      case SQLCUD0_OPEN_PREPARED:
+        printf("%s:%d EXEC SQL DECLARE stmt_%d_cur CURSOR FOR stmt_%d;\n", psqlfpn->filnam, line, magic->nstmt, magic->nstmt);
+        L1:
+        sprintf(bufs.open, FMT_OPEN, magic->nstmt);
+        s_stmt_type = bufs.open;
+        break;
+      case SQLCUD0_FETCH:
+        sprintf(bufs.fetch, FMT_FETCH, magic->nstmt);
+        s_stmt_type = bufs.fetch;
+        break;
+      case SQLCUD0_CLOSE:
+        sprintf(bufs.fetch, FMT_CLOSE, magic->nstmt);
+        s_stmt_type = bufs.close;
+        break;
+      default:
+        sprintf(bufs.unktyp, FMT_UNKNOWN_TYPE, magic->stmt_type);
+        s_stmt_type = bufs.unktyp;
+        /* fallthrough */
+      case SQLCUD0_DELETE:
+      case SQLCUD0_INSERT:
+      case SQLCUD0_SELECT:
+      case SQLCUD0_CALL:
+        ;
+    }
+
+    printf("%s:%d EXEC SQL %s ", psqlfpn->filnam, line, s_stmt_type);
+    print_statement(pctx, stmt, stmt_len);
+    printf(";\n");
+    if (nparams > 0)
+    {
+      int i;
+      printf("%s:%d %d %d\n", psqlfpn->filnam, line, nparams, magic->n_in_params);
+      for (i = 0; i < nparams;i++) {
+        const struct _sqlcud0_params_st *param = &magic->params[i];
+        // printf("(%d %3d %d %d)\n", param->in_or_out,param->typecode,param->x2,param->x3);
+
+        if (param->in_or_out != PARAM_IN) continue;
+
+        printf("%s:%d :p%d = ", psqlfpn->filnam, line, i);
+        if (psqlstm->sqpind[i] != NULL && *(short*)psqlstm->sqpind[i] == -1) {
+          printf("NULL");
+        } else {
+          switch(param->typecode) {
+            case SQLT_INT:
+              printf("%lld", cast_ll(psqlstm->sqphsv[i], psqlstm->sqphsl[i]));
+              break;
+            case SQLT_FLT:
+              printf("%g", cast_double(psqlstm->sqphsv[i], psqlstm->sqphsl[i]));
+              break;
+            case SQLT_AVC:
+            case SQLT_STR:
+              printf("'%s'", (char*)psqlstm->sqphsv[i]);
+              break;
+            default:
+              printf("(%d %3d %d %d)", param->in_or_out,param->typecode,param->x2,param->x3);
+              ;
+          }
+        }
+        printf("\n");
+      }
+    }
+
+    printf("\n");
+  }
+  sqlcxt(pctx,psqlctx,psqlstm,psqlfpn);
+  if (pctx) log_sqlbuft_clear(*pctx);
+}
+
+void _sqlbuft(sql_context *pctx, char *partial_sql)
+{
+  log_sqlbuft_add(*pctx, partial_sql);
+  sqlbuft(pctx, partial_sql);
+}
+
+#define  sqlcxt _sqlcxt
+#define  sqlbuft _sqlbuft
+
+void sqlglmt( sql_context, char *, size_t *, size_t * ); 
+void sqlglm(char   *message_buffer, size_t *buffer_size, size_t *message_length); 
+int sqlglst( sql_context, char *, size_t *, size_t * );
+int sqlgls( char *, size_t *, size_t * );
+
+static void _vdebug(const char *format, va_list args) {
+  fprintf(stderr, "debug: ");
+  vfprintf(stderr, format, args);
+  fprintf(stderr, "\n");
+}
+
+static void _pdebug(const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  _vdebug(format, args);
+}
+
+#define pdebug5 _pdebug
+
+void ServiceDBFreeContext( sql_context ctx )
+{
+  struct sqlca sqlca;
+  pdebug5("ServiceDBFreeContext");
+  EXEC SQL ROLLBACK RELEASE;
+  EXEC SQL CONTEXT FREE :ctx;
+}
+
+int ServiceDBCheckSql(
+  sql_context ctx,
+  struct sqlca *my_sqlca,
+  char *func_name,
+  char *location, 
+  int mask_out )
+{
+  char error_text[1000];
+  size_t msg_len;
+  size_t buf_len;
+
+  pdebug5("ServiceDBCheckSql");
+
+  if ((my_sqlca->sqlcode == DB_SUCCESS)
+      && ( (( (long)(my_sqlca->sqlerrd[2]) == 1) && (mask_out == ONE_FETCH))
+           ||
+           (mask_out != ONE_FETCH)
+         )
+     )
+  {
+    return 0;
+  }
+
+  if ((my_sqlca->sqlcode == (long)DB_NOTFOUND ) && (mask_out == NO_FETCH))
+  {
+    return 0;
+  }
+ 
+  if (my_sqlca->sqlcode != DB_SUCCESS)
+  {
+#define SQL_STMT_MAX_LEN (2048-200)
+    size_t sqlfc = 0;
+    size_t stmt_len = SQL_STMT_MAX_LEN;
+    char stmt_text[SQL_STMT_MAX_LEN+1];
+    int rc;
+    rc = sqlglst( ctx, stmt_text, &stmt_len, &sqlfc);
+    if (rc && stmt_len != 0)
+    {
+      if (stmt_text[stmt_len-1] == '\n' || stmt_text[stmt_len-1] == '\r') stmt_len--;
+      fprintf(stderr, "%.*s\n", stmt_len, stmt_text);
+      fprintf(stderr, "%*s^\n", my_sqlca->sqlerrd[4], "");
+    }
+    buf_len = sizeof(error_text);
+    sqlglmt( ctx, error_text, &buf_len, &msg_len );
+
+    if (error_text[msg_len-1] == '\n' || error_text[msg_len-1] == '\r') msg_len--;
+
+    fprintf(stderr, "%.*s\n", msg_len, error_text);
+  }
+  else
+  {
+    if (mask_out == ONE_FETCH)
+    {
+      fprintf(stderr, "%s(%s): Exactly one row expected (ONE_FETCH) but %d rows returned\n", func_name, location, my_sqlca->sqlerrd[2] );
+    }
+  }
+
+  fprintf(stderr, "%s(%s): ROLLBACK \n", func_name, location);
+  {
+    struct sqlca sqlca;
+    EXEC SQL rollback;
+  }
+
+  return 1;
+}
+
+static int ServiceDBConnect( const char *user )
+{
+  FUNC_HEAD;
+
+  pdebug5("ServiceDBConnect");
+
+  EXEC ORACLE OPTION (MAXOPENCURSORS=64);
+  EXEC SQL CONNECT :user;
+
+  return ServiceDBCheckSql(ctx, &sqlca, "ServiceDBConnect", "CONNECT", NO_FETCH);
+}
+
+static
+sql_context ctx_;
+
+int ServiceDBInit(const char *orauid )
+{
+  struct sqlca sqlca;
+
+  char* db_pool_size_str = NULL;
+  int db_pool_size = 0;
+  
+
+  pdebug5("ServiceDBInit");
+
+  if (orauid == NULL || orauid[0] == 0) {
+    fprintf(stderr, "ServiceDBInit: orauid empty\n");
+    return 1;
+  }
+
+  EXEC SQL CONTEXT ALLOCATE :ctx_;
+
+  return ServiceDBConnect( orauid );
+}
+
+sql_context ServiceDBGetContext()
+{
+  return ctx_;
+}
+
+void sql_error(struct sqlca *psqlca, sql_context ctx) 
+{
+    ServiceDBCheckSql(ctx, psqlca, "x", "x", 0);
+    ServiceDBFreeContext(ctx);
+    exit(1); 
+} 
+
+int main(int argc, char *argv[])
+{
+  if (argc >= 2) {
+    if (0 != ServiceDBInit(argv[1]))
+      return 1;
+    printf("Connected\n"); fflush(stdout);
+  }
+
+  main1();
+}
