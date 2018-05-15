@@ -44,7 +44,10 @@ Q: data breakpoint
 A: watch/rwatch/awatch *0xADDR
 
 Q: gdbtui disassembly
-A: layout asm
+A:
+  layout asm
+or
+ layout split
 
 disass funcname
 

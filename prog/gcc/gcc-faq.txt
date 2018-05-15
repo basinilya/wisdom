@@ -1,7 +1,7 @@
 ********************************************************************************
 ********************************************************************************
 ********************************************************************************
-Q: preserve preprocessor directives as comments with `gcc -E`
+Q: preserve preprocessor directives as comments with `gcc -E` or -save-temps
 A: -Wp,-dD
 ********************************************************************************
 Q: Unrecognized compiler protocol for variable argument lists

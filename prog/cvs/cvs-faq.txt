@@ -1,3 +1,13 @@
+Q: interpret log/rlog
+A:
+  To have only last log message, use -rbranch_name or -rHEAD
+  
+  Files not existing in HEAD have the "Attic" prefix:
+    /path/to/cvsroot/MODULENAME/Attic/deletedfile,v
+  
+  If a file was deleted in selected branch, last log entry contains: state: dead
+
+
 Q: anonymous
 A: try user: anoncvs
 

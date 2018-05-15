@@ -1,3 +1,19 @@
+Q: test only jar
+A:
+    use a separate project
+        - move test sources to src/main
+        or
+        - use <sourceDirectory>src/test/java</sourceDirectory> 
+    
+        - to test itself:
+		<plugin>
+			<artifactId>maven-surefire-plugin</artifactId>
+			<configuration>
+				<testClassesDirectory>${project.build.directory}/classes/</testClassesDirectory>
+			</configuration>
+		</plugin>
+        
+
 Q: Changes detected - recompiling the module
 A: `mvn -X` look for "Stale source detected"
 
@@ -58,8 +74,11 @@ A:
 </plugin>
 
 Q: download artifact to local repo
-
+A:
 mvn org.apache.maven.plugins:maven-dependency-plugin:2.1:get -DrepoUrl=http://repo.jenkins-ci.org/public -Dartifact=com.atlassian.jira:jira-rest-api:6.0-OD-09-3
+
+Q: download source artifact without pom
+A: mvn dependency:get -DgroupId=commons-io -DartifactId=commons-io -Dversion=2.3 -Dclassifier=sources
 
 Q: install artifact to local repo
 A: 

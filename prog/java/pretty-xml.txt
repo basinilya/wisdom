@@ -1,0 +1,21 @@
+        {
+            DOMImplementationLS domImplementationLS =
+                    (DOMImplementationLS) existingDoc.getImplementation().getFeature("LS","3.0");
+            if (domImplementationLS != null) {
+                LSOutput lsOutput = domImplementationLS.createLSOutput();
+                FileOutputStream fos = new FileOutputStream(outputFile);
+                try {
+                    lsOutput.setByteStream(fos);
+                    LSSerializer lsSerializer = domImplementationLS.createLSSerializer();
+                    lsSerializer.write(existingDoc, lsOutput);
+                } finally {
+                    try { fos.close(); } catch (Exception e) {}
+                }
+            } else {
+                // fallback
+                Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                StreamResult output = new StreamResult(outputFile);
+                DOMSource input = new DOMSource(existingDoc);
+                transformer.transform(input, output);
+            }
+        }

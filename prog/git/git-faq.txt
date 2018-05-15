@@ -1,3 +1,9 @@
+Q: --assume-unchanged and git reset
+A: git update-index --skip-worktree A
+
+Q: git add only modified
+A: git add -u
+
 Q: git diff -w crlf ^M 
 A: git config --global core.pager "tr -d '\r' | less"
 

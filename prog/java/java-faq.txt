@@ -7,6 +7,11 @@ A:
     final DocumentBuilder builder = factory.newDocumentBuilder();
     final Document doc = builder.parse(sUrl);
 
+Q: java pretty format xml
+A: see pretty-xml.txt
+
+Q: parse html
+A: javax.swing.text.html.HTMLEditorKit.getParser()
 
 Q: base64
 A: javax.xml.bind.DatatypeConverter.parseBase64Binary

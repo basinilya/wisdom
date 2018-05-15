@@ -1,3 +1,19 @@
+Q: maven generated resources
+A:
+  Window/Preferences/Maven/Discovery/Open Catalog
+    - apt connector
+    - buildhelper connector
+  
+  Window/Preferences/Maven/Annotation Processing
+    Automatically
+  
+  Artifacts containing annotation processors must be installed to local repo.
+  Make sure these artifact maven projects are not opened in Eclipse, or the generated .factorypath will lack some M2_REPO/**/*.jar
+
+Q: Unsupported location: SOURCE_PATH
+A: 
+  Both javac and Eclipse don't support SOURCE_PATH, but javac throws FileNotFoundException and Eclipse throws IllegalArgumentException, which is often not caught by processors
+
 Q: source not found
 A: add seemingly unrelated projects to source path
 

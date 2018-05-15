@@ -1,11 +1,34 @@
+Q: recursive vars
+A: 
+
+can redefine to use in prereqs and targets; valid:
+
+PREREQS = 1 2 3
+TARGETS = a b c
+$(TARGETS): $(PREREQS) # a b c: 1 2 3
+PREREQS = 4 5 6
+TARGETS = d e f
+$(TARGETS): $(PREREQS) # d e f: 4 5 6
+
+can't redefine to use in rules; last seen value is used; invalid:
+
+MYRECIPE = true
+a:
+	$(MYRECIPE) # false
+MYRECIPE = false
+b:
+	$(MYRECIPE) # false
+
+
 *************************************
 Q: list all included makefiles
 A:
 make -n -p | sed -e 's/^\(# makefile (from `\)\(.*\)\(., line .*\)/\2/;t;D' | sort -u
 *************************************
-Q: macros
+Q: macros actually called Automatic Variables
 A:
 $@ expands to target
+$< expands to first prereq
 *************************************
 Q: Command substitution
 A: $(shell <cmd>)

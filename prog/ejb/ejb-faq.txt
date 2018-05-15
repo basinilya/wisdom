@@ -1,3 +1,28 @@
+Q: what is EJB about?
+A: Simply put, transactions.
+  Bonus: remote, threads, balance.
+
+********************************************************************************
+
+Q:
+  session vs entity beans
+  or
+  session vs message-driven beans
+  ?
+A:
+
+********************************************************************************
+Q: ctx.lookup("java:global/classes/
+A: The java:global JNDI namespace is the portable way of finding remote enterprise beans using JNDI lookups...
+
+********************************************************************************
+********************************************************************************
+********************************************************************************
+********************************************************************************
+********************************************************************************
+Q: EJB Module
+A: a *.jar with one or more
+********************************************************************************
 Q: WARNING: Unable to find required classes (javax.activation.DataHandler and javax.mail.internet.MimeMultipart). Attachment support is disabled.
 A: 
 1. download activation.jar http://java.sun.com/javase/technologies/desktop/javabeans/jaf/downloads/index.html
