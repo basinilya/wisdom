@@ -1,0 +1,202 @@
+# packages
+http://cbs.centos.org/koji/buildinfo?buildID=22591
+http://cbs.centos.org/koji/buildinfo?buildID=22592
+
+# guides
+https://wiki.openafs.org/admin/InstallingOpenAFSonRHEL/
+https://wiki.gentoo.org/wiki/OpenAFS
+http://docs.openafs.org/QuickStartUnix.pdf
+
+
+
+### cleanup common
+systemctl stop openafs-client
+systemctl stop openafs-server
+
+umount /afs
+rmmod openafs
+
+yum erase openafs
+
+rm -rf /etc/openafs /var/cache/openafs /var/openafs
+
+rm -rf /vicepa/*
+rmdir /vicepa || rm -f /vicepa
+rmdir /exports/okvmh1bak/vicepa
+
+systemctl stop kadmin
+systemctl stop krb5kdc
+
+yum erase krb5-server        krb5-workstation          libkadm5           words
+
+# !!!
+#rm -rf /var/kerberos/krb5kdc
+
+### END cleanup common
+
+
+### setup common
+
+# some vars
+cat <<'EOFCONF' >/etc/profile.d/openafs-setup.sh
+KRB_SERVER=okdistrhw.acme.com        ; #export KRB_SERVER      
+KRB_DOMAIN=acme.com                  ; #export KRB_DOMAIN      
+KRB_REALM=ACME.COM                   ; #export KRB_REALM       
+cellname=localcell                   ; #export cellname        
+myname=afsadmin                      ; #export myname          
+AFS_SERVER_NAME=okdistrhw.acme.com   ; #export AFS_SERVER_NAME 
+AFS_SERVER_IP=192.168.140.113        ; #export AFS_SERVER_IP   
+EOFCONF
+
+source /etc/profile.d/openafs-setup.sh
+
+
+# prepare local repo with openafs rpms
+mkdir -p /media/distr-ro/localrepo/centos7
+cd /media/distr-ro/localrepo/centos7
+createrepo .
+
+cat <<'EOFCONF' >/etc/yum.repos.d/okdistrhw.repo
+[okdistrhw]
+name=okdistrhw
+baseurl=file:///media/distr-ro/localrepo/centos7
+enabled=0
+EOFCONF
+
+
+# replace example.com and uncomment realm
+sed -b -i \
+  -e "s/kerberos.example.com/${KRB_SERVER:?}/g" \
+  -e "s/example.com/${KRB_DOMAIN:?}/g" \
+  -e "s/EXAMPLE.COM/${KRB_REALM:?}/g" \
+  -e 's/#\( default_realm \)/\1/' \
+  -e /[[]realms[]]/,/[[]/s/^#// \
+  -e /[[]domain_realm[]]/,/[[]/s/^#// \
+  /etc/krb5.conf
+
+cat /etc/krb5.conf
+
+### END setup common
+
+
+### setup server
+
+# kerberos server
+yum install -y krb5-server krb5-workstation libkadm5 words
+
+# replace example.com
+sed -b -i -e "s/example.com/${KRB_DOMAIN:?}/g" -e "s/EXAMPLE.COM/${KRB_REALM:?}/g" /var/kerberos/krb5kdc/kdc.conf /var/kerberos/krb5kdc/kadm5.acl
+
+/usr/sbin/kdb5_util create -s
+
+
+systemctl start kadmin
+systemctl start krb5kdc
+
+systemctl status kadmin
+systemctl status krb5kdc
+
+systemctl enable kadmin
+systemctl enable krb5kdc
+
+
+# openafs server
+
+# /vicepa must exist before server is started
+
+if true; then
+  mkdir -p /vicepa
+else
+  mkdir /exports/okvmh1bak/vicepa
+  ln -s /exports/okvmh1bak/vicepa /vicepa
+fi
+
+touch /vicepa/AlwaysAttach
+
+yum install --nogpgcheck --enablerepo=okdistrhw openafs-server openafs-docs openafs-krb5
+
+# empty krb.conf breaks bos
+rm -f /etc/openafs/server/krb.conf
+#echo "${KRB_REALM:?}" >/etc/openafs/server/krb.conf
+
+
+systemctl start openafs-server
+systemctl status openafs-server
+
+cat /etc/openafs/server/ThisCell
+cat /etc/openafs/server/CellServDB
+
+kadmin.local -q "addprinc -randkey -e aes256-cts-hmac-sha1-96:normal,aes128-cts-hmac-sha1-96:normal afs/${cellname:?}"
+kadmin.local -q "ktadd -k /etc/openafs/server/rxkad.keytab afs/${cellname:?}"
+
+akeyconvert -all
+#  Cannot add single-DES keys to KeyFileExt, continuing
+#  Wrote 7 keys
+
+
+bos create localhost buserver simple /usr/libexec/openafs/buserver -cell "${cellname:?}" -localauth
+bos create localhost ptserver simple /usr/libexec/openafs/ptserver -cell "${cellname:?}" -localauth
+bos create localhost vlserver simple /usr/libexec/openafs/vlserver -cell "${cellname:?}" -localauth
+bos create localhost fs fs /usr/libexec/openafs/fileserver /usr/libexec/openafs/volserver /usr/libexec/openafs/salvager -localauth
+
+bos status localhost -long -localauth
+
+
+vos create localhost a root.afs -localauth
+vos create localhost a root.cell -localauth
+
+
+
+kadmin.local -q "addprinc ${myname:?}/admin"
+
+pts createuser ${myname:?}.admin -localauth
+pts adduser ${myname:?}.admin system:administrators -localauth
+bos adduser localhost ${myname:?}.admin -localauth
+
+cat /etc/openafs/server/UserList
+
+
+### END setup server
+
+
+### openafs client
+
+# do "setup common" first!
+
+# configure krb5 client
+yum install -y krb5-workstation
+
+yum install --nogpgcheck --enablerepo=okdistrhw openafs-client openafs-krb5 kmod-openafs
+
+
+echo "${cellname:?}" >/etc/openafs/ThisCell
+
+cat <<EOFCONF >/etc/openafs/CellServDB.local
+>${cellname:?}      #Cell name
+${AFS_SERVER_IP}    #${AFS_SERVER_NAME:?}
+EOFCONF
+
+cat /etc/openafs/CellServDB.local
+
+systemctl start openafs-client
+
+# login as normal user
+su - il
+
+kinit ${myname:?}/admin
+aklog
+tokens
+vos listvldb
+
+cd /afs/.:mount/${cellname:?}:root.afs/
+
+fs mkmount ${cellname} root.cell -cell ${cellname}
+# fs: You don't have the required access rights on 'localcell'
+fs mkmount ${cellname} root.cell -cell ${cellname}
+# fs: mount points must be created within the AFS file system
+
+$ fs mkmount .${cellname} root.cell -cell ${cellname} -rw
+$ fs setacl . system:anyuser read
+
+$ cd /afs/.:mount/${cellname}:root.cell/
+$ fs setacl . system:anyuser read
