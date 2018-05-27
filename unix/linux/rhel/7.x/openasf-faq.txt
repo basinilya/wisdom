@@ -1,0 +1,59 @@
+Q: bos: can't open cell database (/etc/openafs/server)
+A:
+  check:
+    /etc/openafs/server/CellServDB
+    /etc/openafs/server/ThisCell
+    /etc/openafs/server/krb.conf
+      (must not be empty)
+
+Q:
+    cd /afs/.:mount/${cellname}:root.afs/
+    fs mkmount ${cellname} root.cell -cell ${cellname}
+    fs: You don't have the required access rights on 'localcell'
+    ls /afs/.:mount/${cellname:?}:root.afs/
+    ls: cannot open directory /afs/.:mount/localcell:root.afs/: Permission denied
+
+A:
+    fileserver thinks your token is anonymous. Check krb.conf
+
+Q:
+    echo 192.168.140.113 >/var/openafs/NetInfo
+    ln -sfT /var/openafs/NetInfo /etc/openafs/server/NetInfo
+    
+    /var/openafs/logs/VLLog
+        The following fileserver is being registered in the VLDB:
+              [192.168.140.113]
+           It will replace the following existing entry in the VLDB (same uuid):
+              entry 0: [192.168.140.113 10.8.1.33]
+
+A:
+  TODO
+
+
+Q:
+  in client syslog/journal:
+    kernel: afs: Lost contact with file server 10.8.1.33 in cell localcell (code -1) (multi-homed address; other same-host interfaces maybe up)
+
+A:
+  TODO?
+  workaround: NetInfo
+
+Q: increase debug level
+A:
+  pkill -TSTP fileserver # twice enough
+  tail -F /var/openafs/logs/FileLog
+  
+  pkill -TSTP ptserver # twice enough
+  tail -F /var/openafs/logs/PtLog
+
+
+Q:
+A:
+
+It sounds like you want to use IP ACL's as Harmut suggests.
+
+# as an AFS admin, run the following:
+pts createuser 192.168.148.156
+pts creategroup homeusers
+pts adduser 192.168.148.156 homeusers
+fs setacl /afs/.localcell/home homeusers rlidwk

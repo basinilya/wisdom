@@ -29,6 +29,12 @@ systemctl stop krb5kdc
 
 yum erase krb5-server        krb5-workstation          libkadm5           words
 
+# restore original config
+rm /etc/krb5.conf.d/*
+mv --backup /etc/krb5.conf{,.save}
+yum reinstall krb5-libs
+
+
 # !!!
 #rm -rf /var/kerberos/krb5kdc
 
@@ -64,17 +70,35 @@ enabled=0
 EOFCONF
 
 
-# replace example.com and uncomment realm
-sed -b -i \
-  -e "s/kerberos.example.com/${KRB_SERVER:?}/g" \
-  -e "s/example.com/${KRB_DOMAIN:?}/g" \
-  -e "s/EXAMPLE.COM/${KRB_REALM:?}/g" \
-  -e 's/#\( default_realm \)/\1/' \
-  -e /[[]realms[]]/,/[[]/s/^#// \
-  -e /[[]domain_realm[]]/,/[[]/s/^#// \
-  /etc/krb5.conf
+if true; then :
+cat <<EOFCONF >/etc/krb5.conf.d/${KRB_DOMAIN:?}.conf
+[libdefaults]
+ default_realm = ${KRB_REALM:?}
 
-cat /etc/krb5.conf
+[realms]
+ ${KRB_REALM:?} = {
+  kdc = ${KRB_SERVER:?}
+  admin_server = ${KRB_SERVER:?}
+ }
+
+[domain_realm]
+ .${KRB_DOMAIN:?} = ${KRB_REALM:?}
+ ${KRB_DOMAIN:?} = ${KRB_REALM:?}
+EOFCONF
+
+else
+  # replace example.com and uncomment realm
+  sed -b -i \
+    -e "s/kerberos.example.com/${KRB_SERVER:?}/g" \
+    -e "s/example.com/${KRB_DOMAIN:?}/g" \
+    -e "s/EXAMPLE.COM/${KRB_REALM:?}/g" \
+    -e 's/#\( default_realm \)/\1/' \
+    -e /[[]realms[]]/,/[[]/s/^#// \
+    -e /[[]domain_realm[]]/,/[[]/s/^#// \
+    /etc/krb5.conf
+  cat /etc/krb5.conf
+fi
+
 
 ### END setup common
 
@@ -104,9 +128,9 @@ systemctl enable krb5kdc
 
 # /vicepa must exist before server is started
 
-if true; then
+if true; then :
   mkdir -p /vicepa
-else
+else :
   mkdir /exports/okvmh1bak/vicepa
   ln -s /exports/okvmh1bak/vicepa /vicepa
 fi
@@ -117,21 +141,23 @@ yum install --nogpgcheck --enablerepo=okdistrhw openafs-server openafs-docs open
 
 # empty krb.conf breaks bos
 rm -f /etc/openafs/server/krb.conf
-#echo "${KRB_REALM:?}" >/etc/openafs/server/krb.conf
+
+# realm DOES differ from the cell name
+echo "${KRB_REALM:?}" >/etc/openafs/server/krb.conf
 
 
 systemctl start openafs-server
 systemctl status openafs-server
+systemctl enable openafs-server
 
 cat /etc/openafs/server/ThisCell
 cat /etc/openafs/server/CellServDB
 
+# add just modern keys
 kadmin.local -q "addprinc -randkey -e aes256-cts-hmac-sha1-96:normal,aes128-cts-hmac-sha1-96:normal afs/${cellname:?}"
-kadmin.local -q "ktadd -k /etc/openafs/server/rxkad.keytab afs/${cellname:?}"
+kadmin.local -q "ktadd -k /etc/openafs/server/rxkad.keytab -e aes256-cts-hmac-sha1-96:normal,aes128-cts-hmac-sha1-96:normal afs/${cellname:?}"
 
 akeyconvert -all
-#  Cannot add single-DES keys to KeyFileExt, continuing
-#  Wrote 7 keys
 
 
 bos create localhost buserver simple /usr/libexec/openafs/buserver -cell "${cellname:?}" -localauth
@@ -143,8 +169,9 @@ bos status localhost -long -localauth
 
 
 vos create localhost a root.afs -localauth
-vos create localhost a root.cell -localauth
 
+# This can be performed from client
+vos create localhost a root.cell -localauth
 
 
 kadmin.local -q "addprinc ${myname:?}/admin"
@@ -168,7 +195,11 @@ yum install -y krb5-workstation
 
 yum install --nogpgcheck --enablerepo=okdistrhw openafs-client openafs-krb5 kmod-openafs
 
+# foreign cells not needed
+mv --backup /etc/openafs/CellServDB.dist{,.save}
+touch /etc/openafs/CellServDB.dist
 
+# configure local cell
 echo "${cellname:?}" >/etc/openafs/ThisCell
 
 cat <<EOFCONF >/etc/openafs/CellServDB.local
@@ -188,15 +219,71 @@ aklog
 tokens
 vos listvldb
 
+
+# This can be performed from client
+vos create ${AFS_SERVER_NAME:?} a root.cell
+
 cd /afs/.:mount/${cellname:?}:root.afs/
 
 fs mkmount ${cellname} root.cell -cell ${cellname}
 # fs: You don't have the required access rights on 'localcell'
-fs mkmount ${cellname} root.cell -cell ${cellname}
-# fs: mount points must be created within the AFS file system
 
-$ fs mkmount .${cellname} root.cell -cell ${cellname} -rw
-$ fs setacl . system:anyuser read
+fs mkmount .${cellname} root.cell -cell ${cellname} -rw
+fs setacl . system:anyuser read
 
-$ cd /afs/.:mount/${cellname}:root.cell/
-$ fs setacl . system:anyuser read
+cd /afs/.:mount/${cellname}:root.cell/
+fs setacl . system:anyuser read
+
+
+
+
+server=${AFS_SERVER_NAME:?}
+vos addsite ${server:?} a root.afs
+# Added replication site okdistrhw.acme.com /vicepa for volume root.afs
+vos release root.afs
+# Released volume root.afs successfully
+vos addsite ${server:?} a root.cell
+# Added replication site okdistrhw.acme.com /vicepa for volume root.cell
+vos release root.cell
+# Released volume root.cell successfully
+
+
+
+
+
+vos create ${server:?} a home
+# Volume 536870918 created on partition /vicepa of okdistrhw.acme.com
+cd /afs/.${cellname:?}
+fs mkmount home home
+
+
+fs setquota /afs/.localcell/home 200000000
+
+AFS_CACHESZ=2000000
+fs setcachesize ${AFS_CACHESZ:?}
+fs getcacheparms
+echo /afs:/var/cache/openafs:${AFS_CACHESZ:?} >/etc/openafs/cacheinfo
+
+
+
+$ vos addsite ${server:?} a home
+$ vos release root.cell
+$ vos release home
+
+
+$ vos create ${server:?} a home.<uid> -maxquota 0
+$ cd /afs/.${cellname}/home
+$ fs mkmount <user> home.<uid>
+$ vos release home
+
+
+
+
+
+
+echo 1 >/afs/.${cellname}/aaa
+echo 2 >/afs/${cellname}/aaa
+cat /afs/${cellname}/aaa
+cat /afs/.${cellname}/aaa
+
+
