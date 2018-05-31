@@ -1,3 +1,23 @@
+Q: benefits
+A: 
+  vs NFS:
+    - Dynamic fileserver address
+    - Low fileserver phaseout downtime
+    - One FS "/afs" (Linux autofs nullifies this benefit)
+
+  vs GlusterFS (with one remote brick and a local tier):
+    - WAN performance better
+
+
+Q: drawbacks
+A:
+  - "Caching" no better than NFS with cachefilesd
+  - Disconnected operation `fs discon on` not automatic
+  - Multi-homed peers unsupported
+  - Clients with NAT unsupported (compare exports(5) insecure)
+  - chown only for system:administrators (compare exports(5) no_root_squash)
+
+
 Q: bos: can't open cell database (/etc/openafs/server)
 A:
   check:

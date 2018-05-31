@@ -1,0 +1,27 @@
+# !!! glusterfs too slow for WAN !!!
+
+iptables -I INPUT -s 10.8.1.33 -j ACCEPT
+service iptables save
+
+yum install centos-release-gluster
+yum install glusterfs-server
+yum install glusterfs-fuse
+systemctl start glusterd.service
+systemctl status glusterd.service
+systemctl enable glusterd.service
+
+gluster peer probe glusterfs1
+gluster peer status
+# State: Peer in Cluster (Connected)
+
+gluster volume create gv0 glusterfs2:/exports/okvmh1bak/brick1/gv0
+gluster volume tier gv0 attach glusterfs1:/media/lv_fm/brick1/gv0
+gluster volume start gv0
+gluster volume status
+
+mount -t glusterfs glusterfs2:/gv0 /mnt
+umount /mnt
+
+
+>>/etc/fstab echo 'glusterfs1:/gv0   /var/cache/fm   glusterfs   defaults,_netdev,noauto,x-systemd.automount 0 0'
+mount /var/cache/fm
