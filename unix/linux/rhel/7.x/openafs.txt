@@ -31,7 +31,7 @@ yum erase krb5-server        krb5-workstation          libkadm5           words
 
 # restore original config
 rm /etc/krb5.conf.d/*
-mv --backup /etc/krb5.conf{,.save}
+mv --backup=numbered /etc/krb5.conf{,.save}
 yum reinstall krb5-libs
 
 
