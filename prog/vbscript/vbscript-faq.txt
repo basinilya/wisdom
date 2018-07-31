@@ -1,0 +1,17 @@
+Q: Class is not licensed for use
+A: 
+  For scripts the Design-time licensing needed
+    https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa751973(v=vs.85)
+  This license is included in Visual Studio 6 component "ActiveX"
+
+  http://computer-programming-forum.com/61-wsh/899cc21a80ea5189.htm
+
+
+Q: ?
+A: 
+  VBScript has only limited capability of working with byte arrays. The VarType function does return 8209, which indicates:
+  vbArray 8192 Array
+  vbByte 17 Byte subtype,
+  but you cannot use VBScript's array syntax to access individual elements of the array.
+
+  Conversion can be made with adodb.stream
