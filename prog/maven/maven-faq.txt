@@ -1,3 +1,12 @@
+Q: javadoc
+A: mvn javadoc:jar install / mvn javadoc:jar deploy
+
+Q: sources
+A: mvn source:jar install / mvn source:jar deploy
+
+Q: clean rebuild a submodule while resolving the uninstalled dependencies in the reactor
+A: ?
+
 Q: test only jar
 A:
     use a separate project

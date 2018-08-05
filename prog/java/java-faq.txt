@@ -1,3 +1,17 @@
+Q: java.util.Logger
+A: 
+ -Djava.util.logging.config.file=/path/to/app.properties
+  (load config from classpath unsupported)
+
+  app.properties:
+    handlers = java.util.logging.ConsoleHandler, ...
+    .level = WARNING
+    java.util.logging.ConsoleHandler.level = ALL
+    org.foo.level = FINE
+
+Q: good class file editor byte code editor
+A: dirtyjoe
+
 Q: good db for unit tests
 A: hsqldb
 
@@ -15,9 +29,11 @@ A: javax.swing.text.html.HTMLEditorKit.getParser()
 
 Q: base64
 A: javax.xml.bind.DatatypeConverter.parseBase64Binary
+    (hidden since java 9)
 
 Q: hex string
 A: javax.xml.bind.DatatypeConverter.printHexBinary
+    (hidden since java 9)
 
 Q: md5
 A:

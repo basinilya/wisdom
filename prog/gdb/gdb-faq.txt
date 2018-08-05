@@ -156,6 +156,12 @@ A:
 thread threadno
     Make thread number threadno the current thread
 ********************************************************************************
+Q: current module / current shared library
+A:
+  info symbol <addr>
+  info symbol $pc
+  info symbol funcname
+********************************************************************************
 Q: 
 $ gdb --core=core
 (gdb) info shared

@@ -1,3 +1,15 @@
+Q:
+  pattern rules with multiple targets
+  Only first target made;
+  "make: Nothing to be done for <other targets>"
+
+A:
+  "Pattern rules may have more than one target. Unlike normal rules,
+  this does not act as many different rules with the same prerequisites
+  and recipe. If a pattern rule has multiple targets, make knows that
+  the rule’s recipe is responsible for making all of the targets."
+
+
 Q: recursive vars
 A: 
 

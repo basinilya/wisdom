@@ -1,3 +1,31 @@
+Q: double star/double asterisk in .gitignore
+A: 
+  - If the pattern does not contain a slash /, Git treats it as a shell glob pattern.
+    In this case there's no difference between ** and *
+  
+  - Before git 1.8.2
+    "**/bar" matched "/foo/bar", but not "/bar"
+    "a/**/b" matched "/a/x/b" and "/a/x/y/b", but not "/a/b"
+    
+  - Since git 1.8.2
+    "**/bar" matches "/foo/bar" and "/bar"
+    "a/**/b" matches "/a/x/b", "/a/x/y/b", and "/a/b"
+  
+  - A negation bug fixed in git 1.8.4 (MSysGit 1.8.2)
+  
+  - Before JGit 3.1 it had bugy double star patterns
+
+
+Q: git rev-list show revisions from the beginning including the root commit
+A: `git rev-list HEAD`
+
+Q: show --assume-unchanged files
+A: git ls-files -v | grep '^[[:lower:]]'
+
+Q: show --skip-worktree files
+A: git ls-files -v | grep '^S'
+
+
 Q: --assume-unchanged and git reset
 A: git update-index --skip-worktree A
 

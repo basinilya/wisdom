@@ -1,0 +1,33 @@
+Q: ManagedExecutorService: ExecutionException: javax.enterprise.concurrent.AbortedException: Module myapp is disabled
+A: Don't use until app fully deployed
+
+Q: Archive type of .../gfdeploy/... was not recognized
+A: Restart Netbeans
+
+Q: java.lang.IllegalStateException: Application validation fails for given application [EnterpriseApplication1] for jndi-name []
+A: Two beans with same name in @ConnectionFactoryDefinition annotation
+
+Q: Incorrect Transaction Support Level for this RAR
+A: Non-existent resourceAdapter in @ConnectionFactoryDefinition annotation
+
+Q: NullPointerException at ServerPlatformUtils.createServerPlatform
+A: Safely ignored. Fixed in EclipseLink 2.6.2
+
+Q: UnsupportedClassVersionError
+A: 
+If netbeans: Tools > Servers > Glassfish > Java > Java Platform
+If standalone: check AS_JAVA in asenv.* files. 
+
+
+asadmin.bat start-domain --debug
+asadmin.bat stop-domain
+
+9009
+
+domains/domain1/autodeploy/
+.autodeploystatus - 
+
+
+bin>asadmin
+create-jdbc-connection-pool --restype javax.sql.DataSource --datasourceclassname oracle.jdbc.pool.OracleDataSource --property "user=saeaip_own04:password=saeaip_own04:url=jdbc\\:oracle\\:thin\\:@beethoven\\:1521\\:spm" aipds
+create-jdbc-resource --connectionpoolid aipds aipds

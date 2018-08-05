@@ -1,11 +1,45 @@
+Q: negation
+A: (!(cond))
+
+Q: Use of uninitialized value
+A: 
+  check:if defined $x
+  assign default value: $x //= "default";
+
+Q: split keep delimiter
+A:
+  $s = "Item1sUfFiXpReFiXItem2sUfFiXpReFiXItem3";
+  foreach my $item (split(/(?<=sUfFiX)(?=pReFiX)/, $s)) { print "'", $item, "'\n"; }
+
+  The RE for the part of the delimiter that should be the PREFIX of an item can
+  be wrapped in a lookahead group:
+  (?=pReFiX)
+  The RE for the part of the delimiter that should be the SUFFIX of an item can
+  be wrapped in a lookbehind group:
+  (?<=sUfFiX)
+  Important: lookbehind can't into variable-length matches
+
+Q: read whole file
+A: 
+  my $content;
+  {
+    local *FH;
+    open FH, "$ARGV[0]" or die $!;
+    -f FH and sysread FH, $content, -s FH;
+  }
+
+
 Q: compare numbers
 A: 
 
 Q: cast to number
 A: No way, even 0+$s don't work
 
+Q: compare numbers
+A: ==
+
 Q: array size
-A: @a in scalar context
+A: @a in scalar context, e.g.: print 0 + @a;
 
 Q: pass array
 A: 
