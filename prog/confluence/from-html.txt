@@ -1,0 +1,8 @@
+- unwrap: html/body
+- no <script>
+- no <noscript>
+- css class names safely persisted
+- <div> ?
+- important to preserve list-style:none; for no bullets
+- important to preserve float:left; for horizontal lists
+

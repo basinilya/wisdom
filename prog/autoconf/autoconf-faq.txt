@@ -1,0 +1,2 @@
+Q: new m4 macro not picked by autoconf
+A: aclocal --force

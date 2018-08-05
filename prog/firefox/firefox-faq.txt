@@ -1,0 +1,28 @@
+Q: custom URL handler
+A: 
+Windows:
+
+    REGEDIT4
+    [HKEY_CURRENT_USER\Software\Classes\unkproto]
+    @="URL:Zoom Launcher"
+    "URL Protocol"=""
+    "UseOriginalUrlEncoding"=dword:00000001
+    [HKEY_CURRENT_USER\Software\Classes\unkproto\DefaultIcon]
+    @="\"C:\\Users\\basin\\AppData\\Roaming\\Zoom\\bin\\Zoom.exe\",1"
+    [HKEY_CURRENT_USER\Software\Classes\unkproto\shell]
+    [HKEY_CURRENT_USER\Software\Classes\unkproto\shell\open]
+    [HKEY_CURRENT_USER\Software\Classes\unkproto\shell\open\command]
+    @="\"C:\\Users\\basin\\AppData\\Roaming\\Zoom\\bin\\Zoom.exe\" \"--url=%1\""
+
+
+Linux: see linux-faq.txt
+
+Firefox only
+
+FF 52- 
+https://support.zoom.us/hc/en-us/requests/583798?flash_digest=6b403a5e4a19952ee0906f1f5a10160194fb1a80
+mimeTypes.rdf
+ 
+FF 60+
+~/.mozilla/firefox/et26jtky.default/handlers.json
+"zoommtg":{"action":2,"handlers":[{"name":"zoom","path":"/usr/bin/zoom"}]},

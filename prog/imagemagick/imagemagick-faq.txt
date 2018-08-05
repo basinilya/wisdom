@@ -1,0 +1,21 @@
+Q: convert an image into a blank placeholder image with some text
+A: 
+
+find . -name "*.jpg" -o -name "*.png" -o -name "*.gif" | while read src; do
+  #src=437254_1_En_BookFrontmatter_Figb_HTML.jpg
+  #dst=output.io.${src##*.}
+  dst="../output/${src}"
+  
+  im-identify -format "%w %h" "${src}" | {
+    IFS=$IFS$'\r'
+    read x y dummy
+    if [ 100 -le "${x:?}" -a 100 -le "${y:?}" ]; then
+  mkdir -p "${dst%/*}"
+  im-convert -strip -shave 15x15 -fill "#FF7F7F" -draw "color 0,0 reset" \
+            -gravity south \
+            -stroke '#000C' -strokewidth 2 -annotate 0 "${x}x${y}" \
+            -stroke  none   -fill white    -annotate 0 "${x}x${y}" \
+  -bordercolor black -border 5x5 -bordercolor white  -border 5x5 -bordercolor black -border 5x5 "${src}" "${dst}"
+    fi
+  }
+done
