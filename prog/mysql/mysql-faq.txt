@@ -8,28 +8,58 @@ grant super on *.* to 'cxpstats'@'%';
 mysql -u cxpstats -t -h localhost -P 3306 --password=cxpstats cxpstats
 
 
-Q: passwordless
+Q: CentOS 7
 A:
+  yum install mariadb-server
+  systemctl enable mariadb.service
+  systemctl start mariadb.service
 
-  For 5.7.5 and earlier:
-  
-    mysql
-    update mysql.user set password=PASSWORD("") where User='root' and Host='localhost';
+Q: passwordless root login for Unix user root
+A:
+  !!! Having passworless TCP login on 127.0.0.1 is unsafe, because any local user can connect to it
 
-    # allow only root or mysql
-    mkdir -p /var/lib/mysql/sock
-    chown mysql:mysql /var/lib/mysql/sock
-    chmod 770 /var/lib/mysql/sock
-    
-    cat /etc/my.cnf
+  !!! The account "root@127.0.0.1" is never really used.
+  !!! Even with --proto=TCP --host=127.0.0.1 you are logged as root@localhost
+
+  !!! When using --proto=SOCKET, you are always logged as %@localhost
+
+  !!! This means that for the same username you can't have a passwordless unix
+  !!! socket login and still be able to use a password when using:
+  !!! --proto=TCP --host=127.0.0.1
+
+  !!! Even worse, with a dedicated unix socket user nothing prevented local
+  !!! clients from using TCP with this user.
+  !!! Only the recent versions support the "IDENTIFIED VIA unix_socket"
+  !!! restriction.
+
+  !!! However, users with enabled unix_socket lose the ability to fallback to using a password
+  !!! That is, if you enable unix_socket for root@localhost, other Unix users
+  !!! won't be able to connect as root unless they use a non-loopback TCP address
+  !!! You can only login as a unix_socket user if your Unix user matches the mysql user
+
+  To enable this plugin, do:
+    INSTALL PLUGIN unix_socket SONAME 'auth_socket';
+  or
+    /etc/my.cnf.d/50-socket.cnf
       [mysqld]
-      socket=/var/lib/mysql/sock/mysql.sock
-      ...  
-      [client]
-      socket=/var/lib/mysql/sock/mysql.sock
-    
-    service mysqld restart
+      plugin-load = auth_socket.so
+    and restart
 
-  For 5.7.6 and later
-  
-    ALTER USER 'root'@'localhost' IDENTIFIED BY ''
+
+  To alter an existing user, do:
+    -- The ALTER USER syntax is poorly documented; this works:
+    GRANT ... TO 'socketuser'@'localhost' IDENTIFIED VIA unix_socket;
+  or 
+    -- untested
+    update mysql.user set plugin='unix_socket' where user='socketuser' and Host='localhost';
+    FLUSH PRIVILEGES;
+
+  Despite the docs, @'localhost' is required.
+
+  Setting permissions on the Unix socket won't improve security, because if
+  unix_socket is disabled you can always connect as user@localhost using TCP.
+  And if it's enabled you can only connect as self.
+
+  In older versions where the unix_socket plugin is unsupported nothing beats a
+  cleartext password in /root/.my.cnf
+  Just make sure it's different from the 'root'@'hostname' password
