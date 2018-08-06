@@ -1,0 +1,35 @@
+mysql -u root -t -h localhost -P 3306 --password=password
+mysql -u root -t -h localhost -P 3306 --password
+
+create user 'cxpstats'@'%' identified by 'cxpstats';
+grant ALL PRIVILEGES ON cxpstats.* TO 'cxpstats'@'%' WITH GRANT OPTION;
+grant super on *.* to 'cxpstats'@'%';
+
+mysql -u cxpstats -t -h localhost -P 3306 --password=cxpstats cxpstats
+
+
+Q: passwordless
+A:
+
+  For 5.7.5 and earlier:
+  
+    mysql
+    update mysql.user set password=PASSWORD("") where User='root' and Host='localhost';
+
+    # allow only root or mysql
+    mkdir -p /var/lib/mysql/sock
+    chown mysql:mysql /var/lib/mysql/sock
+    chmod 770 /var/lib/mysql/sock
+    
+    cat /etc/my.cnf
+      [mysqld]
+      socket=/var/lib/mysql/sock/mysql.sock
+      ...  
+      [client]
+      socket=/var/lib/mysql/sock/mysql.sock
+    
+    service mysqld restart
+
+  For 5.7.6 and later
+  
+    ALTER USER 'root'@'localhost' IDENTIFIED BY ''
