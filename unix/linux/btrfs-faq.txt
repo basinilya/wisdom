@@ -1,0 +1,28 @@
+Q: restore an incremental backup from a backups server
+A:
+- There's already "/snapdir/last-good" readonly snapshot on the backups server (name may differ).
+  If there's no, there's nothing to restore
+
+- There's already "/snapdir/current-bad" readonly snapshot on the victim server created by daily backup program
+  If there's no, the only option is to "btrfs send" the whole subvolume from the backups server
+
+- On the backups server launch:
+    btrfs send -p "/snapdir/current-bad" "/snapdir/last-good" | ssh root@victim "receiver command..."
+
+- On the victim server the receiver command will be: btrfs receive "/snapdir"
+  The readonly snapshot "/snapdir/last-good" is created
+
+- Take a read-write snapshot of "/snapdir/last-good"
+  btrfs subvol snapshot "/snapdir/last-good" "/snapdir/last-good-rw"
+
+- Boot into "/snapdir/last-good-rw"
+
+
+Q: Boot into subvol
+A: 
+- option 1: btrfs subvolume set-default
+    After remount or reboot the previous default will be available at: ???
+- option 2: 
+  grub.cfg: rootflags=subvol=...
+  /etc/fstab subvol=...
+
