@@ -8,6 +8,9 @@ grant super on *.* to 'cxpstats'@'%';
 mysql -u cxpstats -t -h localhost -P 3306 --password=cxpstats cxpstats
 
 
+Q: LOCK TABLES ... Table doesn't exist
+A: 
+
 Q: CentOS 7
 A:
   yum install mariadb-server

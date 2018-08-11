@@ -1,3 +1,22 @@
+Q: java.beans.XMLEncoder
+A:
+  for encoding the setter should be present
+  for decoding the getter should be present
+
+  the properties are encoded in alphabetical order
+
+  properties that have default value are not encoded.
+  The default value deduced by creating another bean instance 
+
+Q: java.beans.XMLEncoder and boolean properties
+A:
+  |    good    |      good    |      good    |     bad       |   bad         
+  | B isX()    |*b isX()      |*b isX()      | b isX()       | B isX()       
+  |*B getX()   | B getX()     |              | B getX()      |
+  |*v setX(B)  |*v setX(b)    |*v setX(b)    | v setX(B)     | v setX(B)     
+
+
+
 Q: java.util.Logger
 A: 
  -Djava.util.logging.config.file=/path/to/app.properties
