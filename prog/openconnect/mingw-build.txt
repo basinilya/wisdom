@@ -1,0 +1,26 @@
+https://martchus.no-ip.biz/repo/arch/ownstuff/os/x86_64/
+gcc
+#yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-gcc
+#yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-gnutls
+#yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-libxml2
+#yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-lz4
+
+cd ~/builds
+git clone --depth=1 git://git.infradead.org/users/dwmw2/openconnect.git
+cd ~/builds/openconnect
+autoreconf -i
+#./configure --host=x86_64-w64-mingw32
+./configure --host=i686-w64-mingw32
+make
+make DESTDIR=$HOME/builds/openconnect-inst install
+
+
+#wget ftp://ftp.infradead.org/pub/openconnect/openconnect-7.08.tar.gz
+#tar -xf openconnect-7.08.tar.gz
+#cd openconnect-7.08
+
+
+packaging:
+copy needed dlls from /usr/i686-w64-mingw32/bin
+if gnutls doesn't work, download gnutls windows build from official site
+
