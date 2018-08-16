@@ -1,3 +1,34 @@
+Q: offload
+A: 
+
+  https://stackoverflow.com/a/42208689/447503
+
+  asadmin set server.network-config.protocols.protocol.http-listener-1.http.scheme-mapping=X-Forwarded-Proto
+
+  TODO: check if fixed on 4.1.2:
+    I'm using a NginX server as a SSL terminating proxy and set the following HTTP
+    headers: Host: <NginX host> X-Forwarded-Proto: https In Glassfish I set the following property: asadmin set
+    server.network-config.protocols.protocol.http-listener-1.http.scheme-mapping=X-Forwarded-Proto Glassfish ignores the X-Forwarded-Proto and uses HTTP to build
+    HttpServletRequest.getRequestURL() or evaluate HttpServletRequest.getScheme()
+    and HttpServletRequest.isSecure() I've tested on both Glassfish 3.1.2.2 and Glassfish 4.0 and on Glassfish 3.1.2.2
+    works like a charm! But it's not working on Glassfish 4.0! Seems a regression? (Similar issue
+    https://java.net/jira/browse/GLASSFISH-18685)
+
+  alternatively add a filter to handle custom headers. 
+
+
+Q: servlet filter for all appps
+A: 
+  put jar to
+  glassfish\domains\domain1\lib\
+  register it 
+  glassfish\domains\domain1\config\default-web.xml
+
+Q: java.lang.IllegalStateException: Could not find backup for factory javax.faces.context.FacesContextFactory. 
+A:
+- try changing <url-pattern>*</url-pattern> to <url-pattern>/*</url-pattern> in default-web.xml
+- possibly duplicate faces implementation in classpath
+
 Q: ManagedExecutorService: ExecutionException: javax.enterprise.concurrent.AbortedException: Module myapp is disabled
 A: Don't use until app fully deployed
 
