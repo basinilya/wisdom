@@ -1,0 +1,46 @@
+Q: deleted classes reappear on deploy
+A: del /s /q %USERPROFILE%\AppData\Local\NetBeans\Cache\
+
+Q: javadoc on hover
+A: 
+  Window>IDE Tools>Javadoc Documentation
+  Ctrl+Shift+space
+
+Q: class hierarchy
+A: Right click, Navigate > Inspect Hierarchy; Choose "Subtypes"
+
+Q: synchronize with projects window
+A:
+  Navigate > Select in Projects
+  View > Synchronize Editor with Views
+
+Q: build maven projects with older jdk
+A: project properties -> build -> compile -> java platform
+
+Q: javaee-endorsed-api-6.0 is missing
+A: check
+nbproject/private.properties
+user.properties.file=...
+
+Q: draw spaces
+A: 
+View -> Show Non-printable Characters
+To hide paragraph chars, install 1395152886_org-tvl-netbeans-editor-whitespace.nbm
+
+Q: problems view
+A: Window -> Action items
+In the "Action Items" window press "Show action items for all opened projects"
+
+
+Q: proper cygwin settings
+A:
+include dirs:
+  U:/cygwin/lib/gcc/i686-pc-cygwin/4.3.4/include
+  U:/cygwin/usr/include
+macros:
+  /* GCC keyword, unknown by code assist */
+  __extension__=
+********************************************************************************
+Q: default file encoding
+A: in etc/netbeans.conf, parameter "netbeans_default_options" 
+   append -J-Dfile.encoding (e.g. -J-Dfile.encoding=Cp1250)
