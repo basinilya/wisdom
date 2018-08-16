@@ -1,0 +1,10 @@
+Q:
+  NullPointerException
+  at org.eclipse.persistence.internal.jpa.metadata.MetadataProject.hasEntity
+A:
+  @Entity
+  public class SerialBus<D extends V24Device> implements Serializable {
+      private Map<String, D> endpointsByBusAddr = new HashMap<>(); // NPE
+      // replace with this:
+      // private Map<String, ? extends V24Device> endpointsByBusAddr = new HashMap<>();
+
