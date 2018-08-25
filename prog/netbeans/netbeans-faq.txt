@@ -1,3 +1,11 @@
+Q: Inspect properties of a non-UI custom bean in form editor
+  When you drag a non-UI pojo class onto an `AWT Frame Form` in Netbeans, a new field is created in your frame class, but it's not visible.
+A: 
+  - Switch to the "Design" mode in the Form class editor
+  - Click on the form
+  - Click Window > Navigator
+  - In the Navigator view click on the bean in the "Other components" node.
+
 Q: deleted classes reappear on deploy
 A: del /s /q %USERPROFILE%\AppData\Local\NetBeans\Cache\
 
