@@ -1,0 +1,46 @@
+Q: void functional interface with no argument
+A: Runnable
+
+Q:
+A:
+    public interface MethodGetter {
+        String getMethod();
+    }
+    
+    // non-static getter method refernce is a Function that accepts 'this'
+    public static <T extends MethodGetter> String getMethodName(T mock, final Function<T, ?> getter) {
+        getter.apply( mock );
+        return mock.getMethod();
+    }
+
+    class X extends FooBean implements MethodGetter {
+        String name;
+        @Override
+        public Object getX()
+        {
+            name = "TODO: find out method name";
+            return null;
+        }
+        @Override
+        public String getMethod()
+        {
+            return name;
+        }
+    }
+
+    X mock = new X();
+    String s = getMethodName(mock, FooBean::getX);
+
+
+java 8
+Lambdas, method::references
+default methods
+java.util.function
+java.util.stream
+
+
+Lamdas example:
+
+Arrays.asList("a", "b").stream().forEach((String s) -> { System.out.println(s);});
+Arrays.asList("a", "b").stream().forEach(s -> { System.out.println(s);});
+Arrays.asList("a", "b").stream().forEach(s -> System.out.println(s));
