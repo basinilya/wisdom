@@ -28,6 +28,22 @@ A:
     java.util.logging.ConsoleHandler.level = ALL
     org.foo.level = FINE
 
+
+  static {
+      System.setProperty("java.util.logging.config.class", "espa.LogConf");
+  }
+
+  public class LogConf {
+      public LogConf() throws IOException {
+          try (InputStream is = LogConf.class.getResourceAsStream("logger.properties")) {
+              if (is != null) {
+                  LogManager.getLogManager().readConfiguration(is);
+              }
+          }
+      }
+  }
+
+
 Q: good class file editor byte code editor
 A: dirtyjoe
 
