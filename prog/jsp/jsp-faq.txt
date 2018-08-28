@@ -1,0 +1,81 @@
+Q: jsp inject ejb
+A: 
+  Simply, Annotate Service Implementation class by @Named annotation
+  
+  @Stateless
+  @Named("eJBBankBean")
+  public class EJBBankBean implements EJBBankService {....}
+  
+  In your JSP file, use: #{ejbBankBean.yourServiceMethod(parameter1_ifAny,parameter2_ifAny)}
+  
+  @Named is CDI Annotation, without @Named EJB Bean will not visible in JSP EL i.e. '$' or Unified EL i.e. '#'
+
+  https://stackoverflow.com/a/41050460/447503
+
+Q: ${} vs #{}
+A:
+  Simply put, the ${} can do only a get, while the #{} can do a get and a set of the value.
+  
+  In JSF on legacy JSP, the #{} syntax is mandatory to trigger auto-creation of managed beans and to set request parameters as model values. If you used ${bean.value} in a JSF page, then the managed bean with name bean won't be auto-created if it isn't already in the scope. Also, the managed bean property value won't be set if the form was submitted with that value in an input component.
+  
+  In JSF on Facelets, the ${} is reinterpreted as #{} and thus they will behave exactly the same.
+  See also:
+  
+      https://stackoverflow.com/questions/4812755/difference-between-jsp-el-jsf-el-and-unified-el
+
+
+
+Q: jstl shapka
+A:
+  https://www.tutorialspoint.com/jsp/jsp_standard_tag_library.htm
+
+  <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><%--
+  --%><%@ page import="java.util.*" %><%--
+  --%><%@ page import="java.lang.reflect.*" %><%--
+  --%><%@ page import="javax.servlet.*" %><%--
+  --%><%@ page import="javax.servlet.http.*" %><%--
+  --%><%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %><%--
+  --%><%@ taglib prefix = "fmt" uri = "http://java.sun.com/jsp/jstl/fmt" %><%--
+  --%><%@ taglib prefix = "fn" uri = "http://java.sun.com/jsp/jstl/functions" %><%--
+  --%><%--
+  --%><html>
+
+Q: shapka
+A:
+
+<%@ page language="java" contentType="text/plain; charset=UTF-8" pageEncoding="UTF-8"%><%--
+--%>
+
+
+
+Q: import 
+A: <%@ page import="java.util.List;" %>
+
+Q: declare
+A: <%! %>
+
+Q: comment
+A: <%-- --%>
+
+Q: escape html
+A: 
+pom.xml:
+    <dependency>
+    	<groupId>commons-lang</groupId>
+    	<artifactId>commons-lang</artifactId>
+    	<version>2.6</version>
+    </dependency>
+test.jsp:
+    <%@page import="org.apache.commons.lang.StringEscapeUtils"%>
+    <%!
+    static String escape(String str) {
+    	return StringEscapeUtils.escapeHtml(str);
+    }
+    static void escape(java.io.Writer out, String str) throws java.io.IOException {
+    	StringEscapeUtils.escapeHtml(out, str);
+    }
+    %>
+    <% String s = "ab<br>cd";%>
+    <input type="text" value="<%= escape(s) %>"><br/>
+    <input type="text" value="<% escape(out, s); %>"><br/>
+    
