@@ -1,0 +1,31 @@
+Q: wrap request
+A:
+  https://github.com/basinilya/_dump/blob/ssl-offload-filter/src/com/common/offload/OffloadFilter.java
+
+Q: serve static file from your own servlet
+A: 
+    getServletContext().getNamedDispatcher("default").forward(request, response);
+
+    http://stackoverflow.com/a/837020/447503
+
+
+
+Q: java servlet forwarded request original
+A:
+    http://stackoverflow.com/a/11387378/447503
+    request.getAttribute("javax.servlet.forward.request_uri")
+
+
+Q: mvn jety example
+A: 
+<plugin>
+<groupId>org.eclipse.jetty</groupId>
+<artifactId>jetty-maven-plugin</artifactId>
+<version>9.2.11.v20150529</version>
+<configuration>
+	<scanIntervalSeconds>10</scanIntervalSeconds>
+	<webApp>
+	     <contextPath>/abc</contextPath>
+	</webApp>
+</configuration>
+  </plugin>
