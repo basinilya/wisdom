@@ -1,3 +1,6 @@
+Q: run on server maven war overlay resources missing
+A: open pom.xml, remove overlay dependecy, save, add overlay dependency, save
+
 Q: maven generated resources
 A:
   Window/Preferences/Maven/Discovery/Open Catalog
