@@ -1,6 +1,6 @@
 https://martchus.no-ip.biz/repo/arch/ownstuff/os/x86_64/
 gcc
-#yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-gcc
+#df -m /tmp | { read -r x; read -r x x x avail x; test 12000 -le "$avail"; } && yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-gcc
 #yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-gnutls
 #yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-libxml2
 #yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-lz4
