@@ -1,0 +1,483 @@
+Q: cannot download package - no subscription
+A: replace with CentOS
+    http://debuginfo.centos.org/6/x86_64/
+    http://vault.centos.org/6.5/cr/x86_64/Packages/
+
+
+Q: localrepo local repo
+A: cd Packages && createrepo .
+
+Q: repack rpm
+A: rpmrebuild
+
+Q: What does mediaid do?
+A:
+
+Q: offline upgrade using iso
+A: mount, create in /etc/yum.repos.d, yum upgrade
+(ln -sTf /media/distr-ro/rhel-server-6.8-x86_64-dvd /media/rheldvd)
+
+Q: /dev/random is slow
+A:
+
+Install rng-tools (not on DVD)
+
+cat <<'EOFCONF' >/etc/sysconfig/rngd
+case $1 in
+start|restart|reload|force-reload)
+exec 8< <(exec openssl enc -aes-256-ctr -pass pass:"$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64)" -nosalt < /dev/zero 2>/dev/null)
+;;
+esac
+EXTRAOPTIONS="--rng-device=/proc/self/fd/8"
+EOFCONF
+
+service rngd start
+chkconfig rngd on
+
+
+Q: Failed to open "/var/lib/dbus/machine-id"
+A: dbus-uuidgen --ensure
+    or
+    dbus-uuidgen > /var/lib/dbus/machine-id
+
+
+Q:  sendmail via smtp
+A: 
+    In /etc/postfix/main.cf
+    default_transport = smtp[:[host:]port]
+
+Q: load module at boot
+A: 
+/etc/sysconfig/modules/dm-snapshot.modules
+#!/bin/sh
+exec /sbin/modprobe dm-snapshot >/dev/null 2>&1
+
+chmod +x /etc/sysconfig/modules/dm-snapshot.modules
+
+
+Q: rename host
+A: 
+temporary: hostname $newname
+permanently:
+
+in /etc/sysconfig/network
+change: HOSTNAME=...
+/etc/init.d/network restart 
+or reboot
+
+Q: yum install different arch
+A: yum install packname.i686
+
+Q:    VM communication interface socket family:               [FAILED]
+A: vmware-config-tools.pl
+
+Q: gnome on headless
+A:
+#yum --nogpgcheck install rhn-client-tools oraclelinux-release
+    yum -y groupinstall basic-desktop desktop-platform x11 fonts
+    chkconfig firstboot off
+    
+    rm /etc/X11/xorg.conf
+    
+    init 5
+    
+    yum -y localinstall /media/distr-ro/nomachine_4.3.30_1_x86_64.rpm
+    
+    service nxserver start
+
+cd /usr/NX/var/log
+( tail -F nxd.log & tail -F nxserver.log & tail -F nxerror.log & ) | cat
+
+Q: bash completion
+A: with epel: yum install bash-completion
+
+Q: timeout in locking authority file
+A: chcon unconfined_u:object_r:user_home_dir_t:s0 /home/joe
+
+Q: list installed packages
+A: rpm -q packagename
+
+Q: list installed packages without version
+A: rpm -qa --queryformat "%{NAME}.%{ARCH}\n" | LC_ALL=C sort
+
+Q: explicitly installed packages
+A: 
+  To list `yumdb` from yum-utils
+  yumdb search reason user
+  yumdb search reason dep
+  
+  To cleanup
+  yum autoremove
+  or
+  yum autoremove $package
+
+Q:  `yum erase $a` tries to erase other packages as dependencies
+A:
+Short answer: use `rpm -e`
+Long answer:
+#rpm -qa | LC_ALL=C sort -u >~/my_packs_all_with_versions.lst
+
+
+Remember to keep gpg-pubkey, kernels, zabbix, packages that own files in /etc/yum.repos.d/ (epel-release), oraclelinux-release-notes, redhat-rpm-config
+
+(
+echo zabbix-agent.x86_64
+echo zabbix.x86_64
+rpm -qa --queryformat "%{NAME}.%{ARCH}\n" | LC_ALL=C sort | grep kernel
+for f in /etc/yum.repos.d/*; do a=`rpm -q --queryformat "%{NAME}.%{ARCH}\n" --file "$f"` && echo "$a"; done
+rpm -q --queryformat "%{NAME}.%{ARCH}\n" oraclelinux-release-notes redhat-rpm-config
+) >>~/my_packs_to_keep.lst0
+
+LC_ALL=C sort -u ~/my_packs_to_keep.lst0 >~/my_packs_to_keep.lst
+
+
+
+cp ~/my_packs_to_keep.lst ~/my_packs_to_keep-all.lst0
+
+
+# TODO: use rpm -q --whatprovides 'libgdk_pixbuf-2.0.so.0()(64bit)'
+# use /media/distr-ro/utils/rpmvercmp to analyze CAPABILITY such as 'libXrandr >= 1.2.99.4-2'
+
+while true; do
+    (
+    cat ~/my_packs_to_keep-all.lst0
+    < ~/my_packs_to_keep-all.lst0 xargs --no-run-if-empty rpm -qR --queryformat "%{NAME}.%{ARCH}\n" | sed '/is not installed/d;/[/(]/d;s/ .*//'
+    ) | LC_ALL=C sort -u >~/my_packs_to_keep-all.lst
+    cmp ~/my_packs_to_keep-all.lst0 ~/my_packs_to_keep-all.lst >/dev/null 2>&1 && break
+    command mv ~/my_packs_to_keep-all.lst ~/my_packs_to_keep-all.lst0
+done
+
+< ~/my_packs_to_keep-all.lst0 xargs --no-run-if-empty rpm -q --queryformat "%{NAME}.%{ARCH}\n" | sed '/is not installed/d' | LC_ALL=C sort -u >~/my_packs_to_keep-all.lst
+
+
+rpm -qa --queryformat "%{NAME}.%{ARCH}\n" | LC_ALL=C sort -u >~/my_packs_all.lst
+diff -u ~/my_packs_to_keep-all.lst ~/my_packs_all.lst | sed '1,3d;/cifs-utils\|samba-client/d;s/^+//;t;d' >~/my_packages-ec-stage-db-1-to-uninst.txt
+
+
+4<&1 <~/my_packages-ec-stage-db-1-to-uninst.txt xargs --no-run-if-empty sh -c '<&4 yum erase "$@"' x
+
+
+gdk-pixbuf2.x86_64
+
+
+Removing for dependencies:
+ fprintd                                 x86_64
+ fprintd-pam                             x86_64
+ gtk2                                    x86_64
+ gtk2-engines                            x86_64
+ java-1.7.0-openjdk                      x86_64
+ latencytop                              x86_64
+ libfprint                               x86_64
+ python-matplotlib                       x86_64
+ redhat-lsb                              x86_64
+ redhat-lsb-compat                       x86_64
+ redhat-lsb-graphics                     x86_64
+ seekwatcher                             noarch
+
+
+[root@ec-stage-solr-1 ~]# rpm -qR seekwatcher
+/usr/bin/env
+blktrace
+python
+python-matplotlib
+rpmlib(CompressedFileNames) <= 3.0.4-1
+rpmlib(FileDigests) <= 4.6.0-1
+rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+theora-tools
+rpmlib(PayloadIsXz) <= 5.2-1
+
+
+
+
+
+
+
+<~/my_packages-ec-stage-db-1-to-uninst.txt head -80 | xargs --no-run-if-empty yum erase
+
+
+cat ~/my_packs_to_keep.lst | xargs --no-run-if-empty rpm -qR
+
+
+    #echo "$a" | LC_ALL=C sort >~/my_packages-ec-stage-db-1-to-uninst.txt
+    while true; do
+        package-cleanup --leaves --all | xargs rpm -q --queryformat "%{NAME}.%{ARCH}\n" | LC_ALL=C sort >~/my_packages-ec-stage-db-1-leaves.txt
+        b=`LC_ALL=C join ~/my_packages-ec-stage-db-1-to-uninst.txt ~/my_packages-ec-stage-db-1-leaves.txt`
+        [ -z "$b" ] && break
+        yum erase $b || break
+    done
+
+
+Q: remove old kernels
+A: package-cleanup --oldkernels --count=2
+
+Q: "Cannot retrieve repository metadata (repomd.xml) for repository: InstallMedia. Please verify its path and try again"
+A: to fix it, goto /etc/yum.repos.d and rm packagekit-media.repo
+
+Q: non-interactive passwd
+A: echo "username:newpass"|chpasswd
+
+Q: rhel version
+A: lsb_release -i -r
+
+Q: find installed package which is a file owner
+A: rpm --query --file FILE
+
+Q: find available package containing file
+A: yum provides "*bin/tc"
+
+Q: timezone
+A: /etc/sysconfig/clock
+
+Q: yumdownloader (part of yum-utils) download a specific source version
+A: use the fully qualified name of the binary rpm, not source rpm:
+    yumdownloader --source kernel-`uname -r`
+
+Q: yumdownloader --source prints either No Match for argument or No source RPM found
+A: For example, to make the pre-existing repo [rhel-source] work, the base repo should be named [rhel].
+
+Q: mock
+A:
+sudo yum install -y mock # from epel
+# optionally add to /etc/mock/default.cfg :
+    [main]
+    proxy=http://proxy.acme.com:3128
+
+sudo usermod -a -G mock il
+yumdownloader --source haproxy
+mock --no-clean --rebuild *.src.rpm
+
+Q: rebuild kernel
+A:
+
+Read the .spec and find macros to enable non-default packages.
+e.g.: mock --no-clean --rebuild -D "_with_firmware 1" kernel-2.6.32-573.12.1.el6.src.rpm
+
+Alternatively (from Centos5):
+To rebuild the kernel-firmware and documentation, run with --target noarch
+
+mock -v --disable-plugin='ccache' --resultdir=./mockbuild/noarch/ -r rhel-5-i386 --target='noarch' /var/www/html/redhat/updates/5Server/rhel-source/kernel-2.6.18-238.1.1.el5.src.rpm
+
+The output files are:
+kernel-2.6.18-238.1.1.el5.src.rpm kernel-doc-2.6.18-238.1.1.el5.noarch.rpm
+
+To rebuild the kernel-devel package, run with --target i386
+
+mock -v --disable-plugin='ccache' --resultdir=./mockbuild/i386/ -r rhel-5-i386 --target='i386' /var/www/html/redhat/updates/5Server/rhel-source/kernel-2.6.18-238.1.1.el5.src.rpm
+
+The output files are:
+kernel-2.6.18-238.1.1.el5.src.rpm kernel-headers-2.6.18-238.1.1.el5.i386.rpm
+
+To rebuild the actual kernel package, run with --target i686 (on my
+virtualbox, with only 512 RAM, this step is really taking forever!)
+
+mock -v --disable-plugin='ccache' --resultdir=./mockbuild/i686/ -r rhel-5-i386 --target='i686' /var/www/html/redhat/updates/5Server/rhel-source/kernel-2.6.18-238.1.1.el5.src.rpm
+
+The output files are:
+French fries
+
+Q: rpmbuild setup and examples
+A: 
+Do not use this! Use mock
+
+cat <<'EOF' >~/.rpmmacros 
+%_topdir %(echo $HOME)/rpmbuild
+EOF
+
+
+mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+echo '%_topdir %(echo $HOME)/rpmbuild' > ~/.rpmmacros
+
+cd ~/rpmbuild/SRPMS
+
+# sudo yum install -y yum-utils
+yumdownloader --source haproxy
+
+sudo yum-builddep haproxy-*.src.rpm
+
+if true; then
+    # modify
+    
+    rpm -ivh haproxy-*.src.rpm
+    
+    cd ~/rpmbuild/SPECS
+    # vim haproxy.spec
+    rpmbuild -ba haproxy.spec
+else
+    # build as is
+    rpmbuild --rebuild haproxy-1.5.2-2.el6.src.rpm
+fi
+
+Q: change network settings
+A: system-config-network or manually edit /etc/sysconfig/network-scripts/ifcfg-eth0
+   then restart: /sbin/service network restart
+
+ifcfg-eth0 (dhcp)
+    DEVICE=eth0
+    NM_CONTROLLED=yes
+    ONBOOT=yes
+    TYPE=Ethernet
+    DEFROUTE=yes
+    PEERROUTES=yes
+    IPV4_FAILURE_FATAL=yes
+    IPV6INIT=no
+    #HWADDR=00:15:5d:6f:1e:09
+    #NAME="System eth0"
+    #UUID=5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03
+
+    BOOTPROTO=dhcp
+    PEERDNS=yes
+    DHCP_HOSTNAME=`/bin/hostname`
+
+ifcfg-eth0 (static)
+    DEVICE=eth0
+    NM_CONTROLLED=yes
+    ONBOOT=yes
+    TYPE=Ethernet
+    DEFROUTE=yes
+    PEERROUTES=yes
+    IPV4_FAILURE_FATAL=yes
+    #HWADDR=00:15:5d:6f:1e:09
+    #NAME="System eth0"
+    #UUID=5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03
+
+    BOOTPROTO=none
+    IPADDR=192.168.140.106
+    NETMASK=255.255.255.0
+    DNS2=192.168.110.11
+    GATEWAY=192.168.140.1
+    DNS1=192.168.149.10
+    USERCTL=no
+
+Q:
+X11 forwarding request failed on channel 0
+or $DISPLAY env var not set
+although X11Forwarding yes
+A:
+yum install xorg-x11-xauth
+
+
+Q: Warning: No xauth data; using fake authentication data for X11 forwarding.
+A: client issue.
+
+
+Q:  when ssh X11 forwarding:
+    GConf Error: Failed to contact configuration server
+    or
+    Xlib: extension "RANDR" missing on display "localhost:10.0".
+    or
+    /bin/dbus-launch terminated abnormally
+A: yum install -y dbus-x11
+
+
+Q: ntp
+package: ntp
+conf: /etc/ntp.conf
+
+#server gate.acme.com
+#driftfile /var/lib/ntp/drift
+
+
+#chkconfig ntpdate on
+chkconfig ntpd on
+/etc/init.d/ntpd start
+
+Q: time correction of 11515 seconds exceeds sanity limit (1000); set clock manually to the correct UTC time
+A: Check ps -Af | grep ntpd. It should contain '-g'.
+   $OPTIONS in /etc/sysconfig/ntpd already contains '-g'
+
+Q: base-devel meta package
+A:
+yum groupinstall -y 'Development Tools'
+
+Installing:
+ autoconf automake bison byacc cscope ctags diffstat doxygen flex gcc gcc-c++ gcc-gfortran indent intltool libtool patchutils rcs redhat-rpm-config rpm-build swig systemtap
+Installing for dependencies:
+ cloog-ppl cpp gettext-devel gettext-libs glibc-devel glibc-headers kernel-devel kernel-headers libart_lgpl libgcj libstdc++-devel mpfr ppl
+
+Q: gcc -m32
+A: yum install -y glibc-devel.i686 libgcc.i686 libstdc++-devel.i686 ncurses-devel.i686
+
+Q: permanently disable selinux
+A:
+/etc/selinux/config:
+SELINUX=disabled
+SELINUXTYPE=targeted
+
+Q: temporary disable selinux
+A:
+sudo setenforce 0
+#echo 0 >/selinux/enforce # not working on rhel7
+
+Q: "avc:  denied" "name=authorized_keys"
+avc:  denied  { search } for  pid=39839 comm="sshd" ... ino=<inode of /home>
+A:
+restorecon -v ~/.. ~
+restorecon -R -v ~/.ssh
+
+
+Q: samba
+A:
+man samba_selinux
+
+Q:
+smb: \> ls
+NT_STATUS_ACCESS_DENIED listing \*
+A:
+setsebool -P samba_enable_home_dirs=on
+
+Q:
+smb: \> mkdir a
+NT_STATUS_ACCESS_DENIED making remote directory
+A:
+chcon -R -t samba_share_t /home/fred
+
+
+Q: samba firewall
+    smbclient timeout connecting to
+A:
+In it's simplest form, on a Red Hat-ish system like Fedora Core 3, you can add four lines to /etc/sysconfig/iptables just before the line with "-j REJECT" in it: 
+--- /etc/sysconfig/iptables.old 2012-04-19 07:01:01.695765000 +0400
++++ /etc/sysconfig/iptables     2012-08-23 10:47:01.819983797 +0400
+@@ -7,6 +7,10 @@
+ -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+ -A INPUT -p icmp -j ACCEPT
+ -A INPUT -i lo -j ACCEPT
++-A INPUT -p udp -m udp --dport 137 -j ACCEPT
++-A INPUT -p udp -m udp --dport 138 -j ACCEPT
++-A INPUT -m state --state NEW -m tcp -p tcp --dport 139 -j ACCEPT
++-A INPUT -m state --state NEW -m tcp -p tcp --dport 445 -j ACCEPT
+ -A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+ -A INPUT -j REJECT --reject-with icmp-host-prohibited
+ -A FORWARD -j REJECT --reject-with icmp-host-prohibited
+
+and then restart the iptables service:
+# service iptables restart
+
+
+Q: package manager
+A:
+yum install --nogpgcheck foo.rpm...
+
+Q: setup mirrors
+A:
+# /etc/yum.repos.d/mirrors-e21-cn.repo
+[repository]
+name=mirrors.e21.cn
+baseurl=http://mirrors.e21.cn/CentOS6.0_x64/
+
+# /etc/yum.repos.d/vault-centos-org.repo
+[repository]
+name=vault.centos.org
+baseurl=http://vault.centos.org/6.0/os/x86_64/
+
+# /etc/yum.repos.d/vault-centos-org-src.repo
+[vault-centos-org-src]
+name=vault.centos.org-src
+baseurl=http://vault.centos.org/6.0/os/SRPMS/
+
+http_proxy=http://proxy.acme.com:3128 rpm --import http://vault.centos.org/6.0/os/x86_64/RPM-GPG-KEY-CentOS-6
+
+
+Q: xinetd echo discard
+A: sed -i -E 's/^([[:space:]]*disable[[:space:]]*)=.*/\1= no/' discard-* echo-*
+
