@@ -1,0 +1,94 @@
+Q: 
+  address space needed by 'cygXfixes-3.dll' (0x600000) is already occupied
+  rebaseall doesn't help
+A:
+  /usr/bin/rebase -is | /usr/bin/tail
+  ##/usr/bin/cygGL-1.dll base 0x6ff50000 size 0x00080000
+  ##/usr/bin/cygEGL-1.dll base 0x6ffd0000 size 0x00029000
+  /usr/bin/rebase -b 0x70000000 /usr/bin/cygXfixes-3.dll
+
+
+Q: X11 server
+A: X-start-menu-icons (outdated)
+
+Q: xinit: connection to X server lost
+A: 
+  alias runx="run xwin -multiwindow -noprimary"
+  #alias runx="run xwin -multiwindow -noprimary -auth /home/il/serverauth"
+
+********************************************************************************
+
+Q: Warning: No xauth data; using fake authentication data for X11 forwarding.
+A: 
+1) Run startxwin with "-auth" flag, for example:
+/usr/bin/startxwin -- -noprimary -auth
+
+2) install xauth package and add to ~/.startxwinrc:
+#!/bin/sh
+xauth add :0 . `mcookie`
+
+
+********************************************************************************
+
+Q: musthave packages
+A: procps, util-linux, mintty, vim
+********************************************************************************
+
+Q: move configured openssh server into a new clean cygwin installation
+A:
+install openssh, inetutils
+
+mv $oldcyg/etc/groups /etc/
+mv $oldcyg/etc/passwd /etc/
+mv $oldcyg/etc/ssh* /etc/
+mv $oldcyg/var/empty /var/
+mv $oldcyg/var/log/sshd.log /var/log/
+
+********************************************************************************
+Q: non-English characters are question marks in man pages
+A: /etc/man.conf: NROFF		/usr/bin/preconv -e UTF-8 | /usr/bin/nroff -c -mandoc 2>/dev/null
+********************************************************************************
+Q: command line package
+A: cyg-apt
+********************************************************************************
+Q:
+change NTFS permissions for symlinks
+A:
+find / -mount -type l -printf '"%p"\n' | \
+  xargs bash -c 'chown -h $UID "$@" && for f in "$@"; do echo "$f.forcygpath"; done' _ | \
+  cygpath -w -f - | while read -r f; do cacls "${f%.forcygpath}" /E /G "BUILTIN\Users:W"; done
+********************************************************************************
+Q: restore /etc/hosts
+A:
+rm /etc/hosts
+ln -s "$SYSTEMROOT\system32\drivers\etc\hosts" /etc/hosts
+chown -h Admin /etc/hosts
+********************************************************************************
+Q: nfs
+A:
+- install nfs package
+- apply nfs-server-config.patch (localizes 'Guest' and 'Administrators' names)
+- run nfs-server-config
+- optionally add mount points to fstab: 
+     C:/Documents\040and\040Settings /repo ntfs binary 0 0
+- optionally create map files in /etc/nfs/ to map remote and local users
+  bob.map:
+    uid	100	43290
+
+- edit /etc/exports
+    /pub				*(rw,anonuid=501,anongid=546)
+    /repo				192.168.100.101(rw,map_static=/etc/nfs/bob.map) 192.168.100.102(rw,map_static=/etc/nfs/dioptase.map)
+
+- Careful with NTFS permissions: nfsd won't even try to access windows folders
+  if it thinks that nfsd user or client user has no right to access them.
+  For example, you can't mount "C:\Documents and Settings\user" on remote
+  machine, because windows user "nfsd" has no unix permission to access 
+  directory "user". But you can mount "C:\Documents and Settings" and use
+  symlink to "user", because this way nfsd will impersonate itself as "user"
+  before checking unix permission on folder "user".
+
+- mount commands:
+    Linux:   mount -t nfs john:/some /mnt/there -overs=2,nolock # nolock required for old server
+    Solaris: mount -F nfs john:/some /mnt/there
+
+- You don't have to remount if nfs server restarts, but if performance degrades, remount.
