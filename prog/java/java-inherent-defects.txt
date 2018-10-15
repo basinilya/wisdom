@@ -1,0 +1,10 @@
+- InputStream.available() behavior undefined in case of pipe EOF
+  Linux: throws IOException
+  Windows: returns 0
+
+- "java.protocol.handler.pkgs" can only find handlers in the System Classloader
+  Webapps and EJBs can't register URL handlers
+
+- URLStreamHandler abstract methods not public
+  To create a delegating URLStreamHandler one has to resort to reflection to call the methods of the delegate
+
