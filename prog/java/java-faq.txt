@@ -1,3 +1,13 @@
+Q: Sockets
+A:
+  // create a connected socket
+  sock = new Socket(new InetSocketAddress(InetAddress.getByName("hostname"), 80))
+
+  // create a local server
+  ss = new ServerSocket();
+  ss.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
+  sock = ss.accept();
+
 Q: java.beans.XMLEncoder
 A:
   for encoding the setter should be present

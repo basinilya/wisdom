@@ -1,3 +1,13 @@
+Q: class loading rules
+A:
+  - adjacent EJB modules in an application can access each other classes and the classes in lib/*.jar
+  - ejb jar in ear root only added to classpath if it contains at least one annotated bean
+  - jar in lib/ is always added to classpath, but the discovery of beans in it depends on application.xml:
+    - If it's listed in application.xml, then it becomes an EJB module and its beans belong to itself and registered only once
+    - If it is not listed in application.xml, then every other EJB module registers its own copies of beans in lib/*.jar .
+      This leads to ambiguity during injection and failed deploy.
+
+
 Q: what is EJB about?
 A: Simply put, transactions.
   Bonus: remote, threads, balance.
