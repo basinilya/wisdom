@@ -1,4 +1,21 @@
 Q:
+  BufferUnderflowException
+  at com.sun.enterprise.deployment.annotation.introspection.ConstantPoolInfo.containsAnnotation
+A:
+  https://stackoverflow.com/questions/28301584/javaee-glassfish-bufferunderflowexception
+  https://github.com/payara/Payara/issues/959
+  bug in ConstantPoolInfo.java:
+  unhandled: METHODHANDLE/METHODTYPE/INVOKEDYNAMIC
+  Fixed in:
+
+    payara-blue-4.1.1.164
+    payara-server-4.1.1.164
+    payara-server-5.0.0.Alpha1
+
+
+  Workaround: remove lambdas
+
+Q:
 [181002 10:32:19.629] INFO: "JACC Policy Provider: Failed Permission Check, context(v24testear/V24Handler-ejb_jar)- permission(("javax.security.jacc.EJBMethodPermission" "FastBean" "onChangeConnected,Local,org.foo.businessentity.infrastructure.infracomponents.InterfaceStateEm,org.foo.businessentity.BusinessEntity,org.foo.transaction.content.TyMessagePriorityEm"))" com.sun.enterprise.security.provider.BasePolicyWrapper$2 run
 [181002 10:32:19.631] WARNING: "A system exception occurred during an invocation on EJB FastBean, method: public void org.foo.FastBean.onChangeConnected(org.foo.businessentity.infrastructure.infracomponents.InterfaceStateEm,org.foo.businessentity.BusinessEntity,org.foo.transaction.content.TyMessagePriorityEm)" com.sun.ejb.containers.BaseContainer postInvoke
 [181002 10:32:19.631] WARNING: "" com.sun.ejb.containers.BaseContainer postInvoke
