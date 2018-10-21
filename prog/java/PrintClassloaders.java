@@ -15,6 +15,7 @@ public class PrintClassloaders {
     
     public static void printClassloader(final PrintWriter pw, final Class clazz) throws Exception {
         log(pw, "classloader hierarchy for " + clazz);
+        log(pw, "location: " + clazz.getProtectionDomain().getCodeSource().getLocation());
         printClassloader0(pw, clazz.getClassLoader());
         log(pw, "");
         log(pw, "");

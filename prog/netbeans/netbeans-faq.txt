@@ -1,3 +1,11 @@
+Q: ???
+A:
+  - undeploy
+  - clean
+  - close projects
+  - close Netbeans
+  - rm -f */nbproject/build-impl.xml */nbproject/private/private.properties
+
 Q: Inspect properties of a non-UI custom bean in form editor
   When you drag a non-UI pojo class onto an `AWT Frame Form` in Netbeans, a new field is created in your frame class, but it's not visible.
 A: 
