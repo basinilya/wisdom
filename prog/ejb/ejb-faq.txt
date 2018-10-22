@@ -1,6 +1,14 @@
 Q: ???
 A: @PreDestroy method is not synchronized in singleton
 
+Q: Annotation inheritance
+A:
+  - When overriding an annotated method, parent annotations not inherited
+  - Class level annotations that set a default to the business methods only apply to the current class, not the parent class
+    e.g. @TransactionAttribute
+
+Q: overriding an annotated method
+A: this clears the effect of annotations in parent class
 
 Q: class loading rules
 A:

@@ -2,6 +2,7 @@ Q:
   BufferUnderflowException
   at com.sun.enterprise.deployment.annotation.introspection.ConstantPoolInfo.containsAnnotation
 A:
+  https://github.com/payara/Payara/pull/1052/files
   https://stackoverflow.com/questions/28301584/javaee-glassfish-bufferunderflowexception
   https://github.com/payara/Payara/issues/959
   bug in ConstantPoolInfo.java:
