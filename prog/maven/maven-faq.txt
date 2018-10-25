@@ -1,3 +1,6 @@
+Q: Run a single test in a multi-module project
+A: mvn test -am -DfailIfNoTests=false -Dtest=TestName
+
 Q: "An internal error occurred during: Updating Maven Project" "Path must include project and resource name"
 A: m2e can't into project build directory outside of project folder
 
