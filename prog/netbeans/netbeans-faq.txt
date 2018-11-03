@@ -1,3 +1,6 @@
+Q: IllegalStateException: Were trying to install a module that had never been checked: StandardModule:org.netbeans.api.debugger.jpda
+A: Netbeans is trying to run on JRE. Uncomment and set netbeans_jdkhome= in netbeans.conf
+
 Q: ???
 A:
   - undeploy

@@ -1,0 +1,201 @@
+Q: a stop job is running for
+A: 
+
+Q: interactive console session during shutdown
+A: 
+# on tty2:
+    exec -a '@dontkillme' /bin/bash
+    trap '' HUP
+
+Q: custom URL handler
+A: 
+In Gnome 2 create gconf keys:
+
+    gconftool-2 -t string -s /desktop/gnome/url-handlers/PROTONAME/command "/usr/bin/program %s"
+    gconftool-2 -t bool   -s /desktop/gnome/url-handlers/PROTONAME/needs_terminal false
+    gconftool-2 -t bool   -s /desktop/gnome/url-handlers/PROTONAME/enabled true
+
+  (see schemas to create system-wide keys)
+
+In Gnome 3 create a .desktop file /usr/share/applications and then run update-desktop-database . See http://archive.li/8C3zb#selection-811.0-1421.5
+
+  Ex1:
+    [Desktop Entry]
+    Encoding=UTF-8
+    Version=1.0
+    Type=Application
+    Terminal=false
+    Exec=/usr/bin/tunesviewer %U
+    Name[en_US]=TunesViewer
+    Comment[en_US]=Small, easy-to-use program to access iTunesU media
+    Name=TunesViewer
+    Comment=Small, easy-to-use program to access iTunesU media
+    Icon=/usr/share/icons/hicolor/scalable/apps/tunesview.svg
+    Categories=Application;Network;
+    MimeType=x-scheme-handler/itms;x-scheme-handler/itmss;x-scheme-handler/itpc;
+    Comment[en_US.utf8]=Small, easy-to-use program to access iTunesU media
+  
+  Ex2:
+    [Desktop Entry]
+    Name=Zoom
+    Comment=Zoom Video Conference
+    Exec=/usr/bin/zoom %U
+    Icon=Zoom.png
+    Terminal=false
+    Type=Application
+    Encoding=UTF-8
+    Categories=Network;Application;
+    StartupWMClass=zoom
+    MimeType=x-scheme-handler/zoommtg;application/x-zoom;
+    X-KDE-Protocols=zoommtg
+    Name[en_US]=Zoom
+
+
+Q: create system-wide gconf keys
+A: create and register /etc/gconf/schemas/*.schemas
+  See postinstall scripts of RPMs
+
+Q: mount.nfs: access denied by server while mounting okdistrhw:/exports/okbackup
+A: tail /var/log/messages on server
+
+Q:  Resolve local hostname
+A:  /etc/nsswitch.conf:
+    hosts:      files dns myhostname
+
+Q: 
+/usr/lib/systemd/system-generators/systemd-cryptsetup-generator /run/systemd/generator /run/systemd/generator.early /run/systemd/generator.late
+
+Q: test overclocked cpu stability
+A: mprime
+
+Q: route add default
+route del default
+
+A:
+
+route delete default
+route add default 192.168.137.2
+route change default 192.168.137.2
+
+route add -host 192.168.1.1 dev $1 
+  route add "$d" gw `nvram get wan0_gateway` dev $1 
+
+route add -net 0.0.0.0/0 gw 10.0.3.2 dev eth1
+
+ip route add default via 205.254.211.254 src 205.254.211.198 table 7
+
+Q: power button
+A: 
+    http://lists.freedesktop.org/archives/systemd-devel/2015-February/028325.html
+    As a local fix to make this work for you you can write a udev rule that adds the "power-switch" tag to your keyboard.
+    
+    http://systemd-devel.freedesktop.narkive.com/Rbi3rjNN/patch-1-2-logind-add-support-for-tps65217-power-button
+    # udevadm info -a /dev/input/event0
+    ...
+      looking at parent device '/devices/platform/i8042/serio0/input/input0':
+        ATTRS{name}=="AT Translated Set 2 keyboard"
+    
+    [il@mar ~]$ cat /etc/udev/rules.d/70-power-switch-my.rules
+    ACTION=="remove", GOTO="power_switch_my_end"
+    
+    SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="AT Translated Set 2 keyboard", TAG+="power-switch"
+    
+    LABEL="power_switch_my_end"
+
+Q: re-read partition table
+A: partprobe
+
+Q: `reboot -f` not working
+A:
+    #Force Reboot :
+        echo 1 > /proc/sys/kernel/sysrq; echo b > /proc/sysrq-trigger
+    #If you want to force shutdown machine try this.
+        echo 1 > /proc/sys/kernel/sysrq; echo o > /proc/sysrq-trigger
+
+Q: /dev/urandom too slow
+A: 
+openssl enc -aes-256-ctr -pass pass:"$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64)" -nosalt < /dev/zero 2>/dev/null | dd bs=8192 count=100000 >/dev/null
+dd bs=8192 of=/dev/null if=/dev/urandom count=1000
+
+http://serverfault.com/a/415962/149828
+
+Q: burn flac/cue
+A: k3b with flac plugin
+
+Q: strace examples
+A: 
+
+3>&2 2>~/strace.log strace -s 1024 -q -t -f -e trace=open bash -c '"$@" 2>&3' x /opt/IBM/WebSphere/CommerceServer70/bin/startHelp.sh
+strace -s 1024 -q -f -e accept,connect 3proxy /etc/3proxy.cfg
+
+
+Q: grab audio cd
+A: abcde -1 (see ~/.abcde.conf.flac)
+    see http://www.andrews-corner.org/abcde.html#flac
+
+Q: mount bind fstab
+A: /what    /where    none    bind    0    0 
+
+Q: processes by process group
+A: 
+psbypgrp() {
+# TODO: handle comm with spaces: (ba sh)
+grep -l "^[^ ]* [^ ]* [^ ]* [^ ]* $1 " /proc/[0-9]*/stat 2>/dev/null | sed "s,/proc/\(.*\)/stat,\1,"
+}
+
+###########################################################    
+Q: free cache
+
+# 0 -> Will give the Kernel full control to the cache memory 
+# 1 -> Will free the page cache 
+# 2 -> Will free dentries and inodes 
+# 3 -> Will free dentries and inodes as well as page cache
+A: 
+sync
+echo 1 > /proc/sys/vm/drop_caches
+echo 0 > /proc/sys/vm/drop_caches
+
+###########################################################    
+Q: startup profile for X session
+A:
+~/.xprofile: export A=B
+
+xprofiles are sourced by KDM (/usr/share/config/kdm/Xsession) and GDM (/etc/gdm/Xsession). 
+It is possible to make xprofiles compatible with these programs:
+    startx
+    xinit
+    XDM
+    SLiM
+    any other Display Manager who uses ~/.xsession or ~/.xinitrc 
+All of these execute, directly or indirectly, ~/.xinitrc (usually copied from
+/etc/skel/.xinitrc), or /etc/X11/xinit/xinitrc if it doesn't exist. That's why
+we have to source xprofiles from these files.
+File: ~/.xinitrc and /etc/X11/xinit/xinitrc and /etc/skel/.xinitrc
+  #!/bin/sh
+
+  # Make sure this is before the 'exec' command or it won't be executed.
+  [ -f /etc/xprofile ] && . /etc/xprofile
+  [ -f ~/.xprofile ] && . ~/.xprofile
+
+  ...
+
+###########################################################    
+Q: Enable core dumps
+A: 
+  ulimit -c $SIZE_KB
+or
+  ulimit -c unlimited
+
+###########################################################    
+Q: Enable core dumps for X session
+A:
+~/.xprofile: ulimit -c 100000
+
+
+###########################################################    
+Q: Set directory for core dumps, they are put in CWD by default
+A: 
+/etc/rc.local: echo "/coredumps/%e.%p.%t" > /proc/sys/kernel/core_pattern
+
+###########################################################    
+

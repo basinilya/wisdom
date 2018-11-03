@@ -1,3 +1,9 @@
+Q: /dev/random slow
+A:
+  $JAVA_HOME/jre/lib/security/java.security :
+    securerandom.source=file:/dev/./urandom
+
+
 Q: Sockets
 A:
   // create a connected socket
