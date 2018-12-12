@@ -1,0 +1,16 @@
+Q: defaults
+A: 
+  mysql.exe\..\my.cnf
+  C:\Windows\my.ini
+  C:\Windows\my.cnf
+  C:\my.ini
+  C:\my.cnf
+
+Q: cleanup list of products in mysql installer 
+A:
+- Find the product installation date/path in the GUI
+- Look for matching InstallDate/InstallLocation under:
+    HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\896CA1A59B282694F95FAEABBD5A1A42
+    or
+    HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Installer\Products\896CA1A59B282694F95FAEABBD5A1A42
+- Delete the whole key
