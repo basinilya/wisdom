@@ -1,0 +1,44 @@
+Q: Port Oracle decode() to PostgreSQL
+  
+  desired:
+    select xdecode(3.4, (1.2, now()),(3.4, now())], now());
+    select xdecode(42, (1, 'x'),(42, 'y')], 'z');
+
+A:
+  Not possible.
+  Use "case when". Caveat: NULL is a valid key in Oracle
+
+  Ugly:
+    select xdecode_ft(3.4, ARRAY[(1.2, now()),(3.4, now()) ]::pair_ft[], now());
+    select xdecode_ic(42, ARRAY[(1, 'x'),(42, 'y') ]::pair_id[], 'z');
+
+
+    create type pair_ft as ( k numeric, v timestamptz );
+
+    create or replace function xdecode_ft(expr numeric, args pair_ft[], dflt timestamptz default null) RETURNS timestamptz AS $$
+      select args[i].v from generate_subscripts(args,1) I(i) where (args[i].k = expr or args[i].k is null and expr is null)
+      union all select dflt;
+    $$ LANGUAGE sql;
+
+
+Q: key/value pairs
+A: hstore extension
+
+Q: Pass generic RECORD to function
+A: use LANGUAGE sql and anyelement/anyarray:
+
+    create or replace function foo(variadic args anyarray) RETURNS text AS $$
+      -- ...
+    $$ LANGUAGE sql;
+
+    select foo( (1,'a'),(2,'b') );
+    select foo( (0.5,now()),(0.6,now()) );
+
+Q: Extract data from a generic RECORD without knowing the column names
+A:
+   If types known, use a helper function:
+
+    create or replace function hlp(arg anyelement) RETURNS record AS $$ select arg; $$ LANGUAGE sql;
+    select a,b from hlp( myrec ) AS T(a int , b text);
+
+   If types unknown, only row_to_json()

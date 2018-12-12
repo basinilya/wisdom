@@ -14,6 +14,21 @@ A:
   ss.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0));
   sock = ss.accept();
 
+Q: java.beans.XMLEncoder transient
+A: 
+    since 1.7: @java.beans.Transient
+    before 1.7:
+      static {
+        BeanInfo info = Introspector.getBeanInfo(TestBean.class);
+        PropertyDescriptor[] propertyDescriptors = info.getPropertyDescriptors();
+        for (int i = 0; i < propertyDescriptors.length; ++i) {
+            PropertyDescriptor pd = propertyDescriptors[i];
+            if ("testProp".equals(pd.getName())) {
+                pd.setValue("transient", Boolean.TRUE);
+            }
+        }
+      }
+
 Q: java.beans.XMLEncoder
 A:
   for encoding the setter should be present
