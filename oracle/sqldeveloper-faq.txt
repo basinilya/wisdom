@@ -1,0 +1,5 @@
+Q: where is configuration?
+A: c:\Users\basin\AppData\Roaming\SQL Developer\
+
+Q: File open dialog freeze
+A: Check OpenedFilesHistory* in ide.properties
