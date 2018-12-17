@@ -1,0 +1,96 @@
+#!/bin/bash
+#
+#
+# stop before postfix:
+# chkconfig: 2345 90 20
+# description: Send mail when stop
+
+start() {
+  echo "Doing nothing"
+  touch /var/lock/subsys/powermail
+}
+
+still_queued() {
+  mailq | (
+    saveIFS=$IFS
+    IFS=$IFS'!*' # Queue ID may be suffixed with one of these
+    set -f # disable glob expansion in `set -- $line`
+    read -r header
+    qid=
+    while read -r line; do
+      #echo "line=$line"
+      if [ -z "$line" ]; then
+        # end of message
+        # echo "qid=$qid"
+        if postcat -q "$qid" | grep "${msgid:?}" >/dev/null; then
+          echo "still queued; qid=$qid"
+          exit 0
+        fi
+        qid=
+        continue
+      elif [ -z "$qid" ]; then
+        # processing first line
+        set -- $line
+        qid=$1
+      fi
+    done
+    exit 1 # not found
+  )
+  return $?
+  if false; then
+cat <<'EOFSAMPLE'
+-Queue ID- --Size-- ----Arrival Time---- -Sender/Recipient-------
+B2BEF40804      455 Mon Dec 17 12:40:05  root@dioptase
+        (connect to mail[192.168.149.10]:25: Connection timed out)
+                                         admin@acme.com
+
+E80384076B      455 Mon Dec 17 12:39:47  root@dioptase
+        (connect to mail[192.168.149.10]:25: Connection timed out)
+                                         admin@acme.com
+
+-- 1 Kbytes in 2 Requests.
+EOFSAMPLE
+  fi
+}
+
+stop() {
+  echo "sending mail to root"
+  msgid=`date +%Y%m%d%H%M%S`.powermail@`hostname`
+  (
+    echo "To: root"
+    echo "Subject: powermail"
+    echo "Message-Id: <$msgid>"
+    echo
+    echo "Host is powering off"
+    echo "runlevel: `runlevel`"
+  ) | sendmail root
+  echo "queued..."
+
+  sleep .1
+  for ((i=0;i<10;i++)); do
+    echo "checking..."
+    still_queued || {
+      echo "successfully sent"
+      break
+    }
+    sleep 1
+  done
+
+  rm -f /var/lock/subsys/powermail
+}
+
+# See how we were called.
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    start
+    ;;
+*)
+  >&2 echo $"Usage: $0 {start|stop|restart}"
+  exit 1
+esac

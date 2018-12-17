@@ -8,6 +8,12 @@ grant super on *.* to 'cxpstats'@'%';
 mysql -u cxpstats -t -h localhost -P 3306 --password=cxpstats cxpstats
 
 
+Q: The server time zone value ... is unrecognized or represents more than one time zone
+A:
+- serverTimezone Europe/Moscow
+- Or use mysql-connector-java-5
+
+
 Q: LOCK TABLES ... Table doesn't exist
 A: 
 

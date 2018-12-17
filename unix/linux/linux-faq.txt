@@ -1,3 +1,14 @@
+Q: send mail from command line
+A: 
+  mailx -s testsubject address@domain.com < textfile
+  # 'To:' & 'Subject:' are generated from the command line arguments
+  # (unless -t is specified)
+
+  # or
+  sendmail address@domain.com < textfile
+  # 'To:' & 'Subject:' should be part of the textfile
+
+
 Q: a stop job is running for
 A: 
 

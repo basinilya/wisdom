@@ -1,3 +1,11 @@
+Q: attach precompiled jar sources globally
+A:
+  - Close Netbeans
+  - open folder %APPDATA%\NetBeans\8.2
+  - edit build.properties
+  - add:
+    source.reference.mylib.jar=C:\\path\\to\\mylib\\src\\main\\java
+
 Q: apply code changes
 A: Debug toolbar / Green button "apply code changes" becomes enabled after editing source file
 
