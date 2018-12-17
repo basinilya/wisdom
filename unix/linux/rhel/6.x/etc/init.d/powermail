@@ -83,6 +83,7 @@ stop() {
     : # already removed from queue
     echo "successfully sent"
   fi
+  # TODO: maybe it was a temporary message. Should call match_queued again
 
   rm -f /var/lock/subsys/powermail
 }
