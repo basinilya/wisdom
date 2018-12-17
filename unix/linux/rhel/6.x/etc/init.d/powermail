@@ -10,7 +10,8 @@ start() {
   touch /var/lock/subsys/powermail
 }
 
-still_queued() {
+# print Queue ID of a message matching $msgid
+match_queued() {
   mailq | (
     saveIFS=$IFS
     IFS=$IFS'!*' # Queue ID may be suffixed with one of these
@@ -21,9 +22,9 @@ still_queued() {
       #echo "line=$line"
       if [ -z "$line" ]; then
         # end of message
-        # echo "qid=$qid"
-        if postcat -q "$qid" | grep "${msgid:?}" >/dev/null; then
-          echo "still queued; qid=$qid"
+        # >&2 echo "qid=$qid"
+        if postcat -q "$qid" 2>/dev/null | grep "${msgid:?}" >/dev/null; then
+          printf '%s\n' "$qid"
           exit 0
         fi
         qid=
@@ -66,15 +67,22 @@ stop() {
   ) | sendmail root
   echo "queued..."
 
-  sleep .1
-  for ((i=0;i<10;i++)); do
-    echo "checking..."
-    still_queued || {
-      echo "successfully sent"
-      break
-    }
-    sleep 1
-  done
+  echo "checking..."
+  if qid=`match_queued`; then
+    echo "found qid=$qid"
+    sleep .1
+    for ((i=0;i<10;i++)); do
+      postcat -q "$qid" >/dev/null 2>&1 || {
+        echo "successfully sent"
+        break
+      }
+      sleep 1
+      echo "checking..."
+    done
+  else
+    : # already removed from queue
+    echo "successfully sent"
+  fi
 
   rm -f /var/lock/subsys/powermail
 }
