@@ -1,0 +1,100 @@
+package com.common.config;
+
+import java.io.StringReader;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.UnmarshalException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+
+import org.w3c.dom.Element;
+
+//@XmlRootElement(name = "Root")
+//@XmlAccessorType(XmlAccessType.FIELD)
+public class SAXUnmarshalAny {
+
+    //@XmlAnyElement(lax = true)
+    //protected final List<Object> accounts = new ArrayList<Object>();
+
+    public static void main(final String[] args) throws Exception {
+
+        System.err.println(XML);
+        System.err.println();
+        final JAXBContext jaxbContext = JAXBContext.newInstance(Header.class, Product.class);
+        final Unmarshaller unm = jaxbContext.createUnmarshaller();
+
+        XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(XML));
+        
+        reader.nextTag(); // Advance to root element
+        printElement(reader, unm);
+    }
+
+    static void printElement(XMLStreamReader reader, Unmarshaller unm) throws Exception {
+        // read root element attributes
+        for (int i = 0; i < reader.getAttributeCount(); i++) {
+            System.err.println(reader.getAttributeLocalName(i) + " = " + reader.getAttributeValue(
+                    i));
+        }
+        System.err.println();
+        reader.next(); // Advance to first item or END_ELEMENT
+        forEachDirectElement(reader, unm);
+    }
+
+    static void forEachDirectElement(XMLStreamReader reader, Unmarshaller unm) throws Exception {
+        while (true) {
+            // previous unmarshal() already did advance past END_ELEMENT
+            int event = reader.getEventType();
+            if (event == XMLStreamReader.START_ELEMENT) {
+                // read arbitrary DOM
+                JAXBElement<Object> jel = unm.unmarshal(reader, Object.class);
+                Element el = (Element) jel.getValue();
+                Object obj = el;
+
+                // try known tags
+                try {
+                    obj = unm.unmarshal(el);
+                } catch (UnmarshalException e) {
+                    // e.printStackTrace();
+                }
+                System.err.println(obj.getClass());
+                System.err.println(obj);
+                System.err.println();
+            } else if (event == XMLStreamReader.END_ELEMENT) {
+                reader.next();
+                break;
+            } else {
+                reader.next(); // skip whitespace or comment
+            }
+        }
+    }
+
+    static final String XML = "<Root a='b'>" + 
+            "<Header><chld>xxx</chld><chld1>xxx</chld1></Header>" + 
+            "<Product/>\r\n" + 
+            "<Product/>\r\n" + 
+            "<Product/>\r\n" + 
+            "    <Unknown/>\r\n" + 
+            "</Root>";
+
+    @XmlRootElement(name = "Header")
+    @XmlAccessorType(XmlAccessType.FIELD)
+    public static class Header {
+        protected String chld;
+
+        @Override
+        public String toString() {
+            return "Header [chld=" + chld + "]";
+        }
+    }
+
+    @XmlRootElement(name = "Product")
+    public static class Product {
+
+    }
+
+}
