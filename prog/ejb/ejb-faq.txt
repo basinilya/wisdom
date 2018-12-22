@@ -1,3 +1,6 @@
+Q: MarshalException ... Underflow in BufferManagerReadStream
+A: implements Serializable
+
 Q: ???
 A: @PreDestroy method is not synchronized in singleton
 

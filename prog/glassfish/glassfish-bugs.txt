@@ -1,0 +1,22 @@
+4.1.2
+
+- failed to delete jar after undeploy
+
+  leak in GF prevents deletion of EJB module dependency previously deployed with:
+  asadmin deploy --libraries "path\to\dependency.jar" "path\to\standalone-module.jar"
+
+
+4.1.1
+
+- NoClassDefFoundError ignored in @PostConstruct:
+
+    Severe:   Class ... not found. Error while loading ...
+    Info:   appnanme was successfully deployed in 9 172 milliseconds.
+
+- <resource-ref> and <jdbc-resource> cannot be used as <jta-datasource>
+
+  Invalid resource : { ResourceInfo : (jndiName=java:app/jdbc/JavaProjectRessource__pm), (applicationName=JavaProject) }
+
+  It's because the resources aren't yet registered. In ApplicationLifecycle.deploy it calls prepareModule
+  and only after that it calls ApplicationInfo.load which binds the names.
+

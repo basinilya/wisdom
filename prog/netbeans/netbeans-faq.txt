@@ -1,3 +1,24 @@
+Q:
+  ant -f "./standalone-module" run
+  NoClassDefFoundError
+A: 
+  non-nbdeploy version fails to deploy dependency.jar as dependency
+  ex: http://localhost:4848/__asadmin/deploy?path=path\to\standalone-module.jar&force=true&name=standalone-module
+
+Q: the java db location is not set correctly
+A: 
+  Check presence, usually: C:\Program Files\Java\jdk*\db
+  
+  contains:
+    bin/ij.bat
+    lib/derby.jar
+    lib/derbyclient.jar
+    ...
+  
+  obtain a copy, if missing
+  
+  Services > Databases > Java DB > Properties > Java DB Installation
+
 Q: attach precompiled jar sources globally
 A:
   - Close Netbeans
