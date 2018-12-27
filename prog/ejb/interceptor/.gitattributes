@@ -1,0 +1,12 @@
+# Auto detect text files and perform LF normalization
+*        text=auto
+
+#
+# prettier diff
+*.java   diff=java
+#
+# This file will be normalized by Netbeans
+# If seen as modified, use `git add`
+genfiles.properties text
+build-impl.xml text
+project.xml text

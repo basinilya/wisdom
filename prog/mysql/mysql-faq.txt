@@ -10,7 +10,7 @@ mysql -u cxpstats -t -h localhost -P 3306 --password=cxpstats cxpstats
 
 Q: The server time zone value ... is unrecognized or represents more than one time zone
 A:
-- serverTimezone Europe/Moscow
+- serverTimezone=Europe/Moscow
 - Or use mysql-connector-java-5
 
 
@@ -72,3 +72,9 @@ A:
   In older versions where the unix_socket plugin is unsupported nothing beats a
   cleartext password in /root/.my.cnf
   Just make sure it's different from the 'root'@'hostname' password
+
+Q: change password
+A: SET PASSWORD = PASSWORD('new_pass');
+
+Q: change column type
+A: alter table T MODIFY column C timestamp;

@@ -1,3 +1,6 @@
+Q: Invalid no-interface view asynchronous method
+A: @Async method must return void or Future
+
 Q: MarshalException ... Underflow in BufferManagerReadStream
 A: implements Serializable
 

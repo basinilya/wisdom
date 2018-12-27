@@ -1,3 +1,10 @@
+Q: type mapping
+A:
+java.sql.Timestamp    DATETIME
+java.sql.Date         DATE
+java.util.Date        DATETIME
+java.sql.Time         TIME
+
 Q:
   NullPointerException
   at org.eclipse.persistence.internal.jpa.metadata.MetadataProject.hasEntity
