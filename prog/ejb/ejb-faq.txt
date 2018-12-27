@@ -1,3 +1,6 @@
+Q: REST
+A: https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/javafx_json_tutorial/javafx_javaee7_json_tutorial.html#section2s1
+
 Q: Invalid no-interface view asynchronous method
 A: @Async method must return void or Future
 
