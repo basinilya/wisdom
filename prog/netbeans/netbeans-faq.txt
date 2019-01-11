@@ -1,3 +1,18 @@
+Q: 
+  after redeploy the previous .ear version deployed
+
+  after clean:
+    - Deployment error: No archive for deployment
+    - no gfdeploy/ folder
+A: restart netbeans
+
+Q: deleted private.properties not re-generated
+A: restart netbeans
+
+Q:
+A:
+  C:\cygwin\opt\NetBeans-8.2\bin\netbeans64.exe --userdir C:\keep\netbeans\userdir --cachedir C:\keep\netbeans\cache
+
 Q:
   ant -f "./standalone-module" run
   NoClassDefFoundError
@@ -40,7 +55,7 @@ A:
   - close projects
   - close Netbeans
   - rm -f */nbproject/build-impl.xml */nbproject/private/private.properties 
-  
+
 ??? */nbproject/private/private.xml ???
 
 Q: Inspect properties of a non-UI custom bean in form editor

@@ -1,4 +1,13 @@
 4.1.2
+- delete all <security-role-mapping> elements in glassfish-application.xml
+- redeploy ear
+
+Expected: default behavior restored
+Actual: the mappings remain
+Workaround: restart Glassfish
+
+
+4.1.2
 
 - failed to delete jar after undeploy
 

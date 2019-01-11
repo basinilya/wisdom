@@ -1,3 +1,7 @@
+Q: current search path
+A: select current_schema, current_schemas(false);
+
+
 Q: Port Oracle decode() to PostgreSQL
   
   desired:

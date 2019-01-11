@@ -1,3 +1,11 @@
+Q: "MessageBodyWriter not found for media type"
+A: must be a jaxb bean or javax.json.JsonObject
+
+Q: @EJB ignored in a web service class
+A: On Glassfish: add @javax.enterprise.context.RequestScoped
+  https://stackoverflow.com/a/25997828/447503
+  on other add @Stateless (and maybe @LocalBean)
+
 Q: REST
 A: https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/javafx_json_tutorial/javafx_javaee7_json_tutorial.html#section2s1
 
