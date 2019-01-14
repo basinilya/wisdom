@@ -1,3 +1,15 @@
+Q: How to enable again the HTML error checking
+A: 
+  NetBeans/8.0.1/var/attributes.xml
+    <fileobject name="|Users|pds|Documents|PDS|Projects|ProSpool|Warehouse|Server|web|wiz_pick_external.html">
+        <attr name="disable_error_checking" boolvalue="true"/>
+    </fileobject>
+
+  NetBeans\8.2\config\Editors\text\html\Preferences\org-netbeans-modules-editor-settings-CustomPreferences.xml
+    <entry javaType="java.lang.String" name="mimetypesWithEnabledHtmlErrorChecking" xml:space="preserve">
+        <value><![CDATA[;text/html;]]></value>
+    </entry>
+
 Q: 
   after redeploy the previous .ear version deployed
 
