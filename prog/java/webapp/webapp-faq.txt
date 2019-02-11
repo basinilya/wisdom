@@ -13,6 +13,7 @@ A:
 Q: java servlet forwarded request original
 A:
     http://stackoverflow.com/a/11387378/447503
+    // RequestDispatcher.FORWARD_SERVLET_PATH = "javax.servlet.forward.request_uri";
     request.getAttribute("javax.servlet.forward.request_uri")
 
 

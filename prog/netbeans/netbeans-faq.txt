@@ -1,3 +1,6 @@
+Q: inconsistent module state
+A: restart server
+
 Q: How to enable again the HTML error checking
 A: 
   NetBeans/8.0.1/var/attributes.xml
@@ -53,6 +56,12 @@ A:
   - edit build.properties
   - add:
     source.reference.mylib.jar=C:\\path\\to\\mylib\\src\\main\\java
+
+Q: Execution won't stop at JSP breakpoints
+A: 
+  - Check that "Web Pages Folder" is exactly "web" (web.docbase.dir=web)
+  - Clean all projects
+  - Clear Netbeans cache folder
 
 Q: apply code changes
 A: Debug toolbar / Green button "apply code changes" becomes enabled after editing source file

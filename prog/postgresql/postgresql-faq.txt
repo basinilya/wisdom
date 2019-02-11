@@ -1,3 +1,17 @@
+Q: show server version
+A: select version();
+
+Q: restore search path
+A: 
+  When function created with the "proconfig":
+    SET search_path TO ...
+    or
+    SET search_path TO FROM CURRENT
+  the search path is restored when the function exits.
+  However, even when the function has this proconfig,
+  if "SET search_path" is called in the body, the search path is not restored
+
+
 Q: current search path
 A: select current_schema, current_schemas(false);
 

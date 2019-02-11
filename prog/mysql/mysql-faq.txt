@@ -1,6 +1,7 @@
 mysql -u root -t -h localhost -P 3306 --password=password
 mysql -u root -t -h localhost -P 3306 --password
 
+create database cxpstats;
 create user 'cxpstats'@'%' identified by 'cxpstats';
 grant ALL PRIVILEGES ON cxpstats.* TO 'cxpstats'@'%' WITH GRANT OPTION;
 grant super on *.* to 'cxpstats'@'%';
@@ -78,3 +79,15 @@ A: SET PASSWORD = PASSWORD('new_pass');
 
 Q: change column type
 A: alter table T MODIFY column C timestamp;
+
+Q: rename column
+A: 
+  5.6: alter table gnss_handset_points CHANGE COLUMN PHONE_IDSG PHONE_ID varchar(255);
+  8.0: alter table gnss_handset_points RENAME COLUMN PHONE_IDSG TO PHONE_ID;
+
+Q: server version
+A: select version()
+
+Q: slow WHERE IN SELECT / WHERE EXISTS
+A: Unlike other RDBMS, MySQL never uses index of a FROM table to lookup results of a WHERE IN SELECT / WHERE EXISTS subquery
+  Use join where possible.

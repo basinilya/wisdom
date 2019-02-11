@@ -1,3 +1,11 @@
+Q: [190208 23:30:45.707] SEVERE: "The SSL certificate has expired
+A:
+  keytool -delete -alias equifaxsecureca -keystore cacerts.jks -storepass ${keystore_pass}
+  keytool -delete -alias gtecybertrustglobalca -keystore cacerts.jks -storepass ${keystore_pass}
+
+Q: default master password / keystore password
+A: changeit
+
 Q:
   BufferUnderflowException
   at com.sun.enterprise.deployment.annotation.introspection.ConstantPoolInfo.containsAnnotation
