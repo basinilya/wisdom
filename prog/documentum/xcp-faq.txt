@@ -1,0 +1,230 @@
+Q: UI expressions: multival[0] when empty
+A:
+
+Q: not lose mappings switch single <-> multi
+A:
+
+            <From>
+                <Value>/Collection/Object[0]/finishing_packaging_instruc</Value>
+            <From>
+                <Value>/Collection/Object[ALL]/finishing_packaging_instruc</Value>
+
+
+  To>/Process Data/Variables/out_instructions&lt;/To>
+  To>/Process Data/Variables/out_instructions[0]&lt;/To>
+
+
+  - Change variable types, do not open mapping. Save.
+  - 
+  sed -b -i 's,\(To>/Process Data/Variables/[^&]*\)&,\1[0]\&,g' EducationApplication/Artifacts/Processes/get_print_productio.process
+  sed -b -i 's,\(&lt;From>[^>]*&lt;Value>/Collection/Object\)\[0\],\1[ALL],g' EducationApplication/Artifacts/Processes/get_print_productio.process
+
+  - refresh
+
+Q: Process Variables
+A: Process Properties/Data
+
+
+Q: drop attribute
+A: 
+  - before deleting: click attribute and see where used
+  - delete attribute, save
+  - re-open all artifacts where was used and save
+
+Q: relationship "Source Model", "Target Model"?
+A: "Source Model" = parent, "Target Model" = child
+
+Q: find usages
+A: The "Where used" view in the bottom-left corner
+
+Q: Unable to deploy application
+A:
+find /u01 -type f -name "*.log" -mtime -1 | xargs ls -lt
+
+-rw-r--r--. 1 efxdm efxdm  138517 Nov  5 12:28 /u01/efxd/share/wildfly9.0.1/server/DctmServer_MethodServer/logs/bpm-runtime.log
+-rw-rw-rw-. 1 efxdm efxdm   11371 Nov  5 12:28 /u01/efxd/dba/log/0001e240/agentexec/agentexec.log
+-rw-rw-r--. 1 efxdm efxdm  900785 Nov  5 12:27 /u01/efxd/xPlore/jboss7.1.1/server/DctmServer_PrimaryDsearch/logs/xdb.log
+-rw-r--r--. 1 efxdr efxdr      24 Nov  5 12:24 /u01/efxdr/XDA_DATA/catalog/xDB/log/xhive_checkpoint.log
+-rw-rw-r--. 1 efxdr efxdr 1105920 Nov  5 12:24 /u01/efxdr/XDA_DATA/catalog/xDB/log/xhive_0000000002.log
+-rw-rw-r--. 1 efxdr efxdr  151432 Nov  5 12:24 /u01/efxdr/xDA/bin/log4j.log
+
+
+Q: xcp version
+A: 
+    Help > About > Build;
+    or
+    plugins/com.emc.xcp.builder.workspace_*.jar
+      /internal/com/emc/xcp/builder/workspace/project/util/ArchetypeVersions.properties
+    or
+    plugins/com.emc.xcp.designer.executionenvironments_*.jar
+      /plugin.xml
+        top level <environment ...>
+    
+    
+    16.4.0030.0148
+    Ma
+       Mi
+         PPPP
+    
+    16.4 Patch 3
+
+Q: Invalid combination of DataPolicy MINIMAL and deploying to a PRODUCTION environment, only MAINTAIN is supported
+A: Edit run configuration
+
+Q: xCP project moved
+A: 
+
+Open:
+Applications\.wsdata\ws_data.xwd
+Change the path:
+MRU_WORKSPACE_LOCATION=path\to\projectAsDAsdasdASD
+
+Open:
+Applications\workspaces.xml
+
+Remove the workspace
+
+Delete the folder in Applications\
+
+See also
+Applications\ajwf\.metadata\.plugins\org.eclipse.debug.core\.launches\Standard XCPApplicationProject Build.launch
+d:\ACDC-Code\acdc\acdc\ajwf\configuration\run_config.xml
+
+Q: debug javascript
+A: ?nominify
+(remove ?reload to make breakpoints persistent)
+
+Q: debug css
+A: ?nominify
+
+Q: custom theme */src/main/webapp/js/resources/css/xcp-custom-theme-*.css
+A: 
+    git clone <theme-project>
+    cd <theme-project>/MaterialTheme
+    ant
+
+    put to xcp project,
+
+    http://cdn.sencha.com/cmd/6.1.3.42/jre/SenchaCmd-6.1.3.42-windows-64bit.zip
+    xcpdesigner.ini
+    -Dxcp.theme.compiler.location=C:/Sencha/Cmd/6.1.3.42
+    Master page -> Basics tab -> Application theme dropdown -> Apply button
+
+
+Q: environment settings (xms)
+A:  xCPDesigner_2.3P03\Applications\
+
+Q: restart tomcat
+A: 
+flxdr restart
+see
+/u01/flxdr/vfabric-tc-server
+
+Q: missing artifact com.emc.xcp:...
+ex:
+    Missing artifact com.emc.xcp:xcp-ivf-widgets:jar:2.2.0190.2448
+    c:\xCPDesigner-2.2.19\maven\designer\com\emc\xcp\xcp-ivf-widgets\2.2.0190.2448\xcp-ivf-widgets-2.2.0190.2448.jar
+    http\://localhost\:2910/maven/.lastUpdated=1488962382019
+
+A:
+    - Delete all error messages
+    - delete gen/target/.index
+    - delete all maven cache files: com/emc/xcp/**.lastUpdated
+    - press refresh
+
+Q:
+  /u01/flxd/dba/log/flxdbase.log
+  [DM_SESSION_I_RETRYING_DATABASE_CONNECTION]info:  "The following error was encountered trying to get a database connection:  ORA-12520: TNS:listener could not find available handler for requested type of server
+
+A:
+$ lsnrctl services
+$ lsnrctl status
+Listener Log File         /u01/app/oracle/diag/tnslsnr/flxd/listener/alert/log.xml
+
+su - oracle
+ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe; export ORACLE_HOME
+ORACLE_SID=XE; export ORACLE_SID
+$ORACLE_HOME/bin/sqlplus -L / as sysdba
+
+
+show parameter processes
+show parameter sessions
+
+# SESSIONS=(1.1 * PROCESSES) + 5
+
+alter system set processes=500 scope=spfile;
+alter system set sessions=600 scope=spfile;
+
+Q: Deploy fails
+A: 
+    This is normal. Retry 2-3 times. Try rebooting. If still fails, see
+    tail -F /u01/flxdr/xms/logs/xms-full.log
+    tail -F /u01/flxdr/xDA/logs/xda-full.log
+
+
+# Try cleaning xDA cache:
+# login with flxdr
+# kill xDA java process
+pkill -fu "`cd /home && echo *xdr`" '^[^ ]*java.*xDA'
+
+# then navigate to /u01/flxdr/xDA
+# there you will have temp folder
+rm -rf /u01/*/xDA/temp
+
+# then restart the VM
+
+
+Q: hard clean
+A: 
+
+gen\
+target\
+.generatedresources
+.index
+c:\Users\basin\AppData\Local\eclipse
+
+
+???
+/u01/flxdr/tcserver/vfabric-tc-server-developer-2.9.5.SR1/xmsServer/temp
+
+
+Q: Unable to create artifact project Concordant__Insurance  at location C:/xCPDesigner_2.1_P03_64bit/Applications/Concordant__Insurance
+    Reason:
+    Could not resolve archetype com.emc.xcp.rest:app-project-archetype:2.1.0030.4664 from any of the con
+A:
+    ~/.m2/settings.xml
+    comment proxies
+
+
+Q: find user by workflow
+A:
+  SELECT qi.name 
+  FROM dmi_queue_item qi, dmi_workitem wi, dm_workflow wf 
+  WHERE qi.r_object_id = wi.r_queue_item_id
+  AND wi.r_workflow_id = wf.r_object_id
+  AND wf.r_object_id = '4d01e24080001d04';
+
+Q: Run custom javascript / arbitrary javascript when page loaded
+A:
+  Display Value
+  data type: html
+  value:
+    '
+    <style onload="console.log(42)"></style>
+    '
+  Hide When: true
+
+  !!! Executed twice. First from "finally", then from "contextready" handler !!!
+
+    replaceChild : function(compConfig) {
+        ...
+        try {
+            this.fireEvent('contextready');
+            xcp.util.Utils.resizeBodyContainer();
+        } finally {
+            Ext.resumeLayouts(true);
+        }
+
+Q: "Hide When" on grid columns
+A: Can be changed with grid menu
+

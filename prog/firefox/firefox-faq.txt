@@ -1,3 +1,8 @@
+Q: "firefox" "about:config" "f12" "network" don't clear 
+A:
+    devtools.netmonitor.persistlog
+    devtools.webconsole.persistlog
+
 Q: custom URL handler
 A: 
 Windows:

@@ -58,15 +58,18 @@ A:
   https://stackoverflow.com/a/42208689/447503
 
   asadmin set server.network-config.protocols.protocol.http-listener-1.http.scheme-mapping=X-Forwarded-Proto
+  (Seems to work on 4.1.2)
 
-  TODO: check if fixed on 4.1.2:
-    I'm using a NginX server as a SSL terminating proxy and set the following HTTP
-    headers: Host: <NginX host> X-Forwarded-Proto: https In Glassfish I set the following property: asadmin set
-    server.network-config.protocols.protocol.http-listener-1.http.scheme-mapping=X-Forwarded-Proto Glassfish ignores the X-Forwarded-Proto and uses HTTP to build
-    HttpServletRequest.getRequestURL() or evaluate HttpServletRequest.getScheme()
-    and HttpServletRequest.isSecure() I've tested on both Glassfish 3.1.2.2 and Glassfish 4.0 and on Glassfish 3.1.2.2
-    works like a charm! But it's not working on Glassfish 4.0! Seems a regression? (Similar issue
-    https://java.net/jira/browse/GLASSFISH-18685)
+  Apache httpd example:
+
+        ProxyPreserveHost On
+        RequestHeader set X-Forwarded-Proto "https"
+        ProxyPass / http://localhost:8080/
+        ProxyPassReverse / http://localhost:8080/
+
+  ngnix
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto https;
 
   alternatively add a filter to handle custom headers. 
 

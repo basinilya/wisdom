@@ -405,6 +405,7 @@ SELINUXTYPE=targeted
 
 Q: temporary disable selinux
 A:
+cat /sys/fs/selinux/enforce || cat /selinux/enforce
 sudo setenforce 0
 #echo 0 >/selinux/enforce # not working on rhel7
 
