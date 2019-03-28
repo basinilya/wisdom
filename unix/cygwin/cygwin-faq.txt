@@ -1,3 +1,6 @@
+Q: /etc/fstab ignored 
+A: delete HKEY_CURRENT_USER\Software\Cygnus Solutions
+
 Q: 
   address space needed by 'cygXfixes-3.dll' (0x600000) is already occupied
   rebaseall doesn't help

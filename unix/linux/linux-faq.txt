@@ -14,9 +14,19 @@ A:
 
 Q: interactive console session during shutdown
 A: 
-# on tty2:
-    exec -a '@dontkillme' /bin/bash
-    trap '' HUP
+
+#/etc/systemd/logind.conf
+#NAutoVTs=3
+
+cat <<'SCRIPT' >/tmp/dontkillme.rc
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+trap '' HUP
+SCRIPT
+
+TERM=linux setsid bash -c 'exec -a "@dontkillme" /bin/bash --rcfile /tmp/dontkillme.rc -i <>/dev/tty8 >&0 2>&1'
+
 
 Q: custom URL handler
 A: 

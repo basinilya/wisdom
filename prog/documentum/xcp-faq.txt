@@ -1,3 +1,14 @@
+Q:
+  java.io.FileNotFoundException: Specified source file does not exists: D:\edflux\EducationApplication\configuration\asdasdasd_config.xml
+A:
+  Delete and re-create the run configuration
+
+Q: 
+  Unsupported function name length
+  No server-side functions loaded
+A:
+  Some java module has missing jar
+
 Q: UI expressions: multival[0] when empty
 A:
 
@@ -181,7 +192,7 @@ gen\
 target\
 .generatedresources
 .index
-c:\Users\basin\AppData\Local\eclipse
+c:\Users\basin\AppData\Local\Eclipse
 
 
 ???
@@ -228,3 +239,26 @@ A:
 Q: "Hide When" on grid columns
 A: Can be changed with grid menu
 
+Q: server-side paging and sorting
+A:
+  Add four input variables to the stateless process:
+    sortcol - stateless process output parameter name
+    sortord - "ASC" or "DESC"
+    start   - zero-based starting row for paging
+    limit   - page size
+  
+  Construct the DQL hint based on these parameters:
+  enable (RETURN_range  <start+1> <limit> '<sortcol> <sortord>')
+  !!! For DQL increment start by 1
+  
+  Optionally, assign default values in the Interactions
+  When navigating or sorting, these values will be changed.
+  
+  ex: you click the header of the column associated with the output parameter "out_segment_title"
+  variables implicitly assigned by xCP:
+    start: 0
+    sortord: ASC
+    sortcol: out_segment_title
+    limit: 25
+  
+  DQL: ... enable (RETURN_range  1 25 'out_segment_title  ASC')
