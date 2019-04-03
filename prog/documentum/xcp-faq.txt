@@ -1,7 +1,8 @@
 Q:
   java.io.FileNotFoundException: Specified source file does not exists: D:\edflux\EducationApplication\configuration\asdasdasd_config.xml
 A:
-  Delete and re-create the run configuration
+  Do not ever delete the folder "configuration". If you did,
+  delete and re-create the run configuration
 
 Q: 
   Unsupported function name length

@@ -84,11 +84,12 @@ A:
 git config core.sharedRepository group
 chgrp -R gitwriters .
 
-chmod -R g+rwX .
+chmod -R u+rwX,g+rwX,o+rX .
 # X means set executable only if it's already executable
 
 # setgid bit enforces new files to inherit parent dir's group 
 find . -type d -exec chmod g+rws {} +
+find . -type d -exec chmod u-s {} +
 
 ********************************************************************************
 Q: run build command for every commit with ability to fix error and continue

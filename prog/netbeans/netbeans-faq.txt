@@ -1,3 +1,6 @@
+Q: Generate Netbeans project files
+A: https://gist.github.com/basinilya/9f027f69dd543268004e52a24c949e33
+
 Q: inconsistent module state
 A: restart server
 
