@@ -1,3 +1,8 @@
+Q: goodd decompiler
+A: Enhanced Class Decompiler
+  https://marketplace.eclipse.org/content/enhanced-class-decompiler#comment-6327
+
+
 Q: run on server maven war overlay resources missing
 A: open pom.xml, remove overlay dependecy, save, add overlay dependency, save
 
