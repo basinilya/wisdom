@@ -1,3 +1,9 @@
+Q: "cannot load artifact" error
+A:
+- The artifact was opened for editing when XCP was closed
+- The artifact file was deleted in the source repository
+Solution: delete the .index file
+
 Q:
   java.io.FileNotFoundException: Specified source file does not exists: D:\edflux\EducationApplication\configuration\asdasdasd_config.xml
 A:
