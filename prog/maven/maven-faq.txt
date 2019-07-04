@@ -99,6 +99,9 @@ Q: install artifact to local repo
 A: 
 mvn install:install-file -DgroupId=javax.activation -DartifactId=activation -Dversion=1.0.2 -Dpackaging=jar -Dfile=activation-1.0.2.jar
 
+Q: deploy project to local repo/install snapshot with timestamp suffix
+A: mvn deploy -Dmaven.test.skip -DaltDeploymentRepository=mylocalrepo::default::file:///D:/m2repo
+
 
 Q: install artifact to remote repo
 A: 
