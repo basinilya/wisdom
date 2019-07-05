@@ -23,7 +23,7 @@ Q: show --assume-unchanged files
 A: git ls-files -v | grep '^[[:lower:]]'
 
 Q: show --skip-worktree files
-A: git ls-files -v | grep '^S'
+A: git ls-files -v | sed 's/^S //;t;d'
 
 
 Q: --assume-unchanged and git reset

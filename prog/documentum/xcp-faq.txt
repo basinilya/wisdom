@@ -4,6 +4,24 @@ A:
 - The artifact file was deleted in the source repository
 Solution: delete the .index file
 
+Q: "Refresh" group box missing in on the "General" tab of an Iteraction
+A: The stateless process has no output variables. Fix the process and re-add the interaction
+
+Q: group/process/type already exists in the repository
+A: Caused by incomplete deploy. Restore last good snapshot and try again
+
+Q: No business events tab in a custom relation type
+A: see the business events tab in the "Source Model" (parent) type
+
+Q: Business events triggered
+A: XcpTransactionListener.onPreCommit
+
+Q: inherit context menu of parent type
+A: unsupported
+
+Q: result list disable default navigation
+A: Select to override the default behavior of the first column of the results list widget that is represented as a link
+
 Q:
   java.io.FileNotFoundException: Specified source file does not exists: D:\edflux\EducationApplication\configuration\asdasdasd_config.xml
 A:
@@ -248,6 +266,9 @@ A: Can be changed with grid menu
 
 Q: server-side paging and sorting
 A:
+  Note that the clieant-side pagination is completely unsupported
+  The server-side pagination is transparent for the Advanced Repository Query, but has to be handled explicitly for statless processes
+
   Add four input variables to the stateless process:
     sortcol - stateless process output parameter name
     sortord - "ASC" or "DESC"

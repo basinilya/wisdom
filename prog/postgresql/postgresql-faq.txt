@@ -1,3 +1,41 @@
+Q: top/limit
+A: ... limit 10;
+
+Q: estimate number of rows in a table
+A: SELECT relname, reltuples::BIGINT AS estimate FROM pg_class WHERE relname like '<table_name>';
+
+Q:
+A:
+CREATE EXTENSION pg_trgm with schema pg_catalog;
+create extension btree_gin with schema pg_catalog;
+CREATE INDEX trgm_idx_users_username ON users USING gin (username gin_trgm_ops);
+https://niallburkley.com/blog/index-columns-for-like-in-postgres/
+
+
+Q: identity column
+A: 
+  use a sequence or a pseudo type SERIAL which is sugar for sequence
+
+Q: alter column
+A: alter table T alter column C type ...; 
+
+Q: long-running queries
+A:
+  SELECT
+    pid,
+    now() - pg_stat_activity.query_start AS duration,
+    query,
+    state,
+    waiting
+  FROM pg_stat_activity
+  WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes';
+
+-- cancel it
+-- SELECT pg_cancel_backend(__pid__);
+
+-- dangerous: kill it
+-- SELECT pg_terminate_backend(__pid__);
+
 Q: show server version
 A: select version();
 
@@ -12,8 +50,12 @@ A:
   if "SET search_path" is called in the body, the search path is not restored
 
 
-Q: current search path
+Q: current search path/current schema
 A: select current_schema, current_schemas(false);
+
+Q: set current schema
+A:
+  set search_path to spr_track, efxd;
 
 
 Q: Port Oracle decode() to PostgreSQL

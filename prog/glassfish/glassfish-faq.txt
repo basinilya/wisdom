@@ -1,3 +1,6 @@
+Q: Inconsistent Module State
+A: 
+
 Q: [190208 23:30:45.707] SEVERE: "The SSL certificate has expired
 A:
   keytool -delete -alias equifaxsecureca -keystore cacerts.jks -storepass ${keystore_pass}

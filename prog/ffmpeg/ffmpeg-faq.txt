@@ -1,3 +1,19 @@
+Q: create gif
+A: 
+  set -- out2.mp4 out2.gif
+  filters=fps=25,scale=320:-1:flags=lanczos
+  ffmpeg -y -v warning -i $1 -vf "$filters${filters:+,}palettegen" ${palette:-palette.png}
+  ffmpeg -y -v warning -i $1 -i ${palette:-palette.png} -lavfi "$filters [x]; [x][1:v] paletteuse" $2
+  
+  w/o filters:
+  ffmpeg -y -v warning -i $1 -vf "palettegen" ${palette:-palette.png}
+  ffmpeg -y -v warning -i $1 -i ${palette:-palette.png} -lavfi "[0:v][1:v] paletteuse" $2
+  ffmpeg -y -v warning -i $1 -i ${palette:-palette.png} -lavfi "paletteuse" $2
+
+Q: grab screen (capture desktop) on Windows
+A: sleep 3 && ffmpeg -y -f gdigrab -framerate 25 -offset_x 100 -offset_y 100 -video_size 640x480 -show_region 1 -i desktop -c:v huffyuv out2.avi
+
+
 ======== create audio CD image with imgburn =============
 - create wav files out of mp3 files:
 ex: ffmpeg -y -i test.mp3 -ar 44100 -ac 2 -acodec pcm_s16le test.wav

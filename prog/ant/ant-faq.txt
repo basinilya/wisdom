@@ -1,3 +1,6 @@
+Q: multiple Trying to override old definition of task
+A: put the overriding into an "init" target and depend on it
+
 Q: loops
 A: ant-contrib required
 

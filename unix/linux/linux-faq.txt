@@ -18,14 +18,14 @@ A:
 #/etc/systemd/logind.conf
 #NAutoVTs=3
 
-cat <<'SCRIPT' >/tmp/dontkillme.rc
+cat <<'SCRIPT' >/usr/local/libexec/dontkillme.rc
 if [ -f ~/.bashrc ]; then
         . ~/.bashrc
 fi
 trap '' HUP
 SCRIPT
 
-TERM=linux setsid bash -c 'exec -a "@dontkillme" /bin/bash --rcfile /tmp/dontkillme.rc -i <>/dev/tty8 >&0 2>&1'
+TERM=linux setsid bash -c 'exec -a "@dontkillme" /bin/bash --rcfile /usr/local/libexec/dontkillme.rc -i <>/dev/tty8 >&0 2>&1'
 
 
 Q: custom URL handler
@@ -83,8 +83,16 @@ Q:  Resolve local hostname
 A:  /etc/nsswitch.conf:
     hosts:      files dns myhostname
 
-Q: 
-/usr/lib/systemd/system-generators/systemd-cryptsetup-generator /run/systemd/generator /run/systemd/generator.early /run/systemd/generator.late
+Q: systemd re-generate cryptsetup units
+A:
+    #rm /run/systemd/generator/systemd-cryptsetup@*.service
+    /usr/lib/systemd/system-generators/systemd-cryptsetup-generator /run/systemd/generator /run/systemd/generator.early /run/systemd/generator.late
+
+Q:  clean unmount
+A:
+    systemctl stop systemd-cryptsetup@myprivate
+    cryptsetup close myprivate
+    systemctl stop /media/il/USBHDD
 
 Q: test overclocked cpu stability
 A: mprime

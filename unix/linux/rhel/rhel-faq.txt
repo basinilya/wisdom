@@ -226,7 +226,7 @@ Q: find available package containing file
 A: yum provides "*bin/tc"
 
 Q: timezone
-A: /etc/sysconfig/clock
+A: 6x: /etc/sysconfig/clock
 
 Q: yumdownloader (part of yum-utils) download a specific source version
 A: use the fully qualified name of the binary rpm, not source rpm:
@@ -384,6 +384,9 @@ chkconfig ntpd on
 Q: time correction of 11515 seconds exceeds sanity limit (1000); set clock manually to the correct UTC time
 A: Check ps -Af | grep ntpd. It should contain '-g'.
    $OPTIONS in /etc/sysconfig/ntpd already contains '-g'
+
+Q: which group contains package
+A: you groupinfo '*'
 
 Q: base-devel meta package
 A:
