@@ -1,0 +1,59 @@
+Result List with ARQ guide
+
+- have default sorting
+- sort case insensitive
+- have "Displaying Page 1 of n"
+
+If the query returns col1, col2, etc.
+the query string MUST begin with:
+
+  select
+  lower(col1) as l_col1,
+  lower(col2) as l_col2,
+  ...
+  col1, col2, ...
+
+This is to have default sort by "col1", case insensitive.
+The query will have "order by 1" unless "Sort By" is non-empty or until a column header is clicked.
+
+The query MUST end with
+
+  order by ?
+
+Otherwise the columns cannot be sortable.
+
+The input parameters in ARQ are dollar-quoted, uppercase: $PARAM$
+
+Multivalue (repeating) parameters MUST be used in a in() clause: in($PARAM$)
+
+When you press "SyncQuery" the Multivalued checkbox is not preserved (bug).
+When you press "Finish", the "Enable Sorting" checkbox is not preserved (bug).
+
+After closing the "Validate DQL Query" window go to the "Output Columns" section and check the "Enable Sorting" checkboxes, at least, for the lowercase columns.
+
+Attach the ARQ to the Result List.
+
+Remove all non-lowercase columns
+
+Click all the remaining columns and check the "Can be used to sort" checkbox.
+
+Set the columns property "Display" the actual non-lowercase data column.
+
+Clear the "Width" property of the last column
+
+Create a copy of the ARQ and name it "Existing Name Count"
+
+Wrap the DQL with:
+
+  select count(*) from (
+  ...
+  ) t
+
+Make sure all multivalue input properties are marked
+
+Enable the Result List property "Display Record Count" and use the following expression:
+
+  arrayMax( { <Count-ARQ>.count[0], 1 } )
+
+This is to avoid "Displaying Page 1 of 0"
+
