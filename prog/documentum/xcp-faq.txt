@@ -1,3 +1,9 @@
+Q:  "can be used to sort" is greyed out in a Result List column properties
+A:  You have an Advanced Repository Query attached to the Result List and its <output>s aren't sortable.
+    Open the query, go to the "Dataset" tab and click any column in the "Output Columns" section
+    There's the checkbox "Enable Sorting" in the Properties view, "General" tab
+    If there's no such checkbox, make sure that the query string ends with "order by ?".
+
 Q: "cannot load artifact" error
 A:
 - The artifact was opened for editing when XCP was closed
@@ -19,8 +25,11 @@ A: XcpTransactionListener.onPreCommit
 Q: inherit context menu of parent type
 A: unsupported
 
-Q: result list disable default navigation
+Q: result list "disable default navigation"
 A: Select to override the default behavior of the first column of the results list widget that is represented as a link
+
+Q: result list disable auto resize
+A: Style/Height/ "px"
 
 Q:
   java.io.FileNotFoundException: Specified source file does not exists: D:\edflux\EducationApplication\configuration\asdasdasd_config.xml
@@ -242,9 +251,11 @@ A:
 
 Q: Run custom javascript / arbitrary javascript when page loaded
 A:
-  Display Value
+  Value Display
   data type: html
-  value:
+  To prevent double initialization, do not set the widget value on the "General" tab
+  Instead, use the "on page load" or "on fragment load" event
+  set value:
     '
     <style onload="console.log(42)"></style>
     '

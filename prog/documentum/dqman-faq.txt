@@ -1,0 +1,11 @@
+Q: Unsupported Major
+A: Install dfc_7.3_win.zip
+
+Q: extra classpath
+A: 
+  set "CLASSPATH=%CLASSPATH%;C:\path\to\extra.jar"
+
+Q: log4j config
+A:
+  set "_JAVA_OPTIONS=-Dlog4j.configuration=file:///C:/keep/log4j-trace-most-file.properties "
+

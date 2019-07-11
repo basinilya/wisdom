@@ -57,3 +57,7 @@ Enable the Result List property "Display Record Count" and use the following exp
 
 This is to avoid "Displaying Page 1 of 0"
 
+To enable a tooltip for a cell, change the "Data Type" to "HTML" and set the value to: 
+
+  '<span title="' + htmlEncode(Outputs.supp_address) + '">'+ htmlEncode(Outputs.supp_address) + '</span>'
+
