@@ -61,3 +61,5 @@ To enable a tooltip for a cell, change the "Data Type" to "HTML" and set the val
 
   '<span title="' + htmlEncode(Outputs.supp_address) + '">'+ htmlEncode(Outputs.supp_address) + '</span>'
 
+To draw a border around Result List put it into a Column Box cell and in the column properties 
+add CSS style: table_style
