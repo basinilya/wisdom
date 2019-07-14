@@ -1,0 +1,75 @@
+Q: session leaks
+A:
+   
+    log4j.properties:
+      log4j.logger.com.documentum.fc.client.impl.session.StrongSessionHandle$DisposableData=ERROR,SESS_LEAK_DETECT
+      log4j.logger.com.documentum.fc.client.impl.collection.CollectionHandle$DisposableData=ERROR,SESS_LEAK_DETECT
+      # this one is outdated:
+      #log4j.logger.com.documentum.fc.client.DfSessionLeakChecker=ERROR,SESS_LEAK_DETECT
+    
+    dfc.properties:
+      dfc.diagnostics.resources.enable = true
+
+Q: SQL for session.getObject() with repeating attr
+A: 
+  SELECT  *
+  FROM mytype_rv SQ_ , mytype_sv RQ_
+  WHERE (RQ_.r_object_id=$1
+  AND RQ_.r_object_id=SQ_.r_object_id)
+  ORDER BY SQ_.r_object_id,SQ_.i_position
+
+
+Q: IDfQuery.DF_CACHE_QUERY expiry
+A: 
+IDfQuery.setCurrencyCheckValue(). Default: IDfPersistentObject.CURRENCY_CHECK_NEVER = "check_never"
+
+Q: trace DQL to common log
+A:
+log4j.properties:
+
+  log4j.logger.com.documentum.fc.tracing.DFCTrace=DEBUG
+
+dfc.properties
+
+  dfc.tracing.enable=true
+  dfc.tracing.verbose=true
+  dfc.tracing.max_stack_depth=0
+  dfc.tracing.mode=compact
+  #dfc.tracing.dir=/tmp/dfc_tracing
+  dfc.tracing.include_rpcs=true
+  dfc.tracing.include_session_id=false
+  # !!! dfc.tracing.user_name_filter is buggy, do not use
+  #dfc.tracing.user_name_filter[0]=efxim
+  dfc.tracing.method_name_filter[0]=com.documentum.fc.client.impl.connection.docbase.netwise.NetwiseDocbaseRpcClient.applyForCollection()
+
+
+Q: escape string
+A:
+        System.err.println("toQuotedString " + DfUtil.toQuotedString("abc'def"));
+        toQuotedString 'abc''def'
+
+Q: catch DM_FOLDER_E_PATH_EXISTS
+A: 
+  Mind the DM_FOLDER_E_UNIQUENESS_CHECK_FAILED
+    private static final boolean isPathExists(final DfException e) {
+        return "DM_FOLDER_E_PATH_EXISTS".equals(e.getMessageId());
+    }
+  Note that active transaction becomes invalid after this:
+    DfException:: THREAD: main; MSG: [DM_SESSION_E_TRANSACTION_ERROR]error:  "Transaction invalid due to errors, please abort transaction."; ERRORCODE: 100; NEXT: null
+
+Q: nulldate:
+A:
+  null
+  new DfTime((Date)null))
+  new DfTime("nulldate")
+
+  if iDfTime.toString() returns "nulldate", then getDate() returns null
+
+Q: nullstring
+A: 
+  Recently added string attributes contain NULL values in db.
+  With DQL UPDATE you can store any db value except NULL or empty string.
+  Trailing spaces are not trimmed while updating.
+  On the other hand, getString() applies rtrim operation to the db value and it
+  returns empty string for any db value consisting of spaces.
+  Also, getString() returns empty string for db value NULL.
