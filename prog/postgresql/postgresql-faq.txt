@@ -16,6 +16,9 @@ Q: identity column
 A: 
   use a sequence or a pseudo type SERIAL which is sugar for sequence
 
+Q: rename column
+A: alter table T rename C to C2;
+
 Q: alter column
 A: alter table T alter column C type ...; 
 

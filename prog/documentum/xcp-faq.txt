@@ -1,3 +1,10 @@
+Q: Cache-Control: max-age=31100000
+A:
+  TestApplication-1.0.0\WEB-INF\lib\Services-16.4.0060.0070.jar\com\emc\xcp\config\web\deployment-ui.properties
+
+    StaticApplicationResourceCacheSeconds=31100000
+    ComponentResourceCacheSeconds=31100000
+
 Q:  "can be used to sort" is greyed out in a Result List column properties
 A:  You have an Advanced Repository Query attached to the Result List and its <output>s aren't sortable.
     Open the query, go to the "Dataset" tab and click any column in the "Output Columns" section
