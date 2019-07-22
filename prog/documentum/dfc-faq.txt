@@ -95,6 +95,8 @@ A:
     DF_APPLY
     Use this query type for queries that invoke procedures that perform system administration functions or run external procedures. For example, GET_PATH or GET_INBOX.
     
+    https://msroth.wordpress.com/2010/07/18/dfquery-constants/
+
     The explanation of the 255 chars limit:
     
     The query must be less than or equal to 255 characters in length if one is using Dynamic Data
