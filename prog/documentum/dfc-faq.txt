@@ -73,3 +73,35 @@ A:
   On the other hand, getString() applies rtrim operation to the db value and it
   returns empty string for any db value consisting of spaces.
   Also, getString() returns empty string for db value NULL.
+
+
+Q: DF_READ_QUERY vs DF_EXEC_QUERY
+A:
+    DF_READ_QUERY
+    Use this query type for queries containing SELECT statements that will not make changes to the repository. You can execute non-SELECT statements with a DF_READ_QUERY query, but there are no performance benefits in doing so. Note that if a DF_READ_QUERY query makes changes to the repository during processing, the collection returned by the query closes automatically. When the collection is closed, up to batch_hint_size objects will be modified but no error or exception will be raised. Consequently, if you want a query to make changes to a repository during processing, use a DF_QUERY query
+    
+    DF_QUERY
+    This is a general-purpose query type and the one most commonly used, notice that it corresponds to the ‘1’ mentioned in the text above.  Use this query type for any DQL statement. However, you must use this query type for queries that make changes to the repository.
+    
+    DF_CACHE_QUERY
+    This query type indicates that a query executes as read-only and stores the results in a query cache file. Cached queries can improve performance for queries whose results are generally static. For example, you might use a DF_CACHE_QUERY query to return the names of users in the repository. To implement cached queries, you need to configure the DFC to store the query results in the client query cache. See the EMC Documentum Content Server Fundamentals guide.
+    
+    DF_EXEC_QUERY
+    This query type is the same as the DF_QUERY query type but should be used when the query string is longer than 255 characters. At least that’s what the documentation says. EDN users report that query strings longer than 255 characters run fine with DF_QUERY and that this limitation may have only existed in “old” versions of Documentum.
+    
+    DF_EXECREAD_QUERY
+    This query type is the same as the DF_READ_QUERY query type but should be used when the query string is longer than 255 characters. At least that’s what the documentation says. EDN users report that query strings longer than 255 characters run fine with DF_READ_QUERY and that this limitation may have only existed in “old” versions of Documentum.
+    
+    DF_APPLY
+    Use this query type for queries that invoke procedures that perform system administration functions or run external procedures. For example, GET_PATH or GET_INBOX.
+    
+    The explanation of the 255 chars limit:
+    
+    The query must be less than or equal to 255 characters in length if one is using Dynamic Data
+    Exchange (DDE) as the communications protocol between the external application and Content
+    Server.
+    
+    If one wants to send a query that is greater than 255 characters and you are using DDE, use
+    the exec query method instead of read query.
+    
+    https://education.emc.com/content/dam/dell-emc/documents/en-us/KS2009_Harper-Custom_Documentum_Application_Code_Review.pdf
