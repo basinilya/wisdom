@@ -77,6 +77,8 @@ A:
 
 Q: DF_READ_QUERY vs DF_EXEC_QUERY
 A:
+    TL-DR: Do not READ_QUERY if you perform other DFC calls in between
+
     DF_READ_QUERY
     Use this query type for queries containing SELECT statements that will not make changes to the repository. You can execute non-SELECT statements with a DF_READ_QUERY query, but there are no performance benefits in doing so. Note that if a DF_READ_QUERY query makes changes to the repository during processing, the collection returned by the query closes automatically. When the collection is closed, up to batch_hint_size objects will be modified but no error or exception will be raised. Consequently, if you want a query to make changes to a repository during processing, use a DF_QUERY query
     
