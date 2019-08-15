@@ -1,0 +1,46 @@
+mkdir -p /etc/systemd/system/network-online.target.wants
+ln -sf /usr/lib/systemd/system/sshd.service /etc/systemd/system/network-online.target.wants/
+chkconfig --level 12345 network on
+ln -sf /usr/lib/systemd/system/NetworkManager.service /etc/systemd/system/network-online.target.wants/
+systemctl daemon-reload
+
+
+
+mkdir -p /etc/systemd/system/rescue.target.wants
+ln -sf /usr/lib/systemd/system/sshd.service /etc/systemd/system/rescue.target.wants/
+systemctl daemon-reload
+
+systemctl isolate rescue.target
+
+
+rescue.target
+
+set-default
+
+
+
+
+
+Q: generate image for current running kernel
+A: dracut -f
+
+Q: generate image for another kernel
+A: dracut -f /boot/initramfs-3.10.0-327.18.2.el7.x86_64.img 3.10.0-327.18.2.el7.x86_64
+
+
+Q: generate rescue image for current running kernel
+A:
+rm -f /boot/vmlinuz-0-rescue-* /boot/initramfs-0-rescue-*.img
+/etc/kernel/postinst.d/51-dracut-rescue-postinst.sh $(uname -r) /boot/vmlinuz-$(uname -r)
+(On 6.x rescue from DVD is the only option)
+
+
+Q: install xorg and desktop environment
+A: 
+  yum install -y mesa-libGLES mesa-libEGL mesa-libGL
+  #yum erase nvidia-x11-drv-340xx
+  yum -y groups install "GNOME Desktop"
+  yum -y install gnome-shell-extension-top-icons
+
+
+  systemctl set-default graphical.target 
