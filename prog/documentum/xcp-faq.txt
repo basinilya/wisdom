@@ -267,8 +267,20 @@ A:
   Instead, use the "on page load" or "on fragment load" event
   set value:
     '
-    <style onload="console.log(42)"></style>
+    <style onload="this.removeAttribute(\'onload\'); console.log(this)"></style>
     '
+
+  "this" evaluates to the raw <style> element.
+  "event" evaluates to the "load" event.
+  "removeAttribute" must be called first to prevent "onload" fired twice in Firefox
+
+  Use the following script to locate the enclosing container and its widgets:
+    var rawElem = this;
+    var foundCmp = Ext.Component.fromElement(rawElem);
+    var foundFragm = foundCmp.findParentByType("xcp_fragment");
+    var col_supp_name = foundFragm.query('[xcpId=' + 'col_supp_name' + ']')[0];
+
+
   Hide When: true
 
   !!! Executed twice. First from "finally", then from "contextready" handler !!!
