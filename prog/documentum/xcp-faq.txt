@@ -1,3 +1,14 @@
+Q: inputPropertyChange
+A: fired by this.fireEvent("inputPropertyChange") from datasource setInputProperty() even when the value not really changed
+
+Q: automatically disable button during stateless process
+A: The process must not have triggers on the "Behavior" tab and
+   the buttons must have "Invoke:" "Data service instance" and
+   "Data service instance: " name of the process.
+
+Q: xCP functions that run in browser context
+A: xcp-functions-16.4.0060.0070.jar\xcp-core-functions\content\xcp\core\**\*.js
+
 Q: Result List from stateless process row number
 A: max of all multivalue properties
 
