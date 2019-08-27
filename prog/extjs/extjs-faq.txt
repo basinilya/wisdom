@@ -1,0 +1,4 @@
+Q: selector for component of type
+A: just the type name, no equal sign or "xtype="
+  Ex: grid.getDockedItems('pagingtoolbar')[0].setHidden(true)
+

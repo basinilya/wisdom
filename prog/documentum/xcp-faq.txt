@@ -1,3 +1,23 @@
+Q: field's isValid
+A: = (value != '' OR NOT mandatory) AND (value == '' OR NOT (<Validation-Expression>))
+  * see the dropdown list specifics
+
+Q: mandatory
+A: only affects blank fields. Red mark near the label. Can be cleared dynamically to remove the red mark.
+  * see the dropdown list specifics
+
+Q: validation 
+A: only affects non-blank fields
+  * see the dropdown list specifics
+
+Q: dropdown list validation
+A:
+    Using properties of a dropdown in validation expression may give weird results.
+    It is recommended to create intermediate hidden value displays for
+    "value" and "selectedValue" and use them in the validation. The event triggering
+    the validation should be changed from dropdown.change to the intermediate widgets
+    change.
+
 Q: inputPropertyChange
 A: fired by this.fireEvent("inputPropertyChange") from datasource setInputProperty() even when the value not really changed
 
