@@ -1,3 +1,9 @@
+Q: get array element at variable
+A: No such function
+
+Q: eval
+A: getJavascriptPropertyValue(s)
+
 Q: field's isValid
 A: = (value != '' OR NOT mandatory) AND (value == '' OR NOT (<Validation-Expression>))
   * see the dropdown list specifics
