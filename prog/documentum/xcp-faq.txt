@@ -24,6 +24,9 @@ A:
     the validation should be changed from dropdown.change to the intermediate widgets
     change.
 
+Q: dropdown list disallow arbitrary value
+A: value: widgets.<widget-name>.selectedValue
+
 Q: inputPropertyChange
 A: fired by this.fireEvent("inputPropertyChange") from datasource setInputProperty() even when the value not really changed
 
@@ -301,6 +304,11 @@ A: Change Column Box column orientation to Horizontal
 
 Q: Action flow Next button condition expression
 A: Make sure no variables used in the expression change on other steps
+
+Q: find the "Next>" button inside an Action Flow:
+A:
+  var foundCmp = Ext.Component.fromElement(rawElem);
+  var nextButton = foundCmp.findParentByType("xcp_wizard").nextButton;
 
 Q: Run custom javascript / arbitrary javascript when page loaded
 A:
