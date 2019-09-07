@@ -1,3 +1,10 @@
+Q: check string is valid number
+A: isNumber(getJavascriptPropertyValue('parseFloat('+<quotedString>+')'))
+  (don't use xCP isNumber() or isNaN() directly: they don't do what you think they do)
+
+Q: clear Number Input
+A: set value: { 0 }[1]
+
 Q: expression breakpoint
 A: getJavascriptPropertyValue('(()=>{debugger;})()')
 
