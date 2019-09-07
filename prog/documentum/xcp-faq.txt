@@ -1,3 +1,6 @@
+Q: expression breakpoint
+A: getJavascriptPropertyValue('(()=>{debugger;})()')
+
 Q: get array element at variable
 A: No such function
 
@@ -318,7 +321,7 @@ A:
   Instead, use the "on page load" or "on fragment load" event
   set value:
     '
-    <style onload="this.removeAttribute(\'onload\'); console.log(this)"></style>
+    <style onload=\'this.removeAttribute("onload"); console.log(this)\'></style>
     '
 
   "this" evaluates to the raw <style> element.

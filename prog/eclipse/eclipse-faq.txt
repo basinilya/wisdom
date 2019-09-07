@@ -1,3 +1,8 @@
+Q: console buffer size
+A: workspace\.metadata\.plugins\org.eclipse.core.runtime\.settings\org.eclipse.debug.ui.prefs
+  Console.highWaterMark=8008029
+  Console.lowWaterMark=8000029
+
 Q: good decompiler
 A: Enhanced Class Decompiler
   https://marketplace.eclipse.org/content/enhanced-class-decompiler#comment-6327
