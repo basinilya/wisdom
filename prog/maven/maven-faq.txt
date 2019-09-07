@@ -1,3 +1,21 @@
+Q: bundle precompiled artifacts with the project
+A:
+  <repositories>
+      <repository>
+          <id>jars-bundle-lv0</id>
+          <url>file://${basedir}/jars-bundle/repo</url>
+      </repository>
+      <repository>
+          <id>jars-bundle-lv1</id>
+          <url>file://${basedir}/../jars-bundle/repo</url>
+      </repository>
+      <repository>
+          <id>jars-bundle-lv2</id>
+          <url>file://${basedir}/../../jars-bundle/repo</url>
+      </repository>
+  </repositories>
+
+
 Q: Run a single test in a multi-module project
 A: mvn test -am -DfailIfNoTests=false -Dtest=TestName
 
