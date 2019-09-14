@@ -1,11 +1,12 @@
 Q: preview mode privileged client
 A:
-- in design-time environment fill the global registry tab
-- launch preview mode
-- DA/Client Rights Management/Privileged clients/Manage Clients
-- add and approve
-- update dm_client_rights objects set allow_all_roles = true where client_id = '...';
-
+  - in design-time environment fill the global registry tab
+    see com.emc.xcp.builder.ui*.jar/internal.com.emc.xcp.builder.ui.preview.RepositoryEndpointPreviewContributor
+    The temporary dfc.properties and dfc.keystore are in %TEMP%
+  - launch preview mode
+  - DA/Client Rights Management/Privileged clients/Manage Clients
+  - add and approve
+  - update dm_client_rights objects set allow_all_roles = true where client_id = '...';
 
 Q: "On Fragment Load" conditional trigger doesn't work with fragment inputs 
 A: The event fires before the inputs are ready. Use an intermediate widget's "change" event. The "setValue()" call is deferred so all the inputs will be ready when "change" fires. 
