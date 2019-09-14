@@ -1,3 +1,6 @@
+Q: "On Fragment Load" conditional trigger doesn't work with fragment inputs 
+A: The event fires before the inputs are ready. Use an intermediate widget's "change" event. The "setValue()" call is deferred so all the inputs will be ready when "change" fires. 
+
 Q: check string is valid number
 A: isNumber(getJavascriptPropertyValue('parseFloat('+<quotedString>+')'))
   (don't use xCP isNumber() or isNaN() directly: they don't do what you think they do)
