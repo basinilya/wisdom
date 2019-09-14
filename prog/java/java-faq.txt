@@ -1,3 +1,6 @@
+Q: jvm arguments order
+A: last wins
+
 Q: Environment variables
 A: _JAVA_OPTIONS
 

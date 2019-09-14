@@ -8,6 +8,17 @@ A: isNumber(getJavascriptPropertyValue('parseFloat('+<quotedString>+')'))
 Q: clear Number Input
 A: set value: { 0 }[1]
 
+Q: file selector
+A:
+Set List of File IDs
+  setFileIDs: function(fileIDs)
+  // accepts array to merge with existing entries
+  // cannot be used to remove entrie
+
+fileselector.removeBtn
+
+>>>>>>> x
+
 Q: expression breakpoint
 A: getJavascriptPropertyValue('(()=>{debugger;})()')
 
