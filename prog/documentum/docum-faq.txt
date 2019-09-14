@@ -1,0 +1,2 @@
+Q: dfc client not added to the list at DA/Client Rights Management/Privileged clients/Manage Clients
+A: dfc.globalregistry must be filled in dfc.properties
