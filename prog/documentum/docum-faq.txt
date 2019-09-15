@@ -1,3 +1,24 @@
+Q: dm_agent_exec command line arguments
+A:
+  -override_sleep_duration <seconds>
+  
+  -max_concurrent_jobs <n>
+    The minimum value is 1 second
+  
+  -trace_level <0|1>
+    Setting the trace level to any value except zero turns on full tracing for the process.
+
+Q: Job Status=Running
+A: dm_job.a_special_app
+  when running: a_special_app='agentexec'
+  when idle: a_special_app=''
+
+Q: stop job
+A:
+  dm_job.a_last_process_id is the PID of dm_agent_exec
+  killing the OS process won't stop the method execution on the method server unless it tries to print something to its output stream
+  the only reliable way is restarting the method server
+
 Q: dfc client not added to the list at DA/Client Rights Management/Privileged clients/Manage Clients
 A: dfc.globalregistry must be filled in dfc.properties
 
