@@ -1,3 +1,11 @@
+Q: the expression used in transition / no functions in stateless process
+A: some java code not up to date. Update all jars under content/
+
+Q: over-write insert before insert after
+A: to prepend one row, create two "set process data"
+  in the first "set process data" copy all affected multivalue variables into temporary variables
+  in the second "set process data" copy the new first row to variable[0] and copy the temporary variable to variable[1]
+
 Q: preview mode privileged client
 A:
   - in design-time environment fill the global registry tab
