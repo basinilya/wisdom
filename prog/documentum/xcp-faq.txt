@@ -48,6 +48,13 @@ Q: validation
 A: only affects non-blank fields
   * see the dropdown list specifics
 
+Q: dropdown set value before datasource load
+A:
+  setValue() will search for matching value in the dropdown's data store and if not found, clear the value.
+  However, if called before the data store is loaded for the first time, the value is saved in a custom field
+  and used later when load completes. After it's loaded, you can't set an invalid value even if after
+  re-loading the data store will contain the invalid value.
+
 Q: dropdown list validation
 A:
     Using properties of a dropdown in validation expression may give weird results.

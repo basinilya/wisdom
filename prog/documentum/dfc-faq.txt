@@ -1,3 +1,6 @@
+Q: multiple certificate records in global registry or docbase
+A: quick workaround: delete dfc.keystore on client
+
 Q: session leaks
 A:
    
