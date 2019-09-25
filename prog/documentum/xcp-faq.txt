@@ -6,6 +6,9 @@ A: to prepend one row, create two "set process data"
   in the first "set process data" copy all affected multivalue variables into temporary variables
   in the second "set process data" copy the new first row to variable[0] and copy the temporary variable to variable[1]
 
+Q: NoClassDefFoundError: Could not initialize class com.emc.xcp.model.processmodel.process.ProcessPackage
+A: Compare the contents of ServerApps.ear/lib/ and bpm.ear/lib/ . Some xcp jars might be missing
+
 Q: preview mode privileged client
 A:
   - in design-time environment fill the global registry tab

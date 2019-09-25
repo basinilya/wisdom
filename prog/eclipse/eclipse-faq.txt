@@ -35,7 +35,10 @@ A:
   Both javac and Eclipse don't support SOURCE_PATH, but javac throws FileNotFoundException and Eclipse throws IllegalArgumentException, which is often not caught by processors
 
 Q: source not found
-A: add seemingly unrelated projects to source path
+A: 
+  - Add seemingly unrelated projects to source path
+  - Try "Remote Java Applicatopn". It's more capable than local
+  - Decompile and try to compile the class in question. Add missing dependencies to project classpath
 
 Q: The superclass "javax.servlet.http.HttpServlet" was not found on the Java Build Path	index.jsp	/myweb/src/main/webapp	line 1	JSP Problem
 A: 

@@ -1,3 +1,19 @@
+Q: dfc quick start
+A: 
+        // or launch with -Ddfc.properties.file=
+        System.setProperty("dfc.properties.file", "C:\\Documentum\\config\\dfc.properties");
+        
+        final IDfClient cl = DfClient.getLocalClient();
+        final String docbase = "mydocbase";
+        final IDfSessionManager sm = cl.newSessionManager();
+        
+        final IDfLoginInfo info = new DfLoginInfo();
+        info.setUser("joe");
+        info.setPassword("xxx");
+        info.setSecurityMode(IDfLoginInfo.SECURITY_MODE_TRY_NATIVE_FIRST);
+        sm.setIdentity(docbase, info);
+        final IDfSession session = sm.getSession(docbase);
+
 Q: multiple certificate records in global registry or docbase
 A: quick workaround: delete dfc.keystore on client
 
