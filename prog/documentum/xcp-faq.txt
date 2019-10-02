@@ -1,3 +1,6 @@
+Q: dataservices.<ARQ_name>.outputs.id resolves to 'dql-queries/<ARQ_name>/<r_object_id>' instead of just '<r_object_id>'
+A: Use a column alias, e.g.: select r_object_id as oid, ...
+
 Q: the expression used in transition / no functions in stateless process
 A: some java code not up to date. Update all jars under content/
 
@@ -18,6 +21,8 @@ A:
   - DA/Client Rights Management/Privileged clients/Manage Clients
   - add and approve
   - update dm_client_rights objects set allow_all_roles = true where client_id = '...';
+      or
+      update dm_client_rights objects set allow_all_roles = true where allow_all_roles is nullint;
 
 Q: "On Fragment Load" conditional trigger doesn't work with fragment inputs 
 A: The event fires before the inputs are ready. Use an intermediate widget's "change" event. The "setValue()" call is deferred so all the inputs will be ready when "change" fires. 

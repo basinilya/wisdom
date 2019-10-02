@@ -1,6 +1,13 @@
+Q: IDfSession.getLoginTicketEx() timeout unit
+A: minutes
+
+Q: connect to specific node in a cluster
+A: final IDfSession otherSession = sm.getSession(docbase + "." + otherServer);
+  where otherServer is dm_server_config.object_name
+
 Q: dfc quick start
 A: 
-        // or launch with -Ddfc.properties.file=
+        // or launch with -Ddfc.properties.file= or have dfc.properties in classpath
         System.setProperty("dfc.properties.file", "C:\\Documentum\\config\\dfc.properties");
         
         final IDfClient cl = DfClient.getLocalClient();
