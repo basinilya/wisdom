@@ -1,3 +1,14 @@
+Q: class name instead of type alias in container config:
+    Ext.create('Ext.Panel', {
+        items: [
+            {
+                // xtype: 'form'
+                ???: 'Ext.form.Panel'
+
+A:
+
+
+
 Q: selector for component of type
 A: just the type name, no equal sign or "xtype="
   Ex: grid.getDockedItems('pagingtoolbar')[0].setHidden(true)
