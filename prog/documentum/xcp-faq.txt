@@ -1,3 +1,6 @@
+Q: null array
+A: matchString('','x')
+
 Q: AppDeployException Fetch of object with handle 12xxxxxxxxxxxxxx and type NULL failed.
 A:
   TL;DR: remove temporarily the artifact (if you know it) which had this id from
@@ -347,14 +350,13 @@ rm -rf /u01/*/xDA/temp
 # then restart the VM
 
 
+Q: The container 'Maven Dependencies' references non existing library
+A: click the refresh project button, then open pom.xml for editing in XCP and manually delete the bad dependencies
+
 Q: hard clean
 A: 
 
-gen\
-target\
-.generatedresources
-.index
-c:\Users\basin\AppData\Local\Eclipse
+del /s /q gen\ & del /s /q target\ & del /s /q .generatedresources & del /s /q .index & del /s /q %USERPROFILE%\AppData\Local\Eclipse & git checkout gen
 
 
 ???
