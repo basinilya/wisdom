@@ -1,3 +1,10 @@
+Q: Application Parameters
+A:  
+  http://192.168.56.150:8000/AppName/#application/<namespace>_application_parameter
+  
+  select config_name,  property_value, i_position from dmc_xcp_app_config
+  order by config_name, i_position DESC
+
 Q: dataservices.<ARQ_name>.outputs.id resolves to 'dql-queries/<ARQ_name>/<r_object_id>' instead of just '<r_object_id>'
 A: Use a column alias, e.g.: select r_object_id as oid, ...
 
