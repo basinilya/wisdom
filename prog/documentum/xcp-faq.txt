@@ -4,6 +4,37 @@ A:
   
   select config_name,  property_value, i_position from dmc_xcp_app_config
   order by config_name, i_position DESC
+Q: null array
+A: matchString('','x')
+
+Q: AppDeployException Fetch of object with handle 12xxxxxxxxxxxxxx and type NULL failed.
+A:
+  TL;DR: remove temporarily the artifact (if you know it) which had this id from
+  your project, then deploy and then restore the deleted artifact from VCS or
+  Recycle Bin.
+  
+  Deployer is trying to perform some operation with the object which it believes
+  was installed into docbase earlier and which is seemingly already deleted by
+  you from there.
+  
+  Deployer finds the previous artifacts through the attributes of
+  xcp_artifact_bundle, in particular, its latest version with
+  bundleinstallstatus = 1.
+  
+  You can obtain the object's versions with this DQL query:
+  
+    select  r_object_id, r_version_label, namespace, r_modify_date, bundleinstallstatus
+    from  xcp_artifact_bundle (all)
+    where object_name = 'MyApplication'
+    order by r_modify_date desc;
+  
+  Then you dump the latest installed version and in the dump you can find the
+  artifact's ID in the attribute installedobjectid and then knowing its index
+  find its urn in the attribute artifacturn. For instance, I have this artifact
+  on my host:
+  
+    artifacturn: [9]: urn:spr:com.emc.xcp.artifact.approle:Artifacts/Roles/licensing.role
+    installedobjectid: [9]: 1201e24080000d00
 
 Q: dataservices.<ARQ_name>.outputs.id resolves to 'dql-queries/<ARQ_name>/<r_object_id>' instead of just '<r_object_id>'
 A: Use a column alias, e.g.: select r_object_id as oid, ...
@@ -144,7 +175,7 @@ Q: result list disable auto resize
 A: Style/Height/ "px"
 
 Q:
-  java.io.FileNotFoundException: Specified source file does not exists: D:\edflux\EducationApplication\configuration\asdasdasd_config.xml
+  java.io.FileNotFoundException: Specified source file does not exists: D:\TestApp\configuration\asdasdasd_config.xml
 A:
   Do not ever delete the folder "configuration". If you did,
   delete and re-create the run configuration
@@ -271,12 +302,6 @@ A:
 Q: environment settings (xms)
 A:  xCPDesigner_2.3P03\Applications\
 
-Q: restart tomcat
-A: 
-flxdr restart
-see
-/u01/flxdr/vfabric-tc-server
-
 Q: missing artifact com.emc.xcp:...
 ex:
     Missing artifact com.emc.xcp:xcp-ivf-widgets:jar:2.2.0190.2448
@@ -290,13 +315,13 @@ A:
     - press refresh
 
 Q:
-  /u01/flxd/dba/log/flxdbase.log
+  $DOCUMENTUM/dba/log/*base.log
   [DM_SESSION_I_RETRYING_DATABASE_CONNECTION]info:  "The following error was encountered trying to get a database connection:  ORA-12520: TNS:listener could not find available handler for requested type of server
 
 A:
 $ lsnrctl services
 $ lsnrctl status
-Listener Log File         /u01/app/oracle/diag/tnslsnr/flxd/listener/alert/log.xml
+Listener Log File         /u01/app/oracle/diag/tnslsnr/*/listener/alert/log.xml
 
 su - oracle
 ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe; export ORACLE_HOME
@@ -315,34 +340,33 @@ alter system set sessions=600 scope=spfile;
 Q: Deploy fails
 A: 
     This is normal. Retry 2-3 times. Try rebooting. If still fails, see
-    tail -F /u01/flxdr/xms/logs/xms-full.log
-    tail -F /u01/flxdr/xDA/logs/xda-full.log
+    tail -F /u01/*/xms/logs/xms-full.log
+    tail -F /u01/*/xDA/logs/xda-full.log
 
 
 # Try cleaning xDA cache:
-# login with flxdr
+# login as Tomcat unix user
 # kill xDA java process
 pkill -fu "`cd /home && echo *xdr`" '^[^ ]*java.*xDA'
 
-# then navigate to /u01/flxdr/xDA
+# then navigate to /u01/*/xDA
 # there you will have temp folder
 rm -rf /u01/*/xDA/temp
 
 # then restart the VM
 
 
+Q: The container 'Maven Dependencies' references non existing library
+A: click the refresh project button, then open pom.xml for editing in XCP and manually delete the bad dependencies
+
 Q: hard clean
 A: 
 
-gen\
-target\
-.generatedresources
-.index
-c:\Users\basin\AppData\Local\Eclipse
+del /s /q gen\ & del /s /q target\ & del /s /q .generatedresources & del /s /q .index & del /s /q %USERPROFILE%\AppData\Local\Eclipse & git checkout gen
 
 
 ???
-/u01/flxdr/tcserver/vfabric-tc-server-developer-2.9.5.SR1/xmsServer/temp
+/u01/*/tcserver/vfabric-tc-server-developer-2.9.5.SR1/xmsServer/temp
 
 
 Q: Unable to create artifact project Concordant__Insurance  at location C:/xCPDesigner_2.1_P03_64bit/Applications/Concordant__Insurance
