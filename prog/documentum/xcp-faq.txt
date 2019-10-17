@@ -1,3 +1,22 @@
+Q: Stateless Process errors not displayed when using grid sort/navigate
+A: 
+    operation.feedbackContainer is not set
+    
+    To obtain feedbackContainer call getEffectiveFeedbackContainer() of xcp.action.form.DataSourceAction
+    To obtain current DataSourceAction for a Store override constructor() of xcp.action.form.DataSourceAction
+    and add another handler:
+    
+    Ext.ClassManager.get('xcp.action.form.DataSourceAction').override({
+        constructor: function() {
+            var res = this.callParent(arguments);
+            var me = this;
+            me.store.on("beforeload", function (store, operation) {
+                if (!operation.feedbackContainer) operation.feedbackContainer = me.getEffectiveFeedbackContainer();
+            }, me);
+            return res;
+        }
+    });
+
 Q: Application Parameters
 A:  
   http://192.168.56.150:8000/AppName/#application/<namespace>_application_parameter
