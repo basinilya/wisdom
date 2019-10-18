@@ -1,3 +1,12 @@
+Q: 
+    PDF preview fails with:
+    Access to XMLHttpRequest at 'http://host:9080/ACS/servlet/ACS?command=read&...'
+    from origin 'http://host:8000' has been blocked by CORS policy:
+    No 'Access-Control-Allow-Origin' header is present on the requested resource.
+A:
+  Edit ${JBOSS_HOME:?}/server/DctmServer_MethodServer/deployments/acs.ear/bocs.war/WEB-INF/web.xml
+  and set CORSAllowed to true (see xCP Deployment Guide)
+
 Q: Stateless Process errors not displayed when using grid sort/navigate
 A: 
     operation.feedbackContainer is not set
