@@ -1,3 +1,18 @@
+Q: mvn package from command line fails Windows with:
+  [INFO]   Error importing project TestApp at location c:\testapp\TestApp  
+  [INFO]     Invalid project description.
+A: 
+  The real cause is not printed. Most probably it's "overlaps the location of another project".
+  This happens when -importLocation pased to com.emc.xcp.builder.cli.CLIApplication starts with
+  a lower-case drive letter. Eclipse internally calls
+  "c:\testapp\TestApp".equals("C:\testapp\TestApp") and fails validation.
+  importLocation is projectPath and <projectPath default-value="${basedir}"/>
+  Maven inherits the current working directory from its calling process, usually cmd.
+  If cmd's current working directory has a lowercase drive letter, same goes for ${basedir}.
+  So to make ${basedir} start with a capital drive letter, either change fix the current working
+  directory or pass the absolute path to pom.xml in maven command line:
+  mvn -f "C:\testapp\TestApp\pom.xml" ...
+
 Q: 
     PDF preview fails with:
     Access to XMLHttpRequest at 'http://host:9080/ACS/servlet/ACS?command=read&...'
