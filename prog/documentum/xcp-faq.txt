@@ -15,6 +15,12 @@ A:
 
 Q: 
     PDF preview fails with:
+    http://127.0.0.1:8888/TestApp/undefined 404 (Not Found)
+A:
+    Go to Application / Settings / Viewers and Formats and select all available formats for xCP Advanced Viewer.
+
+Q: 
+    PDF preview fails with:
     Access to XMLHttpRequest at 'http://host:9080/ACS/servlet/ACS?command=read&...'
     from origin 'http://host:8000' has been blocked by CORS policy:
     No 'Access-Control-Allow-Origin' header is present on the requested resource.
