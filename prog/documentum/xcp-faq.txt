@@ -1,3 +1,7 @@
+Q: Caused by: org.apache.maven.plugin.MojoExecutionException: java.lang.IllegalArgumentException: project 'TestApp' is not an IXCPProject
+        at com.emc.xcp.builder.codegen.CodegenUtils.executeArtifactGenerators(CodegenUtils.java:63)
+A:
+
 Q: mvn package from command line fails Windows with:
   [INFO]   Error importing project TestApp at location c:\testapp\TestApp  
   [INFO]     Invalid project description.
