@@ -1,3 +1,6 @@
+Q: update from/update join
+A: update mytable from tab1 A, tab2 B where mytable.x = A.x ...
+
 Q: top/limit
 A: ... limit 10;
 

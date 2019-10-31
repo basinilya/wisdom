@@ -92,6 +92,13 @@ A:
 Q: dataservices.<ARQ_name>.outputs.id resolves to 'dql-queries/<ARQ_name>/<r_object_id>' instead of just '<r_object_id>'
 A: Use a column alias, e.g.: select r_object_id as oid, ...
 
+  Note: In xCP 2.0, you can get context menu for stateless process in a results list, if the process has
+  output variable named "id" which contains Object ID and "r_object_type" which contains Object Type.
+  This stopped working in 2.1. To make it work ensure now that "id" output variable returns the Object
+  URI of the form "business-objects/[r_object_type]/[r_object_id]" instead of just object ID. (Change
+  "business-objects" to "contents" or "folders" as required).
+
+
 Q: the expression used in transition / no functions in stateless process
 A: some java code not up to date. Update all jars under content/
 
