@@ -1,0 +1,7 @@
+Q: jpipe.dll: Can't find dependent libraries
+A: set PATH=...\program\;%PATH%
+
+Q: Insert text at a bookmark.
+A:
+  oBookMark = oDoc.getBookmarks().getByName("<yourBookmarkName>")
+  oBookMark.getAnchor.setString("What you want to insert")
