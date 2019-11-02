@@ -1,3 +1,23 @@
+Q:
+    Exception in thread "main" java.lang.ExceptionInInitializerError
+            ...
+            at com.sn.efx.test.AaaTestFetchBad.main(AaaTestFetchBad.java:19)
+    Caused by: com.rsa.crypto.CryptoException: java.lang.SecurityException: java.lang.SecurityException: The FIPS140 self-integrity check failed.
+            at com.rsa.crypto.jcm.ModuleLoader.<clinit>(Unknown Source)
+            ... 19 more
+    Caused by: java.lang.SecurityException: java.lang.SecurityException: The FIPS140 self-integrity check failed.
+            at com.rsa.jcm.f.hx.a(Unknown Source)
+            at com.rsa.jcm.f.jq.c(Unknown Source)
+            at com.rsa.crypto.jcm.ModuleLoader.b(Unknown Source)
+            ... 20 more
+    Caused by: java.lang.SecurityException: The FIPS140 self-integrity check failed.
+            at com.rsa.jcm.f.f.a(Unknown Source)
+            at com.rsa.jcm.f.hx.f(Unknown Source)
+            ... 23 more
+
+A: It's trying to create the missing dfc.keystore, but the crypto libraries don't work, because they were repacked
+  Don't repack the libraries
+
 Q: IDfSession.getLoginTicketEx() timeout unit
 A: minutes
 

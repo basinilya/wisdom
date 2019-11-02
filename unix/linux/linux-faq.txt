@@ -1,3 +1,6 @@
+Q: ntfs change uuid change volume serial number
+A: ntfslabel --new-serial device
+
 Q: send mail from command line
 A: 
   mailx -s testsubject address@domain.com < textfile
