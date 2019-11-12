@@ -1,3 +1,6 @@
+Q: assign historic date widget utc
+A: splitString(dateToString(d, 'C'),'T')[0]+'T00:00Z
+
 Q:
   Some required dependencies are missing from the selection.
     Project efx:EducationApplication has an invalid POM file
