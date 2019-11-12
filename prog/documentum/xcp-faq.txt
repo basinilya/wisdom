@@ -1,3 +1,10 @@
+Q:
+  Some required dependencies are missing from the selection.
+    Project efx:EducationApplication has an invalid POM file
+      Archetype not found: com.emc.xcp.rest:app-project-archetype:16.4.0060.0228
+A:
+
+
 Q: Caused by: org.apache.maven.plugin.MojoExecutionException: java.lang.IllegalArgumentException: project 'TestApp' is not an IXCPProject
         at com.emc.xcp.builder.codegen.CodegenUtils.executeArtifactGenerators(CodegenUtils.java:63)
 A:
@@ -131,6 +138,14 @@ A: isNumber(getJavascriptPropertyValue('parseFloat('+<quotedString>+')'))
 
 Q: clear Number Input
 A: set value: { 0 }[1]
+
+Q: clear Date Input
+A:
+  An expression returning null or undefined will be ignored, see
+  xcp.core.expr.ExpressionPropertiesPlugin.prototype.createEventHandler
+  We need an expression returning an empty string and then cast it to date.
+  set-value will accept expressions of type ANY so we can use:
+  ifThenElse(true,'','')
 
 Q: file selector
 A:

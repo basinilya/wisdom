@@ -1,3 +1,6 @@
+Q: Failed to apply patch for xPlore, please refer to the log for details
+A: 
+
 Q: dm_agent_exec command line arguments
 A:
   -override_sleep_duration <seconds>

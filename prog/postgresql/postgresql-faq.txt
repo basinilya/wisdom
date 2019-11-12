@@ -1,3 +1,15 @@
+Q: sleep
+A: SELECT pg_sleep(10);
+
+Q: insert default values
+A: insert ... default values;
+
+Q: suppress skipping message
+A:
+    SET client_min_messages TO WARNING;
+    ... do stuff
+    SET client_min_messages TO NOTICE;
+
 Q: update from/update join
 A: update mytable from tab1 A, tab2 B where mytable.x = A.x ...
 
