@@ -1,3 +1,14 @@
+Q: Internal error occurred on xCP Deployment Agent.
+A: see xda.log
+
+Q: in xda.log:
+  ERROR [main][org.springframework.boot.SpringApplication] - Application startup failed
+  Caused by: com.xhive.error.XhiveException: FEDERATION_ALREADY_OPEN: Federation /u01/efxar/XDA_DATA/catalog/xDB/XhiveDatabase.bootstrap is already opened
+  ...
+  Resolving exception from handler [null]: org.springframework.web.multipart.MultipartException: Could not parse multipart servlet request; nested exception is org.apache.commons.fileupload.FileUploadBase$IOFileUploadException: Processing of multipart/form-data request failed. /u01/efxar/xDA/temp/tomcat.8381911546944964385.7000/work/Tomcat/localhost/xda/upload_85062e28_c431_4911_9345_53a0311a3291_00000009.tmp (No such file or directory)
+A:
+  restart xDA
+
 Q: assign historic date widget utc
 A: splitString(dateToString(d, 'C'),'T')[0]+'T00:00Z
 
