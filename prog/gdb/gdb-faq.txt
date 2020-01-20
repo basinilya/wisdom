@@ -1,3 +1,10 @@
+Q: function return value truncated
+A: 
+  7.6+:
+    p ((char * (*) (const char *)) getenv) ("PATH")
+
+  7.3: ?
+
 Q: reopen stdout
 A:
 p dup2(open("/tmp/reopened.stdout", 1089), 1)

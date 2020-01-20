@@ -1,3 +1,6 @@
+Q: create video of images
+A: ffmpeg -framerate 5 -i img-%02d.png video.avi
+
 Q: create gif
 A: 
   set -- out2.mp4 out2.gif

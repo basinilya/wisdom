@@ -1,5 +1,342 @@
-Q: Failed to apply patch for xPlore, please refer to the log for details
+Q: dm_bof_registry password
+A:
+
+Q: Unable to retrieve password from cnt file
+A:
+
+Q: dm_method with method_type = 'program'
+A:
+  The program is spawned directly by the Content Server
+  Most probably, the POSIX function system() is used which effectively spawns:
+    sh -c "<command-line>"
+
+  The command line is constructed from method_verb and arguments string.
+  method_verb is used as is, then a single space is added.
+  The arguments string received by the Content Server is split into arguments and reconstructed:
+  If the parser encounters a backslash, then both the backslash and the next character are added.
+  If it encounters a single or double quote it reads the rest of quoted argument mimicking a shell.
+  If outside of quoted argument it encounters a metacharacter, control operator or another special character, its characters are escaped with a backslash
+
+
+Q: Aborting--Job can't run in it's time window, please check the
+  window_interval argument which is currently set to 120 
+A:
+  Scenario: Running Job dm_Filereport does not execute properly and 'View Job Report' shows following report showing the error that caused Job to fail
+  FileReport Report For DocBase <DocbaseName> As Of 30/8/2011 09:45:38
+  Aborting--Job can't run in it's time window, please check the window_interval argument which is currently set to 60
+  Report End 30/8/2011 09:45:38
+  Solution: Follow the below procedure to fix the issue:
+  Step 1: Right click the Job and open its Properties window.
+  Step 2: Go to the 'Method' tab and click on the 'edit' link available in front of  'Arguments'
+  Step 3: Modify the parameter window_interval value to 1440 to give sufficient time for the job to execute.
+  Step 4: Close the Properties window and try to run the job again. It should work fine now.
+
+Q: do_method output saved
+A: EXECUTE do_method WITH save_results=true, ...
+  The returned row now contains the id of dm_document with object_name='Result.<method-name>' and folder /Temp
+
+
+Q: object id by content storage path
+A:
+  cd /u01/*/data/*base/content_storage_01/0001e240
+  find 80/02 -type f | sed 's,/,,g;s,[.][^.]*$,,' | while read n; do ticket=$(( (0x$n - 0x80000000) - 0x80000000 )); echo $ticket; done | head
+  select parent_id from dmr_content where data_ticket = <value>
+
+Q: launch idql
+A: idql "$(cd ${DOCUMENTUM:?}/dba/config && echo *)" -U${USER} -Pignored
+
+Q: The current user <username> has insufficient privileges to  save or destroy <relname> relation.
+A: ?
+
+Q: generate login ticket
+A:
+  API> getlogin,c,adtsuser
+  ...
+  DM_TICKET=xxxxxxxxxxxxxx...
+
+
+Q: select users having role
+A: select i_all_users_names from dm_group where group_name = 'GROUP_A'
+
+Q: Java 1.8.0_201, Java 11 SSLHandshakeException: Received fatal alert: handshake_failure
+A:
+  $JAVA_HOME/conf/security/java.security
+  jdk.tls.disabledAlgorithms=
+  remove "anon"
+
+
+Q: relations and versioning
+A:
+  dm_relation_type.permanent_link
+      Set this to True and use the i_chronicle_id for the parent_id when you want every new version of the parent to be related to the child.
+  A new dm_relation is automatically created for each new version of the parent
+  (see figure 3).
+  This setting is “FALSE” by default.
+
+  permanent_link can be set on relation instance too
+
+Q: store Double and BigDecimal in Documentum
+A:
+
+Q: DM_FOLDER_E_UNIQUENESS_CHECK_FAILED
 A: 
+SEVERITY: ERROR
+DESCRIPTION: S %s
+CAUSE: During the Check to see if a folder with the same name exists or not, we encountered an error.
+ACTION: This can lead to creation of 2 folders with the same name under certain conditions, please check the system and delete or rename one of them.
+PARAMS: 
+
+Q: DM_FOLDER_E_CONCUR_LINK_OPERATION_FAILURE
+A: bug in 7.x
+
+Q: iapi -z
+A: force unified login
+
+Q: database credentials
+A:
+  iapi "$(cd ${DOCUMENTUM:?}/dba/config && echo *)" -U${USER} -R<(
+    echo "initcrypto,c"
+    echo "decrypttext,c,$(cat ${DOCUMENTUM:?}/dba/config/*base/dbpasswd.txt)"
+  ) -P"ignored"
+
+grep ^database ${DOCUMENTUM:?}/dba/config/*base/server.ini
+  database_name = xxxx
+  database_conn = MyPostgres
+  database_owner = xxxx
+  database_password_file = /u01/xxxx/dba/config/xxxxbase/dbpasswd.txt
+
+cat /etc/odbc.ini
+
+Q: database_conn = MyPostgres
+A: see tnsnames.ora / /etc/odbc.ini
+
+Q: issue API commands from command line
+A: iapi $docbase -U$USER -P$pass < $script_filename
+  ex:
+  iapi "$(cd ${DOCUMENTUM:?}/dba/config && echo *)" -U${USER%?}
+
+Q: Preference repository is not available, reason: preference repository credential is not configured in app.xml
+A: 
+
+Q: nullstring/nulldate/nullint/nullid
+A: serve the same purpose as null in sql
+
+Q: multiple inheritance
+A: aspects: IMyAspect.java, MyAspect.java extends DfDocument, *.module with aspect type, *.aspecttype + optionally default aspects on *.type
+    xCP: business event on a type
+
+Q: refer ucf client logs for details
+A: delete folder %USERPROFILE%\Documentum\ucf
+
+Q: Cannot create new version of sysobject named
+A: 
+- cancel checkout
+- select r_object_id, object_name, r_version_label
+    from xxx (all)
+- right click r_object_id with shortest version
+- content/edit
+
+Q: debug process builder
+A: 
+    C:\Program Files\Documentum\bpm\classes\debug.bat :
+    rem 
+    start "" "C:\Program Files\Documentum\java\1.6.0_27\jre\bin\javaw.exe" -Xms128m -Xmx512m -agentlib:jdwp=transport=dt_socket,address=7676,server=y,suspend=n -Dfile.encoding=UTF-8 -Dawt.useSystemAAFontSettings=on -cp ".;lib\bpm.jar;..\..\dctm.jar;C:\Documentum\config" WorkflowEditor -locale en_US
+    rem pause
+
+Q: DocumentumCoreProject missing in composer
+A: Create a new empty documentum project using the wizard
+
+Q: get folder of a jar
+A:
+    select f.r_folder_path, j.r_object_id from dmc_jar j, dm_folder f
+    where j.i_folder_id = f.r_object_id
+    AND f.r_folder_path != ' '
+    AND j.object_name = 'foo.jar'
+    ENABLE (ROW_BASED)
+    ;
+
+Q: save of object failed because of version mismatch
+A: 
+Unlike in Oracle, when one Documentum transaction update-locks an object, getObject() from other sessions doesn't block.
+They return the old state of the object. This allows a DFC client to work with outdated objects.
+Also, it looks like a DQL UPDATE is not atomic and implemented as a pair of getObject()/save().
+Saving an object from other sessions DOES block until our transaction rolls back or commits, but if it commits,
+then save() throws a DfException with the above message.
+
+Here's the retry code snippet:
+
+    } catch (final DfException e) {
+        final String msgid = e.getMessageId();
+        final IDfException nexte = e.getNextException();
+        final String DM_OBJ_MGR_E_VERSION_MISMATCH = "DM_OBJ_MGR_E_VERSION_MISMATCH";
+        if (!DM_OBJ_MGR_E_VERSION_MISMATCH.equals(msgid)
+                && (nexte == null || DM_OBJ_MGR_E_VERSION_MISMATCH.equals(nexte.getMessageId()))) {
+            throw e;
+        }
+        continue; // retry
+    }
+
+The code "DM_OBJ_MGR_E_VERSION_MISMATCH" is either in the caught exception
+or in the next exception, which follows "DM_SYSOBJECT_E_CANT_SAVE".
+This depends on whether saving of outdated object began before or after the commit
+
+
+
+
+Q: method properties
+A:
+
+Use method Server
+    on:
+        method type:
+    off:
+        pwd: /u01/xxxx/product/7.1/bin
+
+Use method server
+
+interface IDfMethod
+  int execute(Map paramMap, PrintWriter paramPrintWriter) throws Exception;
+OR
+    public static void main(final String[] args) { ... }
+    
+    System.out/err go to method server log with INFO  [stdout]/ERROR [stderr] prefix
+    OutputStream parameter of MainMethodRunner.runIt() is ignored
+    callstack:
+        java.lang.reflect.InvocationTargetException
+             at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+             at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+             at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+             at java.lang.reflect.Method.invoke(Method.java:601)
+             at com.documentum.mthdservlet.MainMethodRunner.runIt(Unknown Source)
+             at com.documentum.mthdservlet.AMethodRunner.runAndReturnStatus(Unknown Source)
+             at com.documentum.mthdservlet.DoMethod.invokeMethod(Unknown Source)
+             at com.documentum.mthdservlet.DoMethod.doPost(Unknown Source)
+             at javax.servlet.http.HttpServlet.service(HttpServlet.java:754)
+             at javax.servlet.http.HttpServlet.service(HttpServlet.java:847)
+             at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:329)
+             at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:248)
+             at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:275)
+             at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:161)
+             at org.jboss.as.web.security.SecurityContextAssociationValve.invoke(SecurityContextAssociationValve.java:153)
+             at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:155)
+             at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:102)
+             at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:109)
+             at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:368)
+             at org.apache.coyote.http11.Http11Processor.process(Http11Processor.java:877)
+             at org.apache.coyote.http11.Http11Protocol$Http11ConnectionHandler.process(Http11Protocol.java:671)
+             at org.apache.tomcat.util.net.JIoEndpoint$Worker.run(JIoEndpoint.java:930)
+             at java.lang.Thread.run(Thread.java:722)
+        Caused by: java.lang.NullPointerException
+             at com.spr.ajwf.methods.jobs.transfer.FTPExchangeJob.main(FTPExchangeJob.java:73)
+             ... 23 more
+
+Launch Asynchronously (Launch as a separate process) (In Composer: Run Asynchronously)
+    Specifes whether the server runs the method asynchronously
+    or not.
+    If this option is selected and the method is launched on the
+    application server, setting SAVE_RESPONSE on to TRUE on the
+    command line is ignored.
+    If this option is select and the method is launched on the method
+    server or Content Server and SAVE_RESULTS is set to TRUE on
+    the command line, the method is always launched synchronously.
+Launch Direct (Use the exec call to execute the procedure) (In Composer: Launch directly)
+    Specifes whether the program is executed by the system call
+    or exec API call. When the launch direct option is selected, the
+    server uses the exec call to execute the procedure. In this case, the
+    method verb must be a fully qualifed path name.
+
+Run As Owner, run_as_server (Run as the installation owner) (In Composer: Run as the server)
+    Specifes whether to run method to run as the installation owner
+    account, with the privileges of the installation owner . If this
+    option is not selected, the method runs with the privileges of the
+    method user.
+    !!! run_as_server=1 is dangerous, because all users can run the method. The method must
+    call IDfLoginInfo.setForceAuthentication(true) if it takes credentials as method arguments
+    When run_as_server=0 even the users with superuser privilege cannot run it. Only the installation owner can
+
+Use method Server (Use the dmbasic Method Server or Java Method Server to execute a dmbasic or Java Method) (In Composer: Use method server)
+    Specifes whether to use the dmbasic method server or Java
+    method server to execute a dmbasic or Java method.
+
+dm_method.a_special_app (can only set via DQL)
+    If empty, the method is run in ServerApps.ear
+    If set to 'Workflow', the method is run in bpm.ear
+
+Q: dm_agent_exec / agentexec
+A: 
+
+Q: debug Content Server
+A: DQL:
+    EXECUTE SET_OPTIONS WITH option='debug', "value"=true;
+    EXECUTE SET_OPTIONS WITH option='nettrace', "value"=true;
+    EXECUTE SET_OPTIONS WITH option='sqltrace', "value"=true;
+
+    $ tail -F /u01/*/dba/log/*base.log
+    
+    EXECUTE SET_OPTIONS WITH option='debug', "value"=false;
+    EXECUTE SET_OPTIONS WITH option='nettrace', "value"=false;
+    EXECUTE SET_OPTIONS WITH option='sqltrace', "value"=false;
+
+Q:
+  2017-01-24T16:34:28.142293      13013[13013]    0101e2408000000a        
+  [DM_WORKFLOW_E_PROCESS_AUTO_TASK]error:  "Workflow Agent failed to process task 4a01e24080015d02 of workflow 4d01e24080015101.
+  The task is using method 'BPSIntegration'. Activity: 'Export Content'. Error: 
+  [DFC_SESSION_TRANSACTION_LOST] Transaction is invalid because server connection was lost (probably due to timeout or I/O error). Please abort transaction. The task will
+  be processed by dm_bpm_XCPAutoTaskMgmt job since it is not completed and is from XCP process.."
+A:
+
+Q: 
+    Workflows stuck in all tasks are future and in bpm.log:
+    Exception invoking com.documentum.bpm.rtutil.JMSHealthCheckMethod. ClientAbortException:  java.net.SocketException: Broken pipe
+A: in DA in Method "JMSHealthChecker" set Default timeout=30 (was 10)
+    (no restart needed)
+
+Q: TBO
+A: Type-based module
+
+Q: SBO
+A: Service-based module
+
+
+Q:
+  The ACL instance object named dm_4501e2408000d50a_80001d0f refers to a non-existent alias set object 6601e24080001d0f.";
+A:
+DQL Tester
+select r_object_id, r_alias_set_id, object_name from dm_acl where r_alias_set_id = '6601e24080001d0f'
+------------
+4501e2408000e130 6601e24080001d0f dm_4501e2408000d50a_80001d0f
+
+DA/API Tester
+destroy,c,4501e2408000e130
+
+
+Q: dump
+A: dump,c,4501e2408000e13b
+
+Q: destroy ACL
+A: destroy,c,4501e2408000e13b
+
+
+Q: ?
+A: 
+  Process builder DQL Read -> repeating attr
+  
+  input: all
+  output: overwrite
+  LAST
+  f([a,b],[]) = [a,b]
+  f([a,b],[a,b]) = [a,a,b]
+
+Q: bpm
+A: Business Process Management
+
+Q: The owner_name or accessor_name 'some_role' given in the ACL 'some_acl_name' does not exist.
+A: Open DA, security and manually remove the missing role from the ACL
+
+
+
+Q: Failed to apply patch for xPlore, please refer to the log for details
+A: Doesn't seem to be fatal
 
 Q: dm_agent_exec command line arguments
 A:

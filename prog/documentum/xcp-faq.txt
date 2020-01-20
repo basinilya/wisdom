@@ -1,6 +1,33 @@
 Q: assign historic date widget utc
 A: splitString(dateToString(d, 'C'),'T')[0]+'T00:00Z
 
+Q: "Not all contextNodes available for evaluation"
+A:
+
+Q: "Could not find the generated expression function"
+A:  refresh page with cache disabled
+
+Q: Application UI editor misbehaves:
+  Layout tab is blank
+  Editor tab has no title
+A:
+  Install Microsoft Visual C++ 2010 Redistributable Package (x64)
+  http://www.microsoft.com/en-in/download/confirmation.aspx?id=14632
+
+
+Q:
+   11:50:54.056 ERROR [CodegenUtils:167] Error Generating artifacts: null
+   java.lang.NullPointerException
+   	at com.emc.xcp.uitemplate.json.generator.UITemplateLocalizationGenerator.printProperties(UITemplateLocalizationGenerator.java:91)
+   	at com.emc.xcp.uitemplate.packaging.WarGenerator.contributeLocalizationConfig(WarGenerator.java:423)
+   	at com.emc.xcp.uitemplate.packaging.WarGenerator.contribute(WarGenerator.java:323)
+   	at com.emc.xcp.uitemplate.packaging.WarGeneratorContributor.generate(WarGeneratorContributor.java:35)
+   	at com.emc.xcp.builder.codegen.CodegenUtils.generateCodes(CodegenUtils.java:149)
+   	at com.emc.xcp.builder.codegen.CodegenUtils.executeArtifactGenerators(CodegenUtils.java:104)
+   	at com.emc.xcp.builder.codegen.internal.CodeGeneratorService.generateCode(CodeGeneratorService.java:41)
+
+A:
+
 Q:
   Some required dependencies are missing from the selection.
     Project efx:EducationApplication has an invalid POM file
@@ -466,6 +493,18 @@ A:
 Q: Horizontal alignment Right not working
 A: Change Column Box column orientation to Horizontal
 
+Q: Change Column Box column orientation in runtime
+A: 
+    /* initial Orientation MUST be "Horizontal" */
+    var columnvbox = firstChld.ownerCt;
+    cb_vertical.addListener("change", function(){
+        var checked = !!cb_vertical.getValue();
+        columnvbox.layout.setVertical(checked);
+        columnvbox.updateLayout();
+    });
+    
+  See change-orientation.gif
+
 Q: Action flow Next button condition expression
 A: Make sure no variables used in the expression change on other steps
 
@@ -493,7 +532,7 @@ A:
     var rawElem = this;
     var foundCmp = Ext.Component.fromElement(rawElem);
     var foundFragm = foundCmp.findParentByType("xcp_fragment");
-    var col_supp_name = foundFragm.query('[xcpId=' + 'col_supp_name' + ']')[0];
+    var col_supp_name = foundFragm.query("[xcpId=" + "col_supp_name" + "]")[0];
 
 
   Hide When: true
