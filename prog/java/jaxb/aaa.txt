@@ -1,0 +1,102 @@
+Q: dynamic tag names with jaxb
+A: 
+  Instantiate org.w3c.dom.Element or JAXBElement and assign to a property marked with @XmlAnyElement
+  See https://dzone.com/articles/map-to-xml-dynamic-tag-names-with-jaxb
+  You can even produce invalid XML using JAXBElement:
+
+    public static void main(final String[] args) throws Exception {
+        final JAXBContext jaxbContext = JAXBContext.newInstance(Object.class);
+        final Marshaller marshaller = jaxbContext.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        final JAXBElement<String> elem =
+            new JAXBElement<String>(new QName("el e>m"), String.class, "val");
+        marshaller.marshal(elem, System.out);
+    }
+
+    <el e>m>val</el e>m>
+
+  Unfortunately, Jackson does not support JAXBElement and treats it as a regular POJO.
+
+  You can try to create custom MixIn and register it with ObjectMapper, but it's half-working
+  https://automationrhapsody.com/unmarshalconvert-json-data-jaxbelement-object/
+
+
+Q: assume xmlns/implicit xmlns/assume namespace
+A:
+  https://stackoverflow.com/questions/2991091/java-xsd-validation-of-xml-without-namespace
+    final SAXSource source =
+        new SAXSource(new NamespaceFilter(XMLReaderFactory.createXMLReader()), inputSrc);
+
+    cfg = (ONIXMessage) unm.unmarshal(source);
+
+    class NamespaceFilter extends XMLFilterImpl {
+
+        NamespaceFilter(final XMLReader parent) {
+            super(parent);
+        }
+
+        @Override
+        public void startElement(
+                final String uriArg,
+                final String localName,
+                final String qName,
+                final Attributes atts) throws SAXException {
+            final String uri = "".equals(uriArg) ? REQUIREDNAMESPACE : uriArg;
+            super.startElement(uri, localName, qName, atts);
+
+        }
+    }
+
+
+Q: generate java classes from xsd
+A: xjc -no-header -encoding UTF-8 -p com.sn.efx.generated.onix3 -d generated ONIX_BookProduct_3.0_reference.xsd
+
+Q: @XmlElement String prop;
+A:
+<tag>abc</tag> => "abc"
+<tag>ab<some/>c</tag> => "c"
+<tag>ab<!-- -->c</tag> => "abc"
+<tag></tag> => ""
+<tag/> => ""
+<!-- --> => null
+
+
+Q: @XmlElement Integer prop;
+A: ditto, but whitespace removed
+
+
+
+Q: save bean to xml
+A: 
+    JAXBContext.newInstance(beanclazz).createMarshaller().marshal(bean,System.out);
+
+Q: schemagen generates multiple xsd files
+A:
+    schemagen generates one file per namespace plus one common file
+    If no namespace used, schemagen will generate just one file
+
+===========================================================================================
+
+@WebServiceClient(name = "OrderServices", targetNamespace = "http://www.ibm.com/xmlns/prod/commerce/9/order", wsdlLocation = "file:/D:/okim-web/src/main/webapp/WEB-INF/wsdl/OrderServices.wsdl")
+public class OrderServices
+    extends Service
+{
+
+    private final static URL ORDERSERVICES_WSDL_LOCATION;
+
+    static {
+    	ORDERSERVICES_WSDL_LOCATION = OrderServices.class.getClassLoader().getResource("META-INF/wsdl/OrderServices.wsdl");
+    }
+
+
+???
+okim-ws/src/main/resources/META-INF/wsdl/InventoryServices.wsdl
+okim-war\src\main\webapp\WEB-INF\wsdl\InventoryServices.wsdl
+???
+
+	<wsdl:types>
+
+		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			targetNamespace="http://www.ibm.com/xmlns/prod/commerce/9/inventory">
+			
+			<xsd:include schemaLocation="../xsd/OAGIS/9.0/Overlays/IBM/Commerce/BODs/GetInventoryAvailability.xsd"/>
