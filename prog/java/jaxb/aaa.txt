@@ -20,6 +20,85 @@ A:
   You can try to create custom MixIn and register it with ObjectMapper, but it's half-working
   https://automationrhapsody.com/unmarshalconvert-json-data-jaxbelement-object/
 
+  Better use the annotations:
+
+    // when deserialized from XML, this will hold one or more org.w3c.dom.Element
+    // when serializing, we can put here one or more JAXBElement (easier to instantiate)
+    // !!! you cannot deserialize JAXBElement without ObjectFactory,
+    // because JAXBElement has no default constructor !!!
+    // see https://timjansen.github.io/jarfiller/guide/jaxb/jaxbelement.xhtml
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @XmlAnyElement
+    private List<Object> getCustom() {
+      ...
+    }
+
+    // this is to deserialize unknown JSON fields; value can be a complex JSON object
+    @com.fasterxml.jackson.annotation.JsonAnySetter
+    public void jsonCustom(final String name, final Object value) {
+      ...
+    }
+    // this is to serialize unknown JSON fields
+    @XmlTransient
+    @com.fasterxml.jackson.annotation.JsonAnyGetter
+    public java.util.Map<String,Object> getJsonCustom() {
+      ...
+    }
+
+
+To create a deep XML structure with dynamic tags:
+
+    <xml>
+        <lv1>
+            <lv2>val1</lv2>
+            <lv2>val2</lv2>
+        </lv1>
+    </xml>
+    
+    // https://stackoverflow.com/a/60184418/447503
+    public class Recurs {
+    
+        private List<Object> custom;
+    
+        @XmlAnyElement
+        public List<Object> getCustom() {
+            if (custom == null) {
+                custom = new ArrayList<>();
+            }
+            return custom;
+        }
+    
+        public void setCustom(List<Object> custom) {
+            this.custom = custom;
+        }
+    }
+    
+    
+    @XmlRootElement
+    @XmlSeeAlso({ Recurs.class }) // !!! This is important
+    public class Xml {
+        private List<Object> custom;
+    
+        @XmlAnyElement
+        public List<Object> getCustom() {
+            if (custom == null) {
+                custom = new ArrayList<>();
+    
+                JAXBElement<String> lv2elem;
+                Recurs recurs = new Recurs();
+                for (int i = 1; i <= 2; i++) {
+                    lv2elem = new JAXBElement<String>(new QName("lv2"), String.class, "val" + i);
+                    recurs.getCustom().add(lv2elem);
+                }
+                JAXBElement lv1elem = new JAXBElement(new QName("lv1"), Recurs.class, recurs);
+                custom.add(lv1elem);
+            }
+            return custom;
+        }
+    
+    }
+
+
 
 Q: assume xmlns/implicit xmlns/assume namespace
 A:

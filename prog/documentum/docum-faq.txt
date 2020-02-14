@@ -31,6 +31,10 @@ A:
   Step 3: Modify the parameter window_interval value to 1440 to give sufficient time for the job to execute.
   Step 4: Close the Properties window and try to run the job again. It should work fine now.
 
+Q: do_method example
+A:
+EXECUTE do_method WITH method = 'aaa', arguments = 'bbb ccc ddd'; 
+
 Q: do_method output saved
 A: EXECUTE do_method WITH save_results=true, ...
   The returned row now contains the id of dm_document with object_name='Result.<method-name>' and folder /Temp
