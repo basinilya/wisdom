@@ -1,0 +1,64 @@
+Q: Environment
+A: Manage Jenkins -> Global Tool Configuration
+
+Q: job config
+A: $JENKINS_HOME/jobs/$jobname/
+
+Q: .gitignore
+A:
+  builds/
+  #modules/
+
+Q: job-scope credentials
+A: put jobs to folders (folders plugin)
+
+Q: "Secret file" credentials
+A: Credentials Plugin, Credentials Binding Plugin
+  When plugins installed, go to job Configure and add a credentials parameter of type "Secret File".
+  Name the variable "TESTCRED".
+
+  Then check the checkbox: "Use secret text(s) or file(s)"
+  This allows to convert a credential id to credential contents.
+  In the "Secret file" binding Name the variable: TESTCRED_PATH
+  and Parameter Expression: ${TESTCRED}
+  Now the path to the secret file is available to the build steps
+
+
+Q: Call another job with a certain secret file parameter
+A: 
+  In the caller job check "Use secret text(s) or file(s)"
+  In the "Secret file" binding Name the variable: LOCAL_TESTCRED_PATH
+
+  In the Trigger parameterized build on other projects in Parameters input the following:
+    TESTCRED=test_cred_id
+    TESTCRED_PATH=${LOCAL_TESTCRED_PATH}
+  
+  (you need both; the actual value used depends on plugins versions)
+
+Q: 
+  org.jenkinsci.plugins.credentialsbinding.impl.CredentialNotFoundException: ${TESTCRED}
+  	at org.jenkinsci.plugins.credentialsbinding.MultiBinding.getCredentials(MultiBinding.java:131)
+  	at org.jenkinsci.plugins.credentialsbinding.impl.FileBinding.bindSingle(FileBinding.java:53)
+  	at org.jenkinsci.plugins.credentialsbinding.Binding.bind(Binding.java:133)
+  	at org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper.setUp(SecretBuildWrapper.java:96)
+  	at hudson.model.Build$BuildExecution.doRun(Build.java:156)
+  	at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:534)
+  	at hudson.model.Run.execute(Run.java:1728)
+  	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:43)
+  	at hudson.model.ResourceController.execute(ResourceController.java:98)
+  	at hudson.model.Executor.run(Executor.java:404)
+  Finished: FAILURE
+
+A:
+  credential plugins too old and the credentials parameter passed from parent job does not refer an existing credential id
+  Newer credential binding plugin ignores the credential id value if the outcome variable is also passed from the parent job
+
+
+Q: list plugins
+A: 
+  http://<jenkins-url>/script
+  
+  Jenkins.instance.pluginManager.plugins.each{
+    plugin -> 
+      println ("${plugin.getDisplayName()} (${plugin.getShortName()}): ${plugin.getVersion()}")
+  }
