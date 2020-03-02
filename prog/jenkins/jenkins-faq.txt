@@ -1,3 +1,16 @@
+Q: build artifacts location
+A: $JENKINS_HOME/jobs/$JOB_NAME/builds/$OLD_BUILD_NUMBER/archive/
+
+Q: list installed plugins
+A:
+  http://<jenkins-url>/script
+  
+  Jenkins.instance.pluginManager.plugins.each{
+    plugin -> 
+      println ("${plugin.getDisplayName()} (${plugin.getShortName()}): ${plugin.getVersion()}")
+  }
+
+
 Q: Environment
 A: Manage Jenkins -> Global Tool Configuration
 

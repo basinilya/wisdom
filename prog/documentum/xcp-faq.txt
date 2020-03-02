@@ -1,3 +1,9 @@
+Q: stale browser cache after release
+A: 
+  increment the project version in pom.xml before packaging the app, possibly use the build number from CI
+  also, if target/${PROJECT}_${NAMESPACE}_${VERSION}_config.xml is generated, name it properly.
+  This will affect the paths of JS and CSS resources
+
 Q: ClassNotFoundException: org.apache.commons.logging.LogFactory
   when trying to update an object having business events using idql
 A: 
