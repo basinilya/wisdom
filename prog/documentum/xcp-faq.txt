@@ -1,3 +1,40 @@
+Q: get component by unique xcpId
+A: btn_maximize = Ext.ComponentQuery.query("[xcpId=" + "btn_maximize" + "]")[0]
+
+Q: custom Java function
+A:
+  Java class file that defines the custom function. After you compile the file
+  as a Java archive (JAR) library and add it, the function appears when you
+  build an expression.
+
+  See FunctionClass in h11306-extension-points-xcp-wp.pdf
+  
+  FunctionClass.class is in expressions.jar in xCPDesigner16.4P6\plugins\com.emc.ide.artifact.process.ui_1.0.0.201810161037.jar
+  Add expressions.jar to build path
+  A custom class must implement FunctionClass
+  methods must be public static and annotated with @XcpFunction
+
+  import com.emc.xcp.expressions.FunctionClass;
+  import com.emc.xcp.expressions.XcpFunction;
+  public class CustomFunctions implements FunctionClass {  
+      @XcpFunction(category = "Custom", description = "some1")
+      public static String aaaFoo(final String param) {
+          return param;
+      }
+      @XcpFunction(category = "Conditional", description = "some2")
+      public static String aaaBar(final String param) {
+          return param;
+      }
+      @XcpFunction(description = "some3")
+      public static String aaaBaz(final String param) {
+          return param;
+      }
+  }
+  
+  Create a Java Module in xCP and set its primary class to "CustomFunctions"
+  
+  Now the functions should be available in expressions builder
+
 Q: stale browser cache after release
 A: 
   increment the project version in pom.xml before packaging the app, possibly use the build number from CI
@@ -172,6 +209,7 @@ Q: NoClassDefFoundError: Could not initialize class com.emc.xcp.model.processmod
 A: Compare the contents of ServerApps.ear/lib/ and bpm.ear/lib/ . Some xcp jars might be missing
 
 Q: preview mode privileged client
+  is not authorized to use role 'dm_superusers_dynamic'
 A:
   - in design-time environment fill the global registry tab
     see com.emc.xcp.builder.ui*.jar/internal.com.emc.xcp.builder.ui.preview.RepositoryEndpointPreviewContributor
