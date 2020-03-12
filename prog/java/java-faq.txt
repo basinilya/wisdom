@@ -1,3 +1,23 @@
+Q: dump on OOM
+A:
+-XX:-HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath="c:/temp/[dump2.hprof]"
+
+https://stackoverflow.com/a/185955/447503
+
+also
+-Xms1024m -Xmx1024m
+-Xms3000m -Xms3000m
+
+
+also
+java -XX:+PrintFlagsFinal -version | grep HeapSize
+    uintx ErgoHeapSizeLimit                         = 0                                   {product}
+    uintx HeapSizePerGCThread                       = 87241520                            {product}
+    uintx InitialHeapSize                          := 62914560                            {product}
+    uintx LargePageHeapSizeThreshold                = 134217728                           {product}
+    uintx MaxHeapSize                              := 994050048                           {product}
+
 Q: jvm arguments order
 A: last wins
 
