@@ -1,3 +1,6 @@
+Q: "The requested role (dm_superusers_dynamic) is marked protected and the requesting application was either not known in this docbase's dm_client_rights table or its credentials did not match those in the dm_client_rights table."
+A: Even if you're a superuser or a sysadmin if your client id is unknown, then adding dm_superusers_dynamic will fail
+
 Q: dm_bof_registry password
 A:
 
