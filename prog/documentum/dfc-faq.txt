@@ -1,3 +1,9 @@
+Q: get client id from dfc.keystore
+A: 
+        final IPublicIdentity identity = new PublicIdentity();
+        // dfc_4bkPbZ5cZbbtup8HyR7oh8tnnjUa
+        System.out.println(identity.getIdentity());
+
 Q: newSession()/getSession() fails with DM_GROUP_E_PROTECTED_ROLE_PRIV
 A: the desired dynamic groups are stored in SM, not in the session handle:
     package com.documentum.fc.client.impl.session;    
@@ -12,6 +18,7 @@ A: the desired dynamic groups are stored in SM, not in the session handle:
         setClientInfo(m_sessionManager.getClientInfo(), true);
       }
   Always clean the invalid dynamic groups before trying to obtain a new session.
+  https://blog.documentum.pro/2014/09/03/dynamic-groups-advances-part-i/
 
 Q:
     Exception in thread "main" java.lang.ExceptionInInitializerError
