@@ -1,3 +1,15 @@
+Q:
+[DM_SYSOBJECT_E_CANT_SAVE]error: "Cannot save 0802254c80c6a1d9 sysobject."; ERRORCODE: 100; NEXT:
+DfException:: THREAD: tomcat-http--22; MSG: [DM_OBJECT_E_COULD_NOT_FETCH_DD_OBJECT]
+error: "Could not fetch the Data Dictionary object for type efx_impression_digital."; ERRORCODE: 100; 
+NEXT: DfException:: THREAD: tomcat-http--22; 
+MSG: [DM_DATA_DICT_E_FIND_DATA_DICTIONARY_OBJECT_IN_DB]
+error: "While trying to retrieve data dictionary information about tefx_impression_digital with locale en,
+the following database cursor error was returned: ERROR(-1) "; ERRORCODE: 100; NEXT: null
+
+
+A:
+
 Q: "The requested role (dm_superusers_dynamic) is marked protected and the requesting application was either not known in this docbase's dm_client_rights table or its credentials did not match those in the dm_client_rights table."
 A: Even if you're a superuser or a sysadmin if your client id is unknown, then adding dm_superusers_dynamic will fail
 

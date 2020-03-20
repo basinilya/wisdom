@@ -1,3 +1,18 @@
+Q: newSession()/getSession() fails with DM_GROUP_E_PROTECTED_ROLE_PRIV
+A: the desired dynamic groups are stored in SM, not in the session handle:
+    package com.documentum.fc.client.impl.session;    
+    class Session {
+      ...
+      public void addDynamicGroup(String groupName) throws DfException {
+        getSessionManager().getConfig().addDynamicGroup(groupName);
+        setClientInfo(m_sessionManager.getClientInfo(), true);
+      }
+      public void removeDynamicGroup(String groupName) throws DfException {
+        getSessionManager().getConfig().removeDynamicGroup(groupName);
+        setClientInfo(m_sessionManager.getClientInfo(), true);
+      }
+  Always clean the invalid dynamic groups before trying to obtain a new session.
+
 Q:
     Exception in thread "main" java.lang.ExceptionInInitializerError
             ...
