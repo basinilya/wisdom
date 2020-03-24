@@ -1,0 +1,18 @@
+replaceString = function (str,pattern,newStr) {
+    var regEx = new RegExp(pattern);
+    return str.replace(regEx,newStr);
+};
+
+test = function(str) {
+  return replaceString(str, '(?:(^[?]|&)(?=.*&)|^[?]|&)' + 'reload' + '(?:[=][^&]*)?(?:&|$)','$1')
+};
+
+
+test('?reload')
+test('?reload=')
+test('?a=b&reload')
+test('?a=b&reload=xxx')
+test('?reload&a=b')
+test('?reload=1&a=b')
+test('?a=b&reload&c=d')
+test('?a=b&reload=1&c=d')

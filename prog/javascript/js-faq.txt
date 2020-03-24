@@ -1,0 +1,57 @@
+Q: when to use setAttribute
+A: 
+You should always use the direct .attribute form
+Use getAttribute/setAttribute when you wish to deal with the DOM as it is (e.g. literal text only)
+https://quirksmode.org/dom/core/#attributes
+
+Q: escape html
+A:
+	function escapeHTML(s) {
+	    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+	}
+
+Q: iterate
+A:
+    for (var key in col) {
+        col[key]
+    }
+
+    HTMLCollection:
+
+Q: alert dump object
+A: JSON.stringify(obj, null, 4)
+
+Q:
+    Why is
+        typeof v === 'undefined'
+    safer than
+        v === undefined
+    ?
+    
+A:
+    using typeof covers cases when the variable does not exist at all
+
+
+Q: comparison
+A: 
+
+    == 	equal to 	x == 8 	false 	Try it »	
+    x == 5 	true 	Try it »	
+    x == "5" 	true 	Try it »	
+    
+    === 	equal value and equal type 	x === 5 	true 	Try it »
+    x === "5" 	false 	Try it »
+    
+    != 	not equal 	x != 8 	true 	Try it »
+    
+    !== 	not equal value or not equal type 	x !== 5 	false 	Try it »
+    x !== "5" 	true 	Try it »
+    x !== 8 	true 	Try it »
+    
+    > 	greater than 	x > 8 	false 	Try it »
+    
+    < 	less than 	x < 8 	true 	Try it »
+    
+    >= 	greater than or equal to 	x >= 8 	false 	Try it »
+    
+    <= 	less than or equal to 	x <= 8 	true 	Try it »

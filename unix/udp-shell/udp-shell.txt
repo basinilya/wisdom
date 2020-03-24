@@ -1,0 +1,5 @@
+Server:
+socat "EXEC:/bin/sh,stderr" "UDP-DATAGRAM:[::1]:24,bind=[::1]:23,reuseaddr"
+
+Client:
+socat - "UDP-DATAGRAM:[::1]:23,bind=[::1]:24,reuseaddr"
