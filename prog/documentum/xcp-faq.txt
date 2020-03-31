@@ -1,3 +1,70 @@
+﻿Q: file selector: Information needed foo.dat. Complete the form.
+A:
+  Единственно правильный способ - не добавлять File Selector из палитры, а кликнуть правой кнопкой на Application UI,
+  New Action Flow, Action: Custom Import
+  
+  При этом создастся Action Flow, у которого на вкладке Navigation/Interactions будет добавлен Custom Import Base Content
+  а на Step 1 будет добавлен file selector, фрагмент и Card Container, и всё это будет связано друг с другом
+  
+  
+  чтобы элемент в списке file selector был помечен как валидный,
+  нужно, чтобы кто-то вызвал
+  record.set('status', this.filestates.UPLOADED);
+  
+  Единственный, кто это делает, - это метод:
+  xcp.widget.selector.FileSelector.prototype.onObjectOpReady
+  обычно параметры
+  name = "_topPageContainer.xcp.multiobject.object.op.ready", cardId = "files/f684acde-1967-494b-b448-4e1ecac61765"
+  
+  Единственный способ вызвать onObjectOpReady - это опубликовать событие xcp.event.multiobject.ObjectReadyOperation.NAME
+  
+  Только два компонента публикуют это событие в своем методе checkEnablement -
+  xcp.action.form.ImportNewVersionTemplateAction (Custom Import New Version)
+  xcp.action.form.ImportTemplateAction (Custom Import Base Content)
+  
+  оба расширяют класс xcp.action.form.MultiObjectDataAction
+  
+  Чтобы событие было опубликовано, нужно, чтобы все инпуты Custom Import были заполнены валидными данными, включая модель. Тогда objectValid будет true
+  
+  Чтобы модель была заполнена, нужно добавить на страницу стандартный фрагмент dm_document_imp и использовать его вывод с типом "модель"
+  
+  Чтобы событие было опубликовано, у инстанса xcp.action.form.MultiObjectDataAction должен быть заранее вызван this.objectStore.add, у которого objectValid по дефолту false
+  
+  
+  для этого нужно, чтобы при добавлении файла кто-то вызвал xcp.action.form.MultiObjectDataAction.prototype.onViewLoad(name, newObjectId)
+  обычно параметры
+  name = "_topPageContainer.application.cardLoadEvent", newObjectId = "files/f684acde-1967-494b-b448-4e1ecac61765"
+  
+  Единственный способ вызвать onViewLoad - это опубликовать событие xcp.event.CardLoadEvent.NAME
+  
+  Единственный, кто публикует это событие, - это
+  xcp.widget.CardContainer (Card Container)
+  
+  Чтобы это работало, у Card Container в дизайнере должны быть заполнены поля:
+  Remove Child: widgets.fileselector.removedFileId
+  Select Child: widgets.fileselector.selectedFileId
+  
+  В палитре этого виджета нет.
+
+
+Q: java service guide
+A:
+  If have more than one parameter, use a java bean, not multiple method parameters, because argument names not preserved
+  
+  Java Beans have limited support
+  
+  java inputs:
+  do not use generics, the process variable mapper is broken.
+  for multivalue use arrays: String[], etc.
+  
+  java outputs:
+  generics work, use List<Date/Integer/Double/String>
+  Do not return lists of beans: nulls will be compacted. Return beans of lists.
+  
+  Inherited bean members not supported, add common beans as members, not parent classes 
+  
+  method can throw any java.lang.Exception
+
 Q: get component by unique xcpId
 A: btn_maximize = Ext.ComponentQuery.query("[xcpId=" + "btn_maximize" + "]")[0]
 
