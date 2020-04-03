@@ -277,6 +277,34 @@ A:
     artifacturn: [9]: urn:spr:com.emc.xcp.artifact.approle:Artifacts/Roles/licensing.role
     installedobjectid: [9]: 1201e24080000d00
 
+Q: automatic hyperlinks in first column
+A:
+  <a href="javascript:void(0)" onclick="xcp.util.Utils.navigateOnCellClick('contents/ns_contract/0901e2408007ecae', 'ns_contract', '1585764118000', 'results_list1', this)">test.pdf</a>
+
+    Гиперссылки в первой колонке не поддерживаются для Stateless Process,
+    однако если вызвать контекстное меню для строки грида, и если источник
+    данных содержит верно заполненные "id" и "r_object_type", то гиперссылка
+    появится в этой строке. При вызове контекстного меню осуществляется новый запрос,
+    и в текущий объект record добавляется атрибут "links", полученный с сервера.
+    
+    Первая колонка любого грида является экземпляром ResultsListPageLinkColumn.
+    Чтобы ячейка отрисовывалась как гиперссылка, надо, чтобы в метод
+    xcp.widget.grid.ResultsListPageLinkColumn.prototype.renderer
+    передавалась переменная record с заполненными:
+    
+    record.data["links"]["self"] === "***/<type>/<oid>"
+    record.data["id"] === "***/<type>/<oid>"
+    
+    Изначально свойство "links" отсутствует, сравни
+    xcp.data.reader.StatelessProcessOutputCollectionReader.prototype.readRecords
+    и
+    xcp.data.reader.CollectionResJson.prototype.readRecords
+    
+    во втором случае заполняется:
+    item[xcp.data.Model.LINKS_ATTR_NAME] = val[xcp.RestConstant.CONTENT] && val[xcp.RestConstant.CONTENT][xcp.RestConstant.LINKS];
+    
+    Ajax ответ от Stateless Process в отличие от ARQ не содержит "links" для отдельных записей.
+
 Q: dataservices.<ARQ_name>.outputs.id resolves to 'dql-queries/<ARQ_name>/<r_object_id>' instead of just '<r_object_id>'
 A: Use a column alias, e.g.: select r_object_id as oid, ...
 
