@@ -1,4 +1,7 @@
-﻿Q: file selector: Information needed foo.dat. Complete the form.
+﻿Q: get page for type
+A: xcp.defaultPages[<type>], see xcp.util.Utils.getDefaultPageFromContextMenu
+
+Q: file selector: Information needed foo.dat. Complete the form.
 A:
   Единственно правильный способ - не добавлять File Selector из палитры, а кликнуть правой кнопкой на Application UI,
   New Action Flow, Action: Custom Import
