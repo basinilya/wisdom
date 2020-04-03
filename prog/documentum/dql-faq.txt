@@ -1,0 +1,25 @@
+Q: "You have specified a non-integer token in an ORDER BY clause with UNION."
+A: sort with: "enable (RETURN_RANGE)".
+  Due to the bug, sorting may be unreliable: in generated sql index in 'order by <index>'
+  is not equal to index of dm_rnum.
+
+Q: top or limit
+A: ... enable(return_top 10);
+    see: enable (RETURN_range  <start+1> <limit> '<sortcol> <sortord>')
+
+
+
+Q: date in utc
+A: select DATE('2020-12-31 12:00:00utc', 'yyyy-mm-dd hh:mi:ss') from dm_docbase_config ;
+
+Q: dual
+A: select date(now) as x from dm_docbase_config
+
+Q: dm_relation has no r_object_type, but relation_name may differ from its actual type
+A:
+  select * from dm_type where i_type in(
+  select i_type from dm_dbo.DMI_OBJECT_TYPE where r_object_id in(
+  select r_object_id from dm_relation where relation_name = 'dm_bof_dependencies' 
+  )
+  )
+  ;

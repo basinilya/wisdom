@@ -5,7 +5,12 @@ A:
   
   При этом создастся Action Flow, у которого на вкладке Navigation/Interactions будет добавлен Custom Import Base Content
   а на Step 1 будет добавлен file selector, фрагмент и Card Container, и всё это будет связано друг с другом
-  
+
+  Наличие всех 4 компонентов обязательно. Удалять их нельзя. Можно только не выполнять Custom Import Base Content,
+  а добавить ещё одно взаимодействие в Navigation.
+
+  Card Container должен содержать хотя бы один виджет, иначе он не сможет нормально инициализироваться.
+  Обычно этот виджет - фрагмент dm_document_imp.
   
   чтобы элемент в списке file selector был помечен как валидный,
   нужно, чтобы кто-то вызвал
@@ -19,16 +24,33 @@ A:
   Единственный способ вызвать onObjectOpReady - это опубликовать событие xcp.event.multiobject.ObjectReadyOperation.NAME
   
   Только два компонента публикуют это событие в своем методе checkEnablement -
-  xcp.action.form.ImportNewVersionTemplateAction (Custom Import New Version)
-  xcp.action.form.ImportTemplateAction (Custom Import Base Content)
+  xcp.action.form.ImportNewVersionTemplateAction.prototype.checkEnablement (Custom Import New Version)
+  xcp.action.form.ImportTemplateAction.prototype.checkEnablement (Custom Import Base Content)
   
   оба расширяют класс xcp.action.form.MultiObjectDataAction
   
-  Чтобы событие было опубликовано, нужно, чтобы все инпуты Custom Import были заполнены валидными данными, включая модель. Тогда objectValid будет true
+  Чтобы событие было опубликовано, нужно, чтобы все инпуты Custom Import были заполнены валидными данными, включая модель.
+  См. xcp.action.form.ImportTemplateAction.prototype.isInvalid
+    folder id должен быть не пуст и не равен '0000000000000000'
+    Остальные должны быть не пусты
+  Тогда objectValid будет true
+  Входы:
+    Folder ID: actionflow.Inputs.folder_id
+    Content ID: actionflow.steps.custom_add_files_st.widgets.fileselector.selectedFileId
+    Content Type: 'dm_document'
+    Model: actionflow.steps.custom_add_files_st.widgets.fragment.Outputs.model
+
+
+  Чтобы модель была заполнена, нужно добавить на страницу стандартный фрагмент dm_document_imp и использовать его вывод с типом "модель".
+  Также можно использовать Set Fragment Id: getFragment(<namespace> + '_document', '_imp')
+  Входы фрагмента:
+    content_type: 'dm_document'
+    content_format: widgets.fileselector.selectedFileExtension
+    folder_path:
+    object_name: widgets.fileselector.selectedFileName
   
-  Чтобы модель была заполнена, нужно добавить на страницу стандартный фрагмент dm_document_imp и использовать его вывод с типом "модель"
-  
-  Чтобы событие было опубликовано, у инстанса xcp.action.form.MultiObjectDataAction должен быть заранее вызван this.objectStore.add, у которого objectValid по дефолту false
+  Чтобы событие было опубликовано, у инстанса xcp.action.form.MultiObjectDataAction должен быть заранее вызван
+  this.objectStore.add, у которого objectValid по дефолту false
   
   
   для этого нужно, чтобы при добавлении файла кто-то вызвал xcp.action.form.MultiObjectDataAction.prototype.onViewLoad(name, newObjectId)
@@ -44,7 +66,8 @@ A:
   Remove Child: widgets.fileselector.removedFileId
   Select Child: widgets.fileselector.selectedFileId
   
-  В палитре этого виджета нет.
+  В палитре этого виджета нет. Скопировать его тоже нельзя. Можно только скопировать кусок XML.
+
 
 
 Q: java service guide
