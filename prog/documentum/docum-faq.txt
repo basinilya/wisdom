@@ -1,3 +1,10 @@
+Q: default file extension to a_content_type mapping
+A:
+select name,is_hidden,filename_modifier from dm_format where UPPER(dos_extension) = 'MSG';
+  msg	MS Outlook Message (.msg)
+
+IDfFormatRecognizer 
+
 Q:
 [DM_SYSOBJECT_E_CANT_SAVE]error: "Cannot save 0802254c80c6a1d9 sysobject."; ERRORCODE: 100; NEXT:
 DfException:: THREAD: tomcat-http--22; MSG: [DM_OBJECT_E_COULD_NOT_FETCH_DD_OBJECT]
@@ -76,6 +83,16 @@ A:
 
 Q: select users having role
 A: select i_all_users_names from dm_group where group_name = 'GROUP_A'
+
+Q: select roles of user
+A:
+  select group_name from dm_group where group_class = 'role' and any i_all_users_names in(
+  select user_name from dm_user 
+  where lower(user_address) = 'firstname.secondnane@domain.com'
+  or lower(user_name) = 'secondnane middlename, firstname'
+  or user_login_name = 'fsecondnane'
+  )
+  ;
 
 Q: Java 1.8.0_201, Java 11 SSLHandshakeException: Received fatal alert: handshake_failure
 A:

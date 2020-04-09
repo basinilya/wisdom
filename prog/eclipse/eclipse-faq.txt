@@ -1,3 +1,6 @@
+Q: .class files visible in "Open Resource"
+A: Open the "Navigator" view, navigate to the project output folder, open folder properties and set the "Derived" checkbox
+
 Q: console buffer size
 A: workspace\.metadata\.plugins\org.eclipse.core.runtime\.settings\org.eclipse.debug.ui.prefs
   Console.highWaterMark=8008029
