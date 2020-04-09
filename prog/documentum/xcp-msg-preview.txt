@@ -1,0 +1,48 @@
+msg preview requires CTS
+
+CTS is a client, not a server, so to enable it on a given repository a system administrator
+needs to launch the Configurator on the CTS host (accessible through the Windows Start menu)
+and add the repo.
+
+Also, the Content Server needs an accessible IP address. That is, it's hard to enable CTS on a developer's host.
+
+Although jpg preview is available, pdf is preferrable, because the xCP Advanced Viewer allows to select text within pdf.
+
+The Advanced Viewer will request the CTS profile 'transform_mime' to create a pdf.
+
+Administration / Content Transformation Services / Profiles
+Choose "show public and system"
+
+SELECT p.r_object_id, p.object_name, p.title, f.r_folder_path FROM dm_media_profile p , dm_folder f
+  WHERE any p.i_folder_id = f.r_object_id
+  and f.r_folder_path is not nullstring
+  and p.object_name = 'transform_mime'
+  enable (ROW_BASED);
+
+object_name: transform_mime
+title: Profile for DOC7 Transformation
+Folder Path: /System/Media Server/System Profiles
+
+Content:
+  <Profile name="transform_mime" label="Profile for DOC7 Transformation" description="Profile for DOC7 Transformation" taskImpl="com.documentum.cts.impl.services.task.doc7.Doc7TaskProcessor" related_objects_only="false" notify_result="false" operation="transform" xmlns:dctm="http://www.documentum.com" dctm:obj_status="~DCTM_STATUS" dctm:obj_id="~DCTM_OBJ_ID" dctm:version_label="~VERSION_LABEL">
+      <Formats>
+          <Format source="msg" target="crtext"/>
+          <Format source="msg" target="rtf"/>
+  		<!-- <Format source="msg" target="jpeg"/> -->
+  		<Format source="msg" target="pdf"/>
+          <Format source="eml" target="crtext"/>		
+  		<Format source="eml" target="pdf"/>
+  		<Format source="eml" target="rtf"/>
+      </Formats>
+      <Filters>
+          <Filter name="CTSProduct" value="ADTS"/> 
+          <Filter name="Visibility" value="System"/>
+      </Filters>
+      <Transcodings>
+          <Transcode name="transform_mime" label="Profile for mime Transformation">
+          </Transcode>
+      </Transcodings>
+      <CommandFilePath mptype="DOC7">
+          /System/Media Server/Command Line Files/mime_clf.xml
+      </CommandFilePath>
+  </Profile>
