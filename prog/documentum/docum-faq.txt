@@ -1,3 +1,6 @@
+Q: get storage path for content
+A: getpath,c,<dm_document_oid|content_oid>
+
 Q: default file extension to a_content_type mapping
 A:
 select name,is_hidden,filename_modifier from dm_format where UPPER(dos_extension) = 'MSG';
@@ -82,7 +85,8 @@ A:
 
 
 Q: select users having role
-A: select i_all_users_names from dm_group where group_name = 'GROUP_A'
+A: 
+select user_login_name from dm_user where user_name in( select i_all_users_names from dm_group where group_name = 'GROUP_A' );
 
 Q: select roles of user
 A:

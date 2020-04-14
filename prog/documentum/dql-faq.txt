@@ -23,3 +23,29 @@ A:
   )
   )
   ;
+
+Q: set null
+A: 
+datecolumn = date('NULLDATE')
+, strcolumn1 = ' '
+, strcolumn2 = '' -- same as above
+
+Q: select nulldate
+A: select date('01/01/1753utc') from dm_docbase_config;
+
+Q: select null
+A: not supported, you can select '' for NULLSTRING or select 0 for NULLINT
+
+Q: check for null
+A: IS [NOT] NULLDATE
+    (NULLSTRING, NULLINT, NULLID)
+  IS [NOT] NULL -- only for registered table columns
+
+  -- for string columns
+  = ' '
+  -- is the same as:
+  is NULLSTRING
+  -- and both translated to Oracle SQL: (field is null or field = ' ')
+
+!!! = '' always false !!! Documentum never stores an empty string or NULL in the varchar db column, only one blank character
+

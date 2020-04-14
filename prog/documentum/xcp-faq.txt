@@ -1,4 +1,12 @@
-﻿Q: get page for type
+﻿Q: <input type="checkbox"> in cell of type HTML in editable grid not cleared
+A: 
+  '<input type="checkbox" disabled '
+  + ifElseStr(
+  asBool(getJavascriptPropertyValue(Outputs.values + '.value_b'))
+  , 'checked /><span x-comment="Without this, Ext.dom.Fly.prototype.syncContent wont call dest.removeAttribute(checked)"></span>'
+  , '/>')
+
+Q: get page for type
 A: xcp.defaultPages[<type>], see xcp.util.Utils.getDefaultPageFromContextMenu
 
 Q: file selector: Information needed foo.dat. Complete the form.

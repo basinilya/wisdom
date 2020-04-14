@@ -1,3 +1,33 @@
+Q: Add C:\Documentum\config to run classpath in IDE for a Maven project
+A: 
+  <properties>
+    <dfc.config.path>C:\Documentum\config</dfc.config.path>
+    <dfc.config.bridge>${dfc.config.path}/../documentum-config-bridge.jar</dfc.config.bridge>
+  </properties>
+
+  <profiles>
+    <profile>
+      <!-- adds dfc.properties to classpath when you run it from IDE -->
+      <!-- copy lib/documentum-config-bridge.jar to: ${dfc.config.path} -->
+      <id>dfc-config</id>
+      <activation>
+        <file>
+          <exists>${dfc.config.bridge}</exists>
+        </file>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>config-bridge</groupId>
+          <artifactId>config-bridge</artifactId>
+          <version>1.0</version>
+          <scope>system</scope>
+          <systemPath>${dfc.config.bridge}</systemPath>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+
+
 Q: get client id from dfc.keystore
 A: 
         final IPublicIdentity identity = new PublicIdentity();
