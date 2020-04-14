@@ -1,4 +1,26 @@
-﻿Q: <input type="checkbox"> in cell of type HTML in editable grid not cleared
+﻿Q: mandatory does not work for edit inputs inside Results List with Allow inline editing
+A:
+  If mandatory is a constant (true) it will only be evaluated on fragment load,
+  but the edit widgers are created when row editing is initiated for the first time.
+  Use the widget's value in the exptession to make it evaluate later.
+
+Q: A blank mandatory edit input inside Results List with Allow inline editing is not marked with a red star
+A: The red star is only shown when an input has a label. The Large error icon is never shown initially
+
+Q: The label is too wide for edit inputs inside Results List with Allow inline editing
+A: ???
+
+Q: A blank mandatory edit input inside Results List with Allow inline editing is not validated
+  when selecting another row
+A:
+  xCP will call reset() on the the edit when selecting another row. This suppresses the change event.
+  But it also clears the invalid state.
+  When initiating editing, the change event doesn't fire, because the edit is already blank.
+  As a workaround add more events to trigger validation: 
+    selectionchange rowedited rowadded rowremoved rowmoved
+
+
+Q: <input type="checkbox"> in cell of type HTML in editable grid not cleared
 A: 
   '<input type="checkbox" disabled '
   + ifElseStr(
