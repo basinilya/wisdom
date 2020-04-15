@@ -1,3 +1,15 @@
+Q: add getter and setter
+A: Object.defineProperty
+
+  this._labelWidth = this.labelWidth;
+  Object.defineProperty(this, "labelWidth", {configurable: true, get: function() { return this._labelWidth; }, set: function (x) {
+    console.log("setting labelWidth2");
+    this._labelWidth = x;
+  } });
+
+  Object.defineProperty(this,"labelWidth",{get:undefined, set:undefined})
+
+
 Q: when to use setAttribute
 A: 
 You should always use the direct .attribute form

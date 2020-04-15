@@ -1,14 +1,53 @@
 ﻿Q: mandatory does not work for edit inputs inside Results List with Allow inline editing
 A:
   If mandatory is a constant (true) it will only be evaluated on fragment load,
-  but the edit widgers are created when row editing is initiated for the first time.
-  Use the widget's value in the exptession to make it evaluate later.
+  but the edit widgets are created when row editing is initiated for the first time.
+  Use the widget's value in the expression to make it evaluate later.
 
 Q: A blank mandatory edit input inside Results List with Allow inline editing is not marked with a red star
 A: The red star is only shown when an input has a label. The Large error icon is never shown initially
 
 Q: The label is too wide for edit inputs inside Results List with Allow inline editing
-A: ???
+A: 
+  labelWidth: 100 is the default width for Ext.form.Labelable
+  Normally, a container creates configs having explicit labelWidth for its items,
+  see the private method: Ext.container.Container.prototype.prepareItems
+    item = this.applyDefaults(item);
+
+  However, unlike ColumnVBox or columnhbox, Ext.grid.header.Container has no labelWidth of its own.
+  Besides, the editor config is in subconfig "editor" of the column config. Merging
+  deep defaults is unsupported, see: Ext.container.Container.prototype.applyDefaults
+    config = me.self.getConfigurator().merge(me, Ext.Object.fork(defaults), config);
+
+  The configs are converted to editor widgets inside
+  Ext.grid.plugin.Editing.prototype.createColumnField
+  which is usually called when the layout is flushed
+
+  The workaround is to set editor.labelWidth for each item after it's created:
+
+    Ext.ClassManager.get('xcp.widget.grid.ResultsList').override({
+        onAdded: function(container, pos, instanced) {
+            var res = this.callParent(arguments);
+            var columns = this.grid && this.grid.columns;
+            if (columns && columns.length !== 0) {
+                var boxcolumn = this.findParentBy(function(c){return c.defaults && c.defaults.labelWidth !== undefined;});
+                if (boxcolumn) {
+                    var labelWidth = boxcolumn.defaults.labelWidth;
+                    var i = 0;
+                    for (;i < columns.length;i++) {
+                        var column = columns[i];
+                        if (column && column.editor && column.editor.labelWidth === undefined) {
+                            column.editor.hideEmptyLabel = false; /* this if for mandatory marker in blank fields */
+                            column.editor.labelWidth = labelWidth;
+                            /* TODO: notify widget if it is already rendered */
+                        }
+                    }
+                }
+            }
+            return res;
+        }
+    });
+
 
 Q: A blank mandatory edit input inside Results List with Allow inline editing is not validated
   when selecting another row
