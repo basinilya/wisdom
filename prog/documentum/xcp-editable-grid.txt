@@ -1,0 +1,44 @@
+Results List / Allow inline editing
+Gotchas
+
+===========================================================================================
+If you render a boolean column as HTML with value '<input type="checkbox" checked>',
+edit the row, change true to false and save the changes by pressing "Update"
+the checkbox will stay checked even though the new HTML has no "checked" attribute: '<input type="checkbox">'.
+
+That's because ExtJS is trying to merge the new HTML value into the existing input element instead of replacing it.
+ExtJS uses Ext.dom.Fly.prototype.syncContent and this method does not call Element.prototype.removeAttribute
+
+The workaround is to use different number of elements: ExtJS will then just replace innerHTML:
+
+  '<input type="checkbox" disabled '
+  + ifElseStr(
+    Outputs.bool_value
+    , 'checked /><span x-comment="Without this, Ext.dom.Fly.prototype.syncContent wont call dest.removeAttribute(checked)"></span>'
+    , '/>')
+
+Also, avoid HTML comments, because Ext.dom.Fly.prototype.syncContent will fail with error trying to sync the comment node.
+
+===========================================================================================
+Entering the edit mode requires double clicking a row or pressing Enter.
+It's not obvious how to edit rows in a mobile browser.
+
+===========================================================================================
+If you press "Add" and then press "Cancel" the new row remains in the store, although it has no data.
+
+===========================================================================================
+The editor widget is created automatically when you create a new column.
+You cannot drag a widget of onother type from the palette to the editor panel.
+However, you can drag a widget away from the editor panel. This will dissociate it from the editor.
+To restore the editor widget without re-creating the column go to the column properties/General/Editing
+and choose another editor type in the dropdown.
+
+===========================================================================================
+There are roweditstart and rowedited events, but there's no roweditcancel event.
+Therefore you can't tell if the grid is in edit mode.
+
+===========================================================================================
+The roweditstart fires twice when you enter the edit mode by pressing Enter.
+It fires one time when you double click the row.
+
+===========================================================================================

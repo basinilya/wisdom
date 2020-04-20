@@ -1,4 +1,24 @@
-﻿Q: mandatory does not work for edit inputs inside Results List with Allow inline editing
+﻿Q: use 'concat' properly in activity with multivalue attributes
+A: 
+  example:
+  inputs: a=["a1","a2"],b=["b1","b2"]
+  
+  a)
+    Input Context: All (default), Output Context: Over-write
+    concat(a[ALL]," (",b[ALL],")")
+    result: ["a1a2 (b1b2)"]
+   
+  b)
+    Input Context: For-each, Output Context: Over-write
+    concat(a[ALL]," (",b[ALL],")")
+    result: ["a1 (b1)","a2 (b2)"]
+  
+  c)
+    Input Context: All (default), Output Context: Over-write
+    concat(a[0]," (",b[0],")")
+    result: ["a1 (b1)"]
+
+Q: mandatory does not work for edit inputs inside Results List with Allow inline editing
 A:
   If mandatory is a constant (true) it will only be evaluated on fragment load,
   but the edit widgets are created when row editing is initiated for the first time.
@@ -234,7 +254,7 @@ Q: Application UI editor misbehaves:
   Layout tab is blank
   Editor tab has no title
 A:
-  Install Microsoft Visual C++ 2010 Redistributable Package (x64)
+  ReInstall Microsoft Visual C++ 2010 Redistributable Package (x64)
   http://www.microsoft.com/en-in/download/confirmation.aspx?id=14632
 
 
@@ -354,6 +374,7 @@ A:
   <a href="javascript:void(0)" onclick="xcp.util.Utils.navigateOnCellClick('contents/ns_contract/0901e2408007ecae', 'ns_contract', '1585764118000', 'results_list1', this)">test.pdf</a>
 
     Гиперссылки в первой колонке не поддерживаются для Stateless Process,
+    TODO: повторно проверить User Interface / Process UI
     однако если вызвать контекстное меню для строки грида, и если источник
     данных содержит верно заполненные "id" и "r_object_type", то гиперссылка
     появится в этой строке. При вызове контекстного меню осуществляется новый запрос,
@@ -411,8 +432,21 @@ A:
       or
       update dm_client_rights objects set allow_all_roles = true where allow_all_roles is nullint;
 
+Q: dropdown or grid load event is fired second time when switching to another tab
+A:
+  "load" is not a one-time event for data-aware widgets:
+        me.on('beforerender', function () {
+            if (me.store.isLoaded()) {
+                me.fireEvent("load");
+            }
+
+
 Q: "On Fragment Load" conditional trigger doesn't work with fragment inputs 
-A: The event fires before the inputs are ready. Use an intermediate widget's "change" event. The "setValue()" call is deferred so all the inputs will be ready when "change" fires. 
+A: The event SOMETIMES fires before the inputs are ready. 
+    !!!Do not rely on that, e.g. do not run pre-initialization On Fragment Load!!!
+    !!!  The earliest to fire is a simple set value on a widget.!!!
+  On Fragment Load and inputs ready are both at the end.
+  Use an intermediate widget's "change" event. The "setValue()" call is deferred so all the inputs will be ready when "change" fires.
 
 Q: check string is valid number
 A: isNumber(getJavascriptPropertyValue('parseFloat('+<quotedString>+')'))

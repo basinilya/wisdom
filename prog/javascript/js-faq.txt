@@ -67,3 +67,8 @@ A:
     >= 	greater than or equal to 	x >= 8 	false 	Try it »
     
     <= 	less than or equal to 	x <= 8 	true 	Try it »
+
+Q: remove search parameters from url
+A:
+  str.replace( /(?:(^[?]|&)(?=.*&)|^[?]|&)(nominify|webby|reload)(?:&|$)/g, "$1")
+  TODO: this only handles params without equal sign =
