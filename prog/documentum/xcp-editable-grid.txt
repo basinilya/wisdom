@@ -24,21 +24,99 @@ Entering the edit mode requires double clicking a row or pressing Enter.
 It's not obvious how to edit rows in a mobile browser.
 
 ===========================================================================================
+The roweditstart fires twice when you enter the edit mode by pressing Enter.
+It fires one time when you double click the row.
+
+===========================================================================================
 If you press "Add" and then press "Cancel" the new row remains in the store, although it has no data.
 
 ===========================================================================================
-The editor widget is created automatically when you create a new column.
+If you hide a column the editor fields are still created in runtime. It's useful when you need a hidden
+widget to maintain the state, because a widget outside of the editor cannot refer the widgets inside,
+because the visibility scope differs.
+
+However, editor widgets can publish custom events that the outside widgets and interactions can subscribe to.
+
+===========================================================================================
+The editor widget is created automatically in the designer when you create a new column.
 You cannot drag a widget of onother type from the palette to the editor panel.
 However, you can drag a widget away from the editor panel. This will dissociate it from the editor.
 To restore the editor widget without re-creating the column go to the column properties/General/Editing
 and choose another editor type in the dropdown.
 
 ===========================================================================================
+Only certain widget types are awailable to each data type:
+Integer, Float: Value Display, Number Input, Drop-down List
+String, HTML, Image: Text Area, Text Input, Value Display, Drop-down List
+Date-time: Date-time Input, Value Display
+Boolean: Checkbox, Value Display, Drop-down List
+Picklist: Drop-down List
+
+The good news is, if you initially choose some column type, create an editor widget and then choose
+another column type (not another data output), the editor widget remains.
+
+This is useful, for instance, when you need a checkbox editor and an HTML cell.
+
+===========================================================================================
+When you change the editor type all its properties are lost including the widget id, the value expression
+and its events. Make a copy before doing so.
+
+===========================================================================================
+It is allowed to associate more than one column with the same data output.
+However, when you save edits to a row the field values from all columns associated with this data output will
+be stored as an array in the current store record. When editing this record again, ExtJS will attempt to
+assign the same array to all related editor fields. Most editors are single-valued so only the first element
+of the array will be set. The exception is Value Display with "Has multiple values" checked. It will have all
+the values.
+
+===========================================================================================
 There are roweditstart and rowedited events, but there's no roweditcancel event.
 Therefore you can't tell if the grid is in edit mode.
 
 ===========================================================================================
-The roweditstart fires twice when you enter the edit mode by pressing Enter.
-It fires one time when you double click the row.
+When entering the edit mode a field value is reset to the value from the data output without
+firing the change event.
+
+If a value expression is evaluated and its result differs from the data output then the change event will fire.
+
+===========================================================================================
+The validation expressions might not always trigger, probably because the change event not always fires.
+The workaround for now is to add more events to the validation:
+selectionchange, rowedited, rowadded, rowmoved, rowremoved.
+
+It's still unclear how to properly solve this.
+
+===========================================================================================
+Constants expressions don't work as expected for editor fiels in "General/Value" and "Validation/Is Mandatory":
+"Is Mandatory: true" does not work at all. "Value: 'foo'" only works for the first time.
+That's because the editor widgets are created when you enter the edit mode for the first time.
+At this stage "Is Mandatory: true" will not be evaluated, because the value hasn't changed.
+As a special case, xCP will evaluate "Value: 'foo'" at widget's creation, but that's all.
+When you start editing another row the new value will be loaded to the widget from the store record ignoring the
+xCP value expression.
+
+The workaround for "Is Mandatory" is to create an expression that is always evaluated when the value of the field
+changes, yet always resolves to true: isEmptyOrNull(widgets.ed_some.value) OR true
+
+The workaround for "Value" is to keep the value expression blank and let it load from the record.
+If it's necessary to reset the field to some initial value on each edit or to set a default value
+for new records then make it depend on selected_row:
+  { 'constant-value', widgets.results_list.selected_row.processVariables.some }[0]
+or:
+  without({ widgets.results_list.selected_row.processVariables.some, widgets.ed_some.value }, '')[0]
+
+This, however, has the following side effect: when you exit the edit mode and select other rows without editing
+them the value expressions will be re-evaluated, because the widgets still exist on the hidden editor panel.
+
+If a field is mandatory or is validated then it may become invalid and its validation errors will be propagated
+up the container tree. The container's isValid property will become false.
+The Error Display widget may show the errors.
+
+===========================================================================================
+The Error Display widget does not prepend the messages with the column names.
+This is because it uses the invalid fields' label property and it's empty by default.
+If you set some label it takes too much space in the editor.
+
+The current workaround is applying "display: none" to editor field labels with a custom css.
 
 ===========================================================================================
