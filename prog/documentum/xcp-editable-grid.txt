@@ -105,12 +105,15 @@ for new records then make it depend on selected_row:
 or:
   without({ widgets.results_list.selected_row.processVariables.some, widgets.ed_some.value }, '')[0]
 
-This, however, has the following side effect: when you exit the edit mode and select other rows without editing
-them the value expressions will be re-evaluated, because the widgets still exist on the hidden editor panel.
+Using selected_row is generally a bad thing. It has the following side effect: when you exit the edit
+mode and select other rows without editing them the value expressions will be re-evaluated, because
+the widgets still exist on the hidden editor panel.
 
 If a field is mandatory or is validated then it may become invalid and its validation errors will be propagated
 up the container tree. The container's isValid property will become false.
 The Error Display widget may show the errors.
+
+The possible workaround is subscribing to roweditstart, but it's not tested yet.
 
 ===========================================================================================
 The Error Display widget does not prepend the messages with the column names.
