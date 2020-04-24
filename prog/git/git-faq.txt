@@ -1,3 +1,20 @@
+Q: bad tree object
+A: 
+
+  RSH="ssh user@host"
+  REMOTE_REPO_PATH="/path/to/repo"
+  OBJECT="f66183b7613b4eb0f93a8541223d38fd7dfcc170"
+  OBJECT=f609edf50aee63e4d521a3c7b0529aa038bf98f8
+  
+  (
+  set -e
+  ( cd .git/objects && mkdir -p "${OBJECT:0:2}" )
+  tmpfile=$(mktemp)
+  ( echo "set e; cd \"${REMOTE_REPO_PATH:?}\" && DIR=\$(mktemp -d) && echo \"${OBJECT:?}\" | git pack-objects --stdout | (cd \"\$DIR\" && git init >&2 && git unpack-objects && cat \".git/objects/${OBJECT:0:2}/${OBJECT:2}\" ) && rm -rf \"\$DIR\" " | ${RSH:?} ) >"$tmpfile"
+  cat "$tmpfile" >".git/objects/${OBJECT:0:2}/${OBJECT:2}"
+  rm "$tmpfile"
+  )
+
 Q: java diff
 A: .gitattributes:
   *.java diff=java

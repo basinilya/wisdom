@@ -1,0 +1,18 @@
+ns_src='tst'
+ns_dst='hds'
+
+name_src='TestApp'
+name_dst='HandlerDS'
+
+grep -Zlrw "${ns_src:?}" "${name_src:?}" | xargs -0 sed -bi "s/\(^\|[^A-Za-z0-9]\)${ns_src:?}\([^A-Za-z0-9]\|$\)/\1${ns_dst:?}\2/g"
+
+grep -Zlrw "${name_src:?}" "${name_src:?}" | xargs -0 sed -bi "s/\(^\|[^A-Za-z0-9]\)${name_src:?}\([^A-Za-z0-9]\|$\)/\1${name_dst:?}\2/g"
+
+git diff --word-diff-regex="[A-Za-z0-9]+"
+
+
+grep -lrw "${ns_src:?}" "${name_src:?}"
+grep -lrw "${name_src:?}" "${name_src:?}"
+
+
+git mv "${name_src:?}" "${name_dst:?}"
