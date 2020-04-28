@@ -863,3 +863,15 @@ A:
     limit: 25
   
   DQL: ... enable (RETURN_range  1 25 'out_segment_title  ASC')
+
+
+Q: fragment output of type "Model" not expandable
+A: 
+  - The fragment must NOT have templateType="application"
+    It can be "folder" or something else, create a new fragment for a "Specific object model" to see
+  - The fragment probably needs the element:
+      <primaryModel 
+    after </rootContainer>
+    This can be selected on the "Basics" tab for fragments with proper templateType
+  - The output property must be first or second and must be named "model"
+  - After making changes you need to reopen the fragment
