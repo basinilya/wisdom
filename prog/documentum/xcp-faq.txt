@@ -1,4 +1,7 @@
-﻿Q: show errors for pristine fields
+﻿Q: dynamic action flow title
+A: the only OOTB way is to put one action flow into the navigation tab of another action flow. Then the title will be the interaction label.
+
+Q: show errors for pristine fields
 A: pristine = not dirty
 
 Q: dirty
