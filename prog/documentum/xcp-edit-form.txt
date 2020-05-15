@@ -1,0 +1,29 @@
+Always create a fragment from an Edit template
+You'll get an undeletable "id" and "model" inputs.
+
+In the .fragment xml this will add an extra templateScope="INSTANCE" attribute to the root element.
+
+
+This fragment CAN be used to create new, but you need to pass (undefined) to the "id" input by using the expression:
+{''}[-1]
+Just passing an empty string won't work.
+
+
+Also, a model output can be added to the same fragment, you need to add an output named "model".
+
+Its default value must be the artifact, not Inputs.model
+
+Close and reopen
+
+Now you can expand the output model.
+
+Set each property to the value of an input widget
+
+
+Do not use the artifact "id" property to distinguish new and edit.
+When working with a new instance the "id" property of the model is populated anyway.
+
+If the table is not empty, then the first found object id is used. If it's empty a dummy value is used.
+
+To distinguish new and edit use Inputs.id or Inputs.model.id or both
+

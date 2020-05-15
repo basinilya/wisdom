@@ -1,3 +1,6 @@
+Q: distinguish INSERT from UPDATE in a trigger
+A: if TG_OP = 'UPDATE' then
+
 Q: sleep
 A: SELECT pg_sleep(10);
 

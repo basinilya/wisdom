@@ -1,4 +1,16 @@
-﻿Q: use 'concat' properly in activity with multivalue attributes
+﻿Q: show errors for pristine fields
+A: pristine = not dirty
+
+Q: dirty
+A: value != originalValue
+
+Q: originalValue
+A: the value set when the form loads 
+
+Q: import project from newer xCP version
+A: create a new project with same name and namespace and copy the generated pom.xml into existing exported project
+
+Q: use 'concat' properly in activity with multivalue attributes
 A: 
   example:
   inputs: a=["a1","a2"],b=["b1","b2"]

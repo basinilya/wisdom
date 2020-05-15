@@ -29,6 +29,7 @@ It fires one time when you double click the row.
 
 ===========================================================================================
 If you press "Add" and then press "Cancel" the new row remains in the store, although it has no data.
+On the other hand, such rows don't get into the "All rows" expression property.
 
 ===========================================================================================
 If you hide a column the editor fields are still created in runtime. It's useful when you need a hidden
@@ -39,7 +40,7 @@ However, editor widgets can publish custom events that the outside widgets and i
 
 ===========================================================================================
 The editor widget is created automatically in the designer when you create a new column.
-You cannot drag a widget of onother type from the palette to the editor panel.
+You cannot drag a widget of another type from the palette to the editor panel.
 However, you can drag a widget away from the editor panel. This will dissociate it from the editor.
 To restore the editor widget without re-creating the column go to the column properties/General/Editing
 and choose another editor type in the dropdown.
