@@ -1,4 +1,4 @@
-﻿Q: dynamic action flow title
+Q: dynamic action flow title
 A: the only OOTB way is to put one action flow into the navigation tab of another action flow. Then the title will be the interaction label.
 
 Q: show errors for pristine fields
@@ -12,6 +12,17 @@ A: the value set when the form loads
 
 Q: import project from newer xCP version
 A: create a new project with same name and namespace and copy the generated pom.xml into existing exported project
+
+Q: action flow height not updated
+A: the config is part of the page that calls the wizard, not the wizard itself
+
+      "wizardConfig" : {
+        "height" : 650,
+        "width" : 1000,
+        "modal" : true,
+        "autoScroll" : false,
+        "title" : "${_UI_Select_Individuals_Select_Individuals_label}"
+      },
 
 Q: use 'concat' properly in activity with multivalue attributes
 A: 
@@ -805,6 +816,11 @@ A:
     });
     
   See change-orientation.gif
+
+Q: Change Table Layout column number in runtime
+A:
+  table_layout.layout.columns = 1;
+  table_layout.updateLayout();
 
 Q: Action flow Next button condition expression
 A: Make sure no variables used in the expression change on other steps
