@@ -1,3 +1,9 @@
+Q: Load an instance fragment without any existing object
+A:
+  Legal: keep Inputs.id === undefined and set Inputs.model
+  Hack: pass  Inputs.id = [undefined] , see xcp.widget.Fragment.prototype.setObjectId
+  This array can be returned by this expression: {''}[-1]
+
 Q: dynamic action flow title
 A: the only OOTB way is to put one action flow into the navigation tab of another action flow. Then the title will be the interaction label.
 
