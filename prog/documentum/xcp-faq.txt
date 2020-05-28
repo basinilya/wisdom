@@ -1,9 +1,23 @@
+Q: "Template ID" of "Create [content]" interaction
+A: "Template ID" and "Folder ID" are ignored (bug)
+
+Q: model fragment output not updated
+A: see xcp.widget.FragmentOutputContainer.prototype.setOutputValue
+    // In case of model objects we compare using ExtJS model ID only because model setting should be done only
+    // for the first time, or when new model is loaded
+  model fragment output is always a copy and it's not updated when source model attribute changes
+
 Q: Load an instance fragment without any existing object
 A:
+  Legal: set Inputs.id = 'types/{x}/{type}/defaults'
+  e.g.:
+    types/folders/tst_folder/defaults
+    types/business-objects/tst_object/defaults
+  
   Legal: set Inputs.id = '' and subscribe Set Hidden: false
 
   Legal: keep Inputs.id === undefined and set Inputs.model
-  
+
   Hack: pass  Inputs.id = [undefined] , 
   This array can be returned by this expression: {''}[-1]
   Warning: this does not load the attribute defaults
@@ -382,6 +396,9 @@ Q: null array
 A: matchString('','x')
 
 Q: AppDeployException Fetch of object with handle 12xxxxxxxxxxxxxx and type NULL failed.
+  or
+  [DM_TYPE_MGR_E_CANT_FIND_TYPE_HANDLE]error:  "Failure to find type with handle
+
 A:
   TL;DR: remove temporarily the artifact (if you know it) which had this id from
   your project, then deploy and then restore the deleted artifact from VCS or
