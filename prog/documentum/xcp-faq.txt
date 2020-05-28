@@ -1,3 +1,5 @@
+﻿===== do not remove first line ==========
+
 Q: "Template ID" of "Create [content]" interaction
 A: "Template ID" and "Folder ID" are ignored (bug)
 
