@@ -1,4 +1,89 @@
 ﻿===== do not remove first line ==========
+Q: [INFO]   [ERROR] Could not locate the file '<ServiceName>' required by Java Module 'jarname.jar'.
+A: /tmp exhausted. To alter the temp location fix pom.xml and launch mvn with custom args:
+
+  mvn -Dcustom.com.emc.xcp.builder.vmArgs="-Djava.io.tmpdir=/u01/jenkins/jenkins/tmp" -B -X -DdesignerPath=/u01/jenkins/xCPDesigner16.4p06 xcp-import-project:run clean package
+
+  (MAVEN_OPTS is not used by the Eclipse process launched by Maven)
+
+pom.xml:
+
+  <properties>
+    <custom.com.emc.xcp.builder.vmArgs/>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+         <groupId>com.emc.xcp.builder</groupId>
+         <artifactId>xcp-import-project</artifactId>
+         <configuration>
+          <vmArgs>${custom.com.emc.xcp.builder.vmArgs}</vmArgs>
+         </configuration>
+      </plugin>
+      <plugin>
+         <groupId>com.emc.xcp.builder</groupId>
+         <artifactId>xcp-validate</artifactId>
+         <executions>
+            <execution>
+               <id>xcp-validate</id>
+               <goals>
+                  <goal>run</goal>
+               </goals>
+            </execution>
+         </executions>
+         <configuration>
+          <vmArgs>${custom.com.emc.xcp.builder.vmArgs}</vmArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+         <groupId>com.emc.xcp.builder</groupId>
+         <artifactId>xcp-generate-sources</artifactId>
+         <executions>
+            <execution>
+               <id>xcp-generate-sources</id>
+               <phase>generate-sources</phase>
+               <goals>
+                  <goal>run</goal>
+               </goals>
+            </execution>
+         </executions>
+         <configuration>
+          <vmArgs>${custom.com.emc.xcp.builder.vmArgs}</vmArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+         <groupId>com.emc.xcp.builder</groupId>
+         <artifactId>xcp-dar</artifactId>
+         <executions>
+            <execution>
+               <id>xcp-dar</id>
+               <phase>prepare-package</phase>
+               <goals>
+                  <goal>run</goal>
+               </goals>
+            </execution>
+         </executions>
+         <configuration>
+          <vmArgs>${custom.com.emc.xcp.builder.vmArgs}</vmArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+         <groupId>com.emc.xcp.builder</groupId>
+         <artifactId>xcp-deploy</artifactId>
+         <executions>
+            <execution>
+               <id>xcp-deploy</id>
+               <goals>
+                  <goal>run</goal>
+               </goals>
+            </execution>
+         </executions>
+         <configuration>
+          <vmArgs>-Xms512m -Xmx768m ${custom.com.emc.xcp.builder.vmArgs}</vmArgs>
+        </configuration>
+      </plugin>
+
 
 Q: "Template ID" of "Create [content]" interaction
 A: "Template ID" and "Folder ID" are ignored (bug)
@@ -16,7 +101,7 @@ A:
     types/folders/tst_folder/defaults
     types/business-objects/tst_object/defaults
   
-  Legal: set Inputs.id = '' and subscribe Set Hidden: false
+  Legal: set Inputs.id = '' and subscribe Set Hidden: false (side effect: when id not blank, fragment loaded twice)
 
   Legal: keep Inputs.id === undefined and set Inputs.model
 
