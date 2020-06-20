@@ -1,3 +1,17 @@
+Q: list aspects
+A: r_aspect_name
+
+Q: drop aspect
+A:
+  -- delete all versions of all sysobjects in the aspect folder
+  -- usually, '/System/Modules/Aspect/aspectname'
+  delete dmc_aspect_type objects where object_name = 'aspectname';
+
+
+A: add default aspect
+A:
+  alter type tst_par2chld add default aspects 'sync_x_relation'
+
 Q: "You have specified a non-integer token in an ORDER BY clause with UNION."
 A: sort with: "enable (RETURN_RANGE)".
   Due to the bug, sorting may be unreliable: in generated sql index in 'order by <index>'
