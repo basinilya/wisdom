@@ -298,7 +298,19 @@ Run As Owner, run_as_server (Run as the installation owner) (In Composer: Run as
     method user.
     !!! run_as_server=1 is dangerous, because all users can run the method. The method must
     call IDfLoginInfo.setForceAuthentication(true) if it takes credentials as method arguments
-    When run_as_server=0 even the users with superuser privilege cannot run it. Only the installation owner can
+    When run_as_server=0 even the users with superuser privilege cannot run it. Only the installation owner can.
+
+    If run_as_server=0 and the method is run on the method server it will fail with:
+    [DM_METHOD_E_RUN_AS_SERVER]error:  "The dm_method must have RUN_AS_SERVER set to TRUE."
+    
+    If run_as_server=0 and the method is an external program and the caller is not a superuser it will fail with:
+    [DM_METHOD_E_ASSUME_USER_UV]error:  "Your method named (<mtdname>) failed to execute because the assume user process could not validation your user credentials.
+    Assume User Process returned (245=DM_CHKPASS_BAD_LOGIN)."; ERRORCODE: 100; NEXT: null
+    
+    dm_menthod.run_as_server can be overriden when "EXECUTE do_method WITH run_as_server = true, ..." if the caller is a superuser.
+    
+    A more reliable way to restrict access to a method is to set its ACL:    
+    update dm_method objects set acl_domain = '<docbaseOwner>', set acl_name = 'dm_acl_superusers' where object_name like '<mtdname>';
 
 Use method Server (Use the dmbasic Method Server or Java Method Server to execute a dmbasic or Java Method) (In Composer: Use method server)
     Specifes whether to use the dmbasic method server or Java
@@ -307,9 +319,13 @@ Use method Server (Use the dmbasic Method Server or Java Method Server to execut
 dm_method.a_special_app (can only set via DQL)
     If empty, the method is run in ServerApps.ear
     If set to 'Workflow', the method is run in bpm.ear
+    
 
 Q: dm_agent_exec / agentexec
 A: 
+
+Q: jobs log
+A: ${DM_DBA:?}/log/*/agentexec/agentexec.log
 
 Q: debug Content Server
 A: DQL:

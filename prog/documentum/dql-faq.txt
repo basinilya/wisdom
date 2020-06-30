@@ -1,3 +1,11 @@
+Q: change sysobject type
+A:
+  CHANGE current_type [(ALL)] OBJECT[S]
+  TO new_type[update_list]
+  [IN ASSEMBLY document_id [VERSION version_label] [DESCEND]]
+  [SEARCH fulltext search condition]
+  [WHERE qualification]
+
 Q: list aspects
 A: r_aspect_name
 
