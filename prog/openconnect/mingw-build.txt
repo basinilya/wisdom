@@ -1,16 +1,24 @@
 https://martchus.no-ip.biz/repo/arch/ownstuff/os/x86_64/
 gcc
 #df -m /tmp | { read -r x; read -r x x x avail x; test 12000 -le "$avail"; } && yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-gcc
+df -m /tmp | { read -r x; read -r x x x avail x; test 12000 -le "$avail"; } && pikaur --mflags="--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-gcc
+
 #yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-gnutls
 #yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-libxml2
 #yaourt --m-arg "--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-lz4
+
+pikaur --mflags="--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-gnutls
+pikaur --mflags="--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-libxml2
+pikaur --mflags="--skippgpcheck" -S --noconfirm --asdeps --needed mingw-w64-lz4
 
 cd ~/builds
 git clone --depth=1 git://git.infradead.org/users/dwmw2/openconnect.git
 cd ~/builds/openconnect
 autoreconf -i
-#./configure --host=x86_64-w64-mingw32
-./configure --host=i686-w64-mingw32
+
+./configure --host=x86_64-w64-mingw32
+#./configure --host=i686-w64-mingw32
+
 make
 make DESTDIR=$HOME/builds/openconnect-inst install
 
@@ -21,6 +29,11 @@ make DESTDIR=$HOME/builds/openconnect-inst install
 
 
 packaging:
+copy the binary from $DESTDIR/usr/local/sbin
+copy libopenconnect-*.dll binary from $DESTDIR/usr/local/bin
+
 copy needed dlls from /usr/i686-w64-mingw32/bin
+libatomic-*.dll;libffi-*.dll;libgcc_s_seh-*.dll;libgmp-*.dll;libgmpxx-*.dll;libgnutls-*.dll;libhogweed-*.dll;libiconv-*.dll;libidn2-*.dll;liblz4.dll;liblzma-*.dll;libnettle-*.dll;libopenconnect-*.dll;libp11-kit-*.dll;libproxy-*.dll;libssp-*.dll;libstdc++-*.dll;libtasn1-*.dll;libunistring-*.dll;libwinpthread-*.dll;libxml2-*.dll;zlib1.dll
+
 if gnutls doesn't work, download gnutls windows build from official site
 

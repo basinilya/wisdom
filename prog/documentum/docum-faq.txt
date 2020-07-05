@@ -4,6 +4,9 @@ A:
 Q: dm_job.a_current_status = 'The job object indicated the job was in progress, but the job was not actually running.  It is likely that the dm_agent_exec utility was stopped while the job was in progress.'
 A: 
 
+Q: [DM_SYSOBJECT_E_NO_WRITE_ACCESS]error: "No write access for sysobject named
+A: check ACL
+
 Q: get storage path for content
 A: getpath,c,<dm_document_oid|content_oid>
 
