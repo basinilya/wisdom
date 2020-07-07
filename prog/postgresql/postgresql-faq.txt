@@ -1,3 +1,10 @@
+Q: query timeout
+A: 
+  set statement_timeout = 120000;
+  or
+  begin transaction;
+  set local statement_timeout = 120000;
+
 Q: distinguish INSERT from UPDATE in a trigger
 A: if TG_OP = 'UPDATE' then
 
