@@ -6,17 +6,35 @@ A:
   [SEARCH fulltext search condition]
   [WHERE qualification]
 
-Q: list aspects
-A: r_aspect_name
+Q: list object aspects
+A: select r_aspect_name from dm_sysobject where ...
+
+Q: list default type aspects
+A: select ti.r_object_id, ti.default_aspects, ti.r_type_name from dmi_type_info ti where ti.r_type_name = '...';
 
 Q: drop aspect
 A:
-  -- delete all versions of all sysobjects in the aspect folder
-  -- usually, '/System/Modules/Aspect/aspectname'
-  delete dmc_aspect_type objects where object_name = 'aspectname';
+
+  -- select sysobjects having r_aspect_name[1] = 'tst_auditaspect'
+  select r_object_id, -1 - i_position from dm_sysobject (all) where r_aspect_name = 'tst_auditaspect' and i_position = -2 enable (ROW_BASED) ;
+  
+  -- remove aspect from sysobjects having r_aspect_name[1] = 'tst_auditaspect'
+  update dm_sysobject (all) objects remove r_aspect_name[1] where r_object_id in( '0801e24080086229' );
+  
+  -- unlink the jars from aspect
+  update dm_sysobject (all) objects unlink '/System/Modules/Aspect/tst_auditaspect' where folder('/System/Modules/Aspect/tst_auditaspect', descend) and i_reference_cnt > 1;
+  update dm_sysobject (all) objects unlink '/System/Modules/Aspect/tst/tst_auditaspect' where folder('/System/Modules/Aspect/tst/tst_auditaspect', descend) and i_reference_cnt > 1;
+  
+  -- remove aspect configuration
+  delete dm_sysobject (all) objects where folder('/System/Modules/Aspect/tst_auditaspect', descend) and i_reference_cnt = 1;
+  delete dm_sysobject (all) objects where folder('/System/Modules/Aspect/tst/tst_auditaspect', descend) and i_reference_cnt = 1;
+  
+  -- delete aspect
+  delete dmc_aspect_type (all) objects where object_name = 'tst_auditaspect';
 
 
-A: add default aspect
+
+Q: add default aspect
 A:
   alter type tst_par2chld add default aspects 'sync_x_relation'
 
