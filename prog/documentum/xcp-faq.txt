@@ -1025,3 +1025,25 @@ A:
     This can be selected on the "Basics" tab for fragments with proper templateType
   - The output property must be first or second and must be named "model"
   - After making changes you need to reopen the fragment
+
+Q: select application parameters
+A:
+  see com.emc.xcp.rest.core.commons.dao.impl.PersistenceFacadeImpl.findApplicationConfigsByNamespace(String, CommonParams)
+  
+    select r_object_id, namespace, config_type, config_name, config_description, config_label, property_name, property_value,
+    property_datatype, r_object_type, i_folder_id, r_modify_date, r_creator_name, r_modifier, r_creation_date, 
+    acl_domain, acl_name, owner_name, owner_permit  
+    from dmc_xcp_app_config 
+    where namespace in ( 
+    select namespace from xcp_artifact_bundle (all) where r_object_id in (
+    select bundlelibrary from xcp_artifact_bundle where namespace = 'tst' and namespace != 'xcp'
+    )
+    )
+    and config_type='PARAMETER'
+    union
+    select r_object_id, namespace,config_type,config_name,config_description,config_label, property_name,property_value,
+    property_datatype,r_object_type, i_folder_id, r_modify_date, r_creator_name, r_modifier, r_creation_date,
+    acl_domain, acl_name, owner_name, owner_permit  
+    from dmc_xcp_app_config 
+    where namespace = 'tst' and config_type='PARAMETER'
+    ;

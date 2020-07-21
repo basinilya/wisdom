@@ -33,7 +33,6 @@ MSG: [DM_DATA_DICT_E_FIND_DATA_DICTIONARY_OBJECT_IN_DB]
 error: "While trying to retrieve data dictionary information about tefx_impression_digital with locale en,
 the following database cursor error was returned: ERROR(-1) "; ERRORCODE: 100; NEXT: null
 
-
 A:
 
 Q: "The requested role (dm_superusers_dynamic) is marked protected and the requesting application was either not known in this docbase's dm_client_rights table or its credentials did not match those in the dm_client_rights table."
@@ -333,6 +332,17 @@ dm_method.a_special_app (can only set via DQL)
 
 Q: dm_agent_exec / agentexec
 A: 
+
+Q: stop agent
+A:
+  You can do this by killing the main agent_exec process repeatedly. The Content Server will detect
+  that the agent exec dies and try and restart it, however there is a limit to the number of times
+  this will happen (seems to be 5 by default). Eventually you get the following message in the
+  content server log and the dm_agent_exec stays dead:
+
+    Thu Jan 17 13:35:37 2008 984000 [DM_SESSION_W_AGENT_EXEC_FAILURE_EXCEED]warning:
+    "The failure limit of the agent exec program has exceeded. It will not be restarted again.
+    Please correct the problem and restart the server."
 
 Q: jobs log
 A: ${DM_DBA:?}/log/*/agentexec/agentexec.log
