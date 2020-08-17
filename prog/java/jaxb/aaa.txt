@@ -139,6 +139,7 @@ A:
 <tag/> => ""
 <!-- --> => null
 
+See also @XmlJavaTypeAdapter(javax.xml.bind.annotation.adapters.CollapsedStringAdapter.class)
 
 Q: @XmlElement Integer prop;
 A: ditto, but whitespace removed

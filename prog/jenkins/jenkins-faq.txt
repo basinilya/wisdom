@@ -1,3 +1,15 @@
+Q: free space background monitor
+A:
+  exec 4>&1
+  coproc TMPMON {
+    set +x
+    echo TMPMON started
+    while read -r -t 1 x || [ $? = 142 ]; do
+      df -m /tmp
+    done
+  } >&4
+  eval "exec ${TMPMON[0]}<&-"
+
 Q: build artifacts location
 A: $JENKINS_HOME/jobs/$JOB_NAME/builds/$OLD_BUILD_NUMBER/archive/
 

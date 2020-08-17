@@ -113,6 +113,10 @@ A:
   )
   ;
 
+Q: add user to role
+A:
+  UPDATE dm_group OBJECTS APPEND users_names = 'Dave' WHERE group_name IN ('role_name');
+
 Q: Java 1.8.0_201, Java 11 SSLHandshakeException: Received fatal alert: handshake_failure
 A:
   $JAVA_HOME/conf/security/java.security
@@ -282,7 +286,7 @@ OR
              at org.apache.tomcat.util.net.JIoEndpoint$Worker.run(JIoEndpoint.java:930)
              at java.lang.Thread.run(Thread.java:722)
         Caused by: java.lang.NullPointerException
-             at com.spr.ajwf.methods.jobs.transfer.FTPExchangeJob.main(FTPExchangeJob.java:73)
+             at
              ... 23 more
 
 Launch Asynchronously (Launch as a separate process) (In Composer: Run Asynchronously)
@@ -343,6 +347,13 @@ A:
     Thu Jan 17 13:35:37 2008 984000 [DM_SESSION_W_AGENT_EXEC_FAILURE_EXCEED]warning:
     "The failure limit of the agent exec program has exceeded. It will not be restarted again.
     Please correct the problem and restart the server."
+
+Q: run_now ignored
+A: Other frequently scheduled jobs eat-up all the runners. The agent will check as many jobs as the runners number:
+  WHERE ... (run_now = 1) OR ... a_next_invocation <= DATE('now') ...
+  ORDER BY a_next_invocation, r_object_id ENABLE (RETURN_TOP 3)
+  Put your job to the top reults: set run_now=1, set a_next_invocation= <a_next_invocation - 1 schedule interval>
+  (the schedule is based on a_next_invocation)
 
 Q: jobs log
 A: ${DM_DBA:?}/log/*/agentexec/agentexec.log
@@ -451,3 +462,10 @@ A: keytool -list -keystore dfc.keystore -v
 Q: dfc.keystore password
 A: The default password is the acronym for the Documentum Java API in lower case
 
+
+Q: DfIdNotFoundException:: THREAD: main; MSG: [DM_API_E_EXIST]error:  "Document/object specified by 0b02254b8055e0f0 does not exist.";
+  ERRORCODE: 100; NEXT: DfException:: THREAD: main; MSG: [DM_OBJ_MGR_E_FETCH_FAIL]error:  "attempt to fetch object with handle 0b02254b8055e0f0 failed";
+  ERRORCODE: 100; NEXT: null
+A
+  If DQL select works, get its r_object_type and try SELECT * FROM <r_object_type> where r_object_id = ?
+  

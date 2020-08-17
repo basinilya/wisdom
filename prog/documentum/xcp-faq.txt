@@ -511,7 +511,7 @@ A:
   find its urn in the attribute artifacturn. For instance, I have this artifact
   on my host:
   
-    artifacturn: [9]: urn:spr:com.emc.xcp.artifact.approle:Artifacts/Roles/licensing.role
+    artifacturn: [9]: urn:foo:com.emc.xcp.artifact.approle:Artifacts/Roles/licensing.role
     installedobjectid: [9]: 1201e24080000d00
 
 Q: automatic hyperlinks in first column
@@ -647,7 +647,9 @@ A:
 
 Q: dropdown list validation
 A:
-    Using properties of a dropdown in validation expression may give weird results.
+    Using properties of a dropdown in validation expression may give weird results,
+    because the "change" event is fired, but the selectedValue is not changed until entering is complete.
+    
     It is recommended to create intermediate hidden value displays for
     "value" and "selectedValue" and use them in the validation. The event triggering
     the validation should be changed from dropdown.change to the intermediate widgets

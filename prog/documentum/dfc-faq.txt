@@ -170,7 +170,7 @@ A:
   Trailing spaces are not trimmed while updating.
   On the other hand, getString() applies rtrim operation to the db value and it
   returns empty string for any db value consisting of spaces.
-  Also, getString() returns empty string for db value NULL.
+  Also, getString() returns empty string for db value NULL (except when it's a repeating attribute having zero values, then it returns null).
 
 
 Q: DF_READ_QUERY vs DF_EXEC_QUERY

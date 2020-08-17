@@ -77,15 +77,29 @@ Q: select null
 A: not supported, you can select '' for NULLSTRING or select 0 for NULLINT
 
 Q: check for null
-A: IS [NOT] NULLDATE
-    (NULLSTRING, NULLINT, NULLID)
-  IS [NOT] NULL -- only for registered table columns
+A:
+  - In WHERE / LEFT JOIN conditions
 
-  -- for string columns
-  = ' '
-  -- is the same as:
-  is NULLSTRING
-  -- and both translated to Oracle SQL: (field is null or field = ' ')
+  If what you want is to check for empty value use:
+  IS [NOT] NULLDATE (checks for null or special 17xx year)
+    NULLSTRING (translated to Oracle SQL: (field is null or field = ' ') )
+    NULLINT (null or 0)
+    NULLID (?)
 
-!!! = '' always false !!! Documentum never stores an empty string or NULL in the varchar db column, only one blank character
+  If you want real nulls in condition, use:
+  IS [NOT] NULL
+
+  - In result column
+  
+  The API won't allow you to tell DB NULL from empty
+  The workaround is to use special arithmetics in SELECT.
+
+  For string:
+  SELECT ASCII(colname)+1, because ASCII(NULL)+1 always returns 0
+
+  For int:
+  colname*0 + 1
+
+
+!!! = '' always false (except for corrupt rows) !!! Documentum never stores an empty string or NULL in the varchar db column, only one blank character
 

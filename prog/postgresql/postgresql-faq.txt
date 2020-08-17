@@ -85,6 +85,8 @@ Q: set current schema
 A:
   set search_path to spr_track, efxd;
 
+Q: rows affected in pl/pgsql, @@ROWCOUNT ?
+A: GET DIAGNOSTICS integer_var = ROW_COUNT;
 
 Q: Port Oracle decode() to PostgreSQL
   
