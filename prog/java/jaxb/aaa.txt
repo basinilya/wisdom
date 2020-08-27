@@ -130,6 +130,33 @@ A:
 Q: generate java classes from xsd
 A: xjc -no-header -encoding UTF-8 -p com.sn.efx.generated.onix3 -d generated ONIX_BookProduct_3.0_reference.xsd
 
+Q: generate xsd from java classes
+A: 
+    private static Schema genSchema(final JAXBContext jc) throws Exception {
+        final List<StringWriter> outs = new ArrayList<StringWriter>();
+        jc.generateSchema(new SchemaOutputResolver() {
+            
+            @Override
+            public Result createOutput(final String namespaceUri, final String suggestedFileName)
+                    throws IOException {
+                final StringWriter out = new StringWriter();
+                outs.add(out);
+                final StreamResult streamResult = new StreamResult(out);
+                streamResult.setSystemId("");
+                return streamResult;
+            }
+        });
+        final StreamSource[] sources = new StreamSource[outs.size()];
+        for (int i = 0; i < outs.size(); i++) {
+            final StringWriter out = outs.get(i);
+            sources[i] = new StreamSource(new StringReader(out.toString()));
+        }
+        final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        final Schema schema = sf.newSchema(sources);
+        return schema;
+    }
+
+
 Q: @XmlElement String prop;
 A:
 <tag>abc</tag> => "abc"

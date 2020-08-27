@@ -1,3 +1,10 @@
+Q: Cannot create a generic array of List<String>
+A: 
+  @SuppressWarnings("unchecked")
+  ...
+  List<T> x = new List[sz];
+
+
 Q: dump on OOM
 A:
 -XX:-HeapDumpOnOutOfMemoryError

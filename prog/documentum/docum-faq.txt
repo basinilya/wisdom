@@ -1,3 +1,8 @@
+Q: Re-initialize server
+A: 
+  reinit,c[,<config-name>]
+  session.reInit(configName)
+
 Q: idql extra classpath
 A: 
   ${DM_HOME:?}/bin/java.ini
@@ -355,6 +360,21 @@ A: Other frequently scheduled jobs eat-up all the runners. The agent will check 
   Put your job to the top reults: set run_now=1, set a_next_invocation= <a_next_invocation - 1 schedule interval>
   (the schedule is based on a_next_invocation)
 
+Q: job does not start checklist
+A: 
+  - Check if the job is found by the garbage_collect_jobs query:
+    SELECT ALL   r_object_id, a_last_invocation,   a_last_completion, a_special_app FROM dm_job
+    WHERE ( ((a_last_invocation IS NOT NULLDATE) AND    (a_last_completion IS NULLDATE))  
+    AND  ((a_special_app = 'agentexec') 
+    ) ) 
+    AND (i_is_reference = 0 OR i_is_reference is NULL) 
+    AND (i_is_replica = 0 OR i_is_replica is NULL)
+    ;
+    AND (r_lock_machine = 'blahblah')
+  
+  - Check dm_job.r_lock_date . Maybe the agent was killed while running a job. Unlock the job
+  - Check the job lock file
+
 Q: jobs log
 A: ${DM_DBA:?}/log/*/agentexec/agentexec.log
 
@@ -433,13 +453,16 @@ A: Doesn't seem to be fatal
 
 Q: dm_agent_exec command line arguments
 A:
-  -override_sleep_duration <seconds>
+  -override_sleep_duration <job poll interval seconds>
   
   -max_concurrent_jobs <n>
     The minimum value is 1 second
   
   -trace_level <0|1>
     Setting the trace level to any value except zero turns on full tracing for the process.
+    
+   7.1+
+  -job_launch_interval <interval between jobs seconds>
 
 Q: Job Status=Running
 A: dm_job.a_special_app

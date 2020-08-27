@@ -88,6 +88,17 @@ pom.xml:
 Q: "Template ID" of "Create [content]" interaction
 A: "Template ID" and "Folder ID" are ignored (bug)
 
+Q:
+  java.lang.IndexOutOfBoundsException: Index: 0, Size: 0
+          at java.util.ArrayList.rangeCheck(ArrayList.java:653)
+          at java.util.ArrayList.get(ArrayList.java:429)
+          at com.documentum.bps.dql.utils.DQLUtils.getAttributeValue(DQLUtils.java:550)
+A: 
+  A repeating attribute has zero values and "Read from Repository" activity maps:
+    row[0]property[ALL]
+  It's a bug in xCP. Workaround, if you expect just one row map:
+    row[ALL]property[ALL]
+
 Q: model fragment output not updated
 A: see xcp.widget.FragmentOutputContainer.prototype.setOutputValue
     // In case of model objects we compare using ExtJS model ID only because model setting should be done only
