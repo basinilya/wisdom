@@ -44,3 +44,20 @@ Lamdas example:
 Arrays.asList("a", "b").stream().forEach((String s) -> { System.out.println(s);});
 Arrays.asList("a", "b").stream().forEach(s -> { System.out.println(s);});
 Arrays.asList("a", "b").stream().forEach(s -> System.out.println(s));
+
+
+the following is not needed, use Stream.toArray
+    public static <T> Collector<T, //
+        ?, // NOSONAR
+        T[]> toArrayCollector3(final Supplier<T[]> supplier) {
+        return Collector
+            .of(
+                ArrayList::new, // supplier,
+                List::add, // accumulator,
+                (left, right) -> {
+                    left.addAll(right);
+                    return left;
+                }, // combiner,
+                a -> a.toArray(supplier.get()) // finisher
+            );
+    }

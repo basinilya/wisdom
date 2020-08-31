@@ -40,6 +40,9 @@ the following database cursor error was returned: ERROR(-1) "; ERRORCODE: 100; N
 
 A:
 
+Q: JMS server log: Exception handling request to /bpm/servlet/DoMethod: javax.servlet.ServletException: Digital signature Validation Failed.
+A: 
+
 Q: "The requested role (dm_superusers_dynamic) is marked protected and the requesting application was either not known in this docbase's dm_client_rights table or its credentials did not match those in the dm_client_rights table."
 A: Even if you're a superuser or a sysadmin if your client id is unknown, then adding dm_superusers_dynamic will fail
 
