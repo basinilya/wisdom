@@ -1,4 +1,7 @@
 ﻿===== do not remove first line ==========
+Q: [INFO] 09:04:25.017 ERROR [ProjectValidatorService:98] Validation error: project 'Some' not found in workspace '/u01/jenkins/jenkins/workspace/some'.
+A: ???
+
 Q: [INFO]   [ERROR] Could not locate the file '<ServiceName>' required by Java Module 'jarname.jar'.
 A: /tmp exhausted. To alter the temp location fix pom.xml and launch mvn with custom args:
 

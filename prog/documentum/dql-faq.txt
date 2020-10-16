@@ -1,4 +1,4 @@
-Q: change sysobject type
+Q: change sysobject type (convert to another type)
 A:
   CHANGE current_type [(ALL)] OBJECT[S]
   TO new_type[update_list]

@@ -1,0 +1,17 @@
+Q: stop/undeploy webapp without killing process
+A: connect with JConsole, Mbeans, org.eclipse...servlethandler/0/.../stop()
+
+Q: mvn jetty:run +JMX 
+A: 
+  Download jetty distribution of the same version as jetty plugin
+  extract jetty-jmx.xml and put into src/etc/
+
+  			<plugin>
+  				<groupId>org.eclipse.jetty</groupId>
+  				<artifactId>jetty-maven-plugin</artifactId>
+  				<version>9.4.32.v20200930</version>
+  				  <configuration>
+  					<scanintervalseconds>10</scanintervalseconds>
+  					<jettyXml>src/etc/jetty-jmx.xml</jettyXml>
+  				  </configuration>
+  			</plugin>

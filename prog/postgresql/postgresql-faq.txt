@@ -41,6 +41,9 @@ Q: identity column
 A: 
   use a sequence or a pseudo type SERIAL which is sugar for sequence
 
+Q: current sequence next value
+A: SELECT last_value FROM foo_seq;
+
 Q: rename column
 A: alter table T rename C to C2;
 
