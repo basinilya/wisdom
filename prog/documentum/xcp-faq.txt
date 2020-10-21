@@ -1,4 +1,13 @@
 ﻿===== do not remove first line ==========
+Q: Process ... already exists in the docbase.
+A:
+  - If possible, delete the artifact from the project and deploy, then undelete the artifact and deploy again
+  OR
+  - Delete the CURRENT version of the application xcp_artifact_bundle object effectively restoring the previous version
+  OR
+  - replace the repeating attributes of xcp_artifact_bundle except for installedobjectid and bundlelibrary
+    then find matching objects r_object_id and set installedobjectid
+
 Q: [INFO] 09:04:25.017 ERROR [ProjectValidatorService:98] Validation error: project 'Some' not found in workspace '/u01/jenkins/jenkins/workspace/some'.
 A: ???
 
@@ -1063,3 +1072,11 @@ A:
     from dmc_xcp_app_config 
     where namespace = 'tst' and config_type='PARAMETER'
     ;
+
+Q: publish an xCP event from javascript
+A: xcp.event.EventBus.publish('ns_event_artifact_name', { param1: value1, ... }, wizard.getPageContext()|fragment_context|??? )
+
+Q: subscribe to an xCP event from javascript
+A: 
+  var subscription = xcp.event.EventBus.subscribe('ns_event_artifact_name', function(name, paramsObj) { ... }, wizard.getPageContext()|fragment_context|??? );
+  wizard.on('destroy', function() {xcp.event.EventBus.unsubscribe(subscription); });

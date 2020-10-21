@@ -1,3 +1,11 @@
+Q: On Postgresql, save on a locked database row  fails after 10 seconds with: canceling statement due to statement timeout
+A: 
+  When you call save() on a new dm_folder object, the Content Server sends this SQL command:
+    set local statement_timeout =      10000
+  and never reverts the value.
+  If a new dm_folder was created previously in the same transaction, then statement_timeout remains 10 seconds
+
+
 Q: Re-initialize server
 A: 
   reinit,c[,<config-name>]
