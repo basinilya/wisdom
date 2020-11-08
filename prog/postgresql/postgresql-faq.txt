@@ -44,6 +44,9 @@ A:
 Q: current sequence next value
 A: SELECT last_value FROM foo_seq;
 
+Q: next value from sequence
+A: SELECT nextval('foo_seq');
+
 Q: rename column
 A: alter table T rename C to C2;
 
@@ -138,3 +141,5 @@ A:
     select a,b from hlp( myrec ) AS T(a int , b text);
 
    If types unknown, only row_to_json()
+
+Q: excel to 

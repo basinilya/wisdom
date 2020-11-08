@@ -28,6 +28,36 @@ A: mvn javadoc:jar install / mvn javadoc:jar deploy
 Q: sources
 A: mvn source:jar install / mvn source:jar deploy
 
+Q: old Maven fails insecure download from http://repo.maven.apache.org/maven2
+  Failed to transfer file: http://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-resources-plugin/2.5/maven-resources-plugin-2.5.pom
+  ReasonPhrase:HTTPS Required
+
+A: settings.xml:
+  ...
+  	<profiles>
+  		<profile>
+  			<id>default-repos</id>
+  			<repositories>
+  				<repository>
+  					<id>dflt</id>
+  					<name>dflt</name>
+  					<url>https://repo.maven.apache.org/maven2</url>
+  				</repository>
+  			</repositories>
+  			<pluginRepositories>
+  				<pluginRepository>
+  					<id>dflt-plugins</id>
+  					<name>dflt-plugins</name>
+  					<url>https://repo.maven.apache.org/maven2</url>
+  				</pluginRepository>
+  			</pluginRepositories>
+  		</profile>
+  	</profiles>
+  	<activeProfiles>
+  		<activeProfile>default-repos</activeProfile>
+  	</activeProfiles>
+  </settings>
+
 Q: clean rebuild a submodule while resolving the uninstalled dependencies in the reactor
 A: ?
 

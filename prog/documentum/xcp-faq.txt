@@ -257,6 +257,8 @@ A: xcp.defaultPages[<type>], see xcp.util.Utils.getDefaultPageFromContextMenu
 
 Q: file selector: Information needed foo.dat. Complete the form.
 A:
+  TL/DR:
+  =========================================================
   Единственно правильный способ - не добавлять File Selector из палитры, а кликнуть правой кнопкой на Application UI,
   New Action Flow, Action: Custom Import
   
@@ -265,6 +267,7 @@ A:
 
   Наличие всех 4 компонентов обязательно. Удалять их нельзя. Можно только не выполнять Custom Import Base Content,
   а добавить ещё одно взаимодействие в Navigation.
+  =========================================================
 
   Card Container должен содержать хотя бы один виджет, иначе он не сможет нормально инициализироваться.
   Обычно этот виджет - фрагмент dm_document_imp.
@@ -589,6 +592,8 @@ A: Compare the contents of ServerApps.ear/lib/ and bpm.ear/lib/ . Some xcp jars 
 
 Q: preview mode privileged client
   is not authorized to use role 'dm_superusers_dynamic'
+  OR
+  The requesting application is not privileged to use role (dm_superusers_dynamic).
 A:
   - in design-time environment fill the global registry tab
     see com.emc.xcp.builder.ui*.jar/internal.com.emc.xcp.builder.ui.preview.RepositoryEndpointPreviewContributor
@@ -639,6 +644,9 @@ Set List of File IDs
   // cannot be used to remove entrie
 
 fileselector.removeBtn
+
+Q: fileselector drag'n'drop does not work
+A: Must have Behavior/Set List of File IDs: uievent.Application.xcp.file_uploaded_list.fileid
 
 Q: expression breakpoint
 A: getJavascriptPropertyValue('(()=>{debugger;})()')
@@ -1078,5 +1086,14 @@ A: xcp.event.EventBus.publish('ns_event_artifact_name', { param1: value1, ... },
 
 Q: subscribe to an xCP event from javascript
 A: 
-  var subscription = xcp.event.EventBus.subscribe('ns_event_artifact_name', function(name, paramsObj) { ... }, wizard.getPageContext()|fragment_context|??? );
+  var subscription = xcp.event.EventBus.subscribe('ns_event_artifact_name', function(name, paramsObj) { ... }, wizard.getPageContext()|fragment_context|xcp.core.PageContextManager.getApplicationPageContext()|undefined|??? );
   wizard.on('destroy', function() {xcp.event.EventBus.unsubscribe(subscription); });
+
+  pageContext is not madatory for application events, in this case xcp.core.PageContextManager.getApplicationPageContext() will be used.
+  However, the application context must exist at time of subscription. The call to subscribe() must follow the "appready" event of xcp.Startup
+
+Q:
+A:
+  xcp.event.ApplicationEvent.getEventData (name, pageContext)
+  pageContext is the context in which you're reading event data, not the context when it was fired
+  pageContext can be undefined

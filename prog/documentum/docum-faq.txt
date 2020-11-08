@@ -5,6 +5,29 @@ A:
   and never reverts the value.
   If a new dm_folder was created previously in the same transaction, then statement_timeout remains 10 seconds
 
+Q: save failed for object with handle ...  error from database system was  STATE=42601, CODE=7, MSG=ERROR: INSERT has more expressions than target columns
+A:
+  check single attrs:
+  
+  select cols.column_name, attrs.attr_name, attrs.i_position
+  from (
+  select * from
+  dm_type_rp attrs 
+  	where exists( 
+  	select * from dm_type_sp where dm_type_sp.name = 'mytype'
+  	and attrs.i_position < -(dm_type_sp.start_pos)
+  	and attrs.r_object_id = dm_type_sp.r_object_id 
+  		and attrs.attr_repeating = 0
+  	)
+  ) attrs
+  full join 
+  ( select * from information_schema.columns cols where  cols.table_name = 'mytype_s' and cols.column_name not in('r_object_id','i_partition')
+  ) cols 
+  on attrs.attr_name = cols.column_name
+  where ( cols.column_name is null or attrs.attr_name is null )
+  order by attrs.i_position desc
+
+
 
 Q: Re-initialize server
 A: 
