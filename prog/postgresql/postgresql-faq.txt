@@ -143,3 +143,18 @@ A:
    If types unknown, only row_to_json()
 
 Q: excel to 
+A: save as CSV, utf-8, field sep - comma, string sep:"
+  
+  # strip CR and create columns definition from CSV header
+  sed 's/\o15//;s/\(,\|$\)/ varchar(1000)\1/g;q' '/path/to/file.csv'
+  
+  create table blah (
+  ...
+  );
+  
+  # in psql tool
+  \COPY blah FROM '/path/to/file.csv' WITH CSV HEADER ENCODING 'UTF-8' DELIMITER ',' QUOTE '"'
+
+Q: see only DML and errors in pg_log (but not Documentum internal)
+A: 
+  tail -F /var/lib/pgsql/9.4/data/pg_log/postgresql-`date +%a`.log  | stdbuf -i0 -o0 -e0 grep -v -i 'dm_user_s\|workitem' | grep -i "\(notice\|error\):\|\(insert \|update \|delete \)"

@@ -1,0 +1,109 @@
+﻿===== do not remove first line ==========
+Бизнес-события xCP - это события, которые выстреливают, после того, как DFC Java приложение (обычно сервер приложений) изменяет xCP объект.
+В момент сохранения объекта событие добавляется в очередь, а в момент коммита вызываются все обработчики событий.
+Если явной транзакции нет, то при сохранении объекта создаётся и коммитится неявная транзакция.
+
+Существуют следующие события:
+Created, Updated, Attached to Folder, Unattached from Folder, [child] Related, [child] Unrelated, Relationship Updated
+
+!!! События "Destroyed" не существует.
+Кроме того, не срабатывает событие "Unrelated", если связь была удалена каскадно при удалении одного из связанных объектов.
+
+Постановка событий в очередь реализована с помощью аспектов Documentum. xCP-типы, кроме связей, имеют аспект по умолчанию defaultdatatypeaspect (com.emc.xcp.runtime.aspect.impl.DataTypeAspect).
+Связи имеют аспект defaultrelationaspect (com.emc.xcp.runtime.aspect.impl.RelationAspect).
+
+Оба класса содержатся в datatypeaspect.jar, который устанавливается в докбейз как модуль единожды при установке xCP.
+
+Накопленные обработчики вызывает com.emc.xcp.runtime.engine.tracker.XcpTransactionListener, который реализует IDfTransactionObserver#onPreCommit(IDfSession).
+Класс находится в bpm_infra*.jar, который тоже является модулем в докбейзе, но дополнительная копия находится в WEB-INF/lib/ xCP веб приложения.
+
+На одно событие можно назначить несколько обработчиков.
+
+Обработчик события - это обычный Stateless Process, который был назначен в свойствах xCP-типа. Однако такой
+Stateless Process может выполняться в контексте любого DFC Java приложения, а не только сервера приложений.
+Для нормальной работы ему требуется org.apache.commons.logging.LogFactory из commons-logging*.jar
+Эта библиотека не установлена как модуль, поэтому её нужно вручную добавить в класпас.
+
+Свойства изменённых объектов доступны в момент события. При событии "Updated" доступны старые значения атрибутов, а при событиях "Unrelated" и "Unattached" доступны свойства ранее связанного объекта.
+
+Эти свойства можно использовать в выражениях, подобных тем, что используются в UI, однако выполняются выражения не в браузере, а в java. 
+Выражения могут использоваться как входные параметры процессов либо как условия вызова обработчика.
+Более подробно это описано в xcp-server-expressions.txt
+
+Если в обработчик передавать r_object_id изменённого объекта, то можно получить этот объект из текущей сессии и внести дополнительные изменения.
+Не существует способа сохранить объект единожды после вызова всех обработчиков. Несохранённые изменения будут отброшены.
+Каждый обработчик должен самостоятельно сохранять объект, если он внёс свои изменения.
+
+Во время выполнения процесса все его действия получат сессию, для которой в данный момент выполняется коммит.
+
+!!! Существует баг xCP, из-за которого все обработчики, накопленные для текущего треда, вызываются при любом коммите, даже если объекты были сохранены в другой сессии.
+Обходной путь - закоммитить сессию этих объектов прежде чем использовать другую сессию.
+Пример ошибки:
+
+2020-11-26 05:22:41,819 ERROR [default task-54] [com.documentum.fc.common.DfUtil] - Invalid Java Message Pattern :
+  Error occurred while creating data providers for dataNodesMap 
+  {
+    CompositeNode [name=event]=[event.folder.sec_id, event.folder.r_object_id, event.folder, event.folder.i_folder_id, event,
+    event.folder.object_name, event.folder.dcmi_title], CompositeNode [name=parameters]=[], CompositeNode [name=session]=[]
+  }
+  Error Message :can't parse argument number: CompositeNode [name=event]=[event.folder.sec_id
+2020-11-26 05:22:41,827 ERROR [default task-54] [com.emc.xcp.runtime.engine.tracker.XcpTransactionListener] - Error occurred in pre commit handler :
+DfException:: THREAD: default task-54; MSG: 
+  Error occurred while creating data providers for dataNodesMap
+  {
+    CompositeNode [name=event]=[event.folder.sec_id, event.folder.r_object_id, event.folder, event.folder.i_folder_id, event,
+    event.folder.object_name, event.folder.dcmi_title], CompositeNode [name=parameters]=[], CompositeNode [name=session]=[]
+  }
+  ; ERRORCODE: ff; NEXT: null
+       at com.emc.xcp.runtime.provider.DataProviderUtils.createDataProviders(DataProviderUtils.java:201)
+       at com.emc.xcp.runtime.engine.tracker.DataTypeObjectOperation.createDataProviders(DataTypeObjectOperation.java:47)
+       at com.emc.xcp.runtime.engine.tracker.DataTypeObjectOperation.fireEvents(DataTypeObjectOperation.java:66)
+       at com.emc.xcp.runtime.engine.tracker.DataTypeObjectOperation.handle(DataTypeObjectOperation.java:42)
+       at com.emc.xcp.runtime.engine.tracker.XcpTransactionListener.onPreCommit(XcpTransactionListener.java:35)
+       at com.documentum.fc.client.transaction.impl.TransactionEvent$1.update(TransactionEvent.java:14)
+       at com.documentum.fc.client.transaction.impl.TransactionObservable.notifyObservers(TransactionObservable.java:40)
+       at com.documentum.fc.client.impl.session.Session$DfLocalTransaction.notify(Session.java:4625)
+       at com.documentum.fc.client.impl.session.Session.commit(Session.java:623)
+       at com.documentum.fc.client.impl.session.Session.commitTrans(Session.java:607)
+       at com.documentum.fc.client.impl.session.SessionHandle.commitTrans(SessionHandle.java:614)
+       at com.emc.xcp.runtime.aspect.impl.DataTypeAspectUtils.xcpSave(DataTypeAspectUtils.java:87)
+       at com.emc.xcp.runtime.aspect.impl.DataTypeAspectUtils.xcpSave(DataTypeAspectUtils.java:27)
+       at com.emc.xcp.runtime.aspect.impl.DataTypeAspect.doSave(DataTypeAspect.java:49)
+       at com.documentum.fc.client.DfPersistentObject.saveEx(DfPersistentObject.java:924)
+       at com.documentum.fc.client.DfPersistentObject.save(DfPersistentObject.java:919)
+       at com.emc.xcp.runtime.aspect.impl.DataTypeAspect___PROXY.save(DataTypeAspect___PROXY.java)
+       at org.foo.???
+Caused by: DfException:: THREAD: default task-54; MSG: 
+  Error occurred while creating data provider for contextNode "event" with primary objId: "0b0225498065d04f" and secondary objId: "0000000000000000"; ERRORCODE: ff; NEXT: null
+       at com.emc.xcp.runtime.provider.DataProviderFactory$Builder.build(DataProviderFactory.java:126)
+       at com.emc.xcp.runtime.provider.DataProviderFactory.createEventDataProvider(DataProviderFactory.java:32)
+       at com.emc.xcp.runtime.provider.DataProviderUtils.createDataProviders(DataProviderUtils.java:170)
+       ... 67 more
+Caused by: com.emc.xcp.runtime.XCPRuntimeException: Error occurred while loading data
+       at com.emc.xcp.runtime.provider.PersistenceDataProvider.loadDataForDataTree(PersistenceDataProvider.java:85)
+       at com.emc.xcp.runtime.provider.PersistenceDataProvider.<init>(PersistenceDataProvider.java:42)
+       at com.emc.xcp.runtime.provider.EventDataProvider.createPersistentDataProvider(EventDataProvider.java:81)
+       at com.emc.xcp.runtime.provider.EventDataProvider.<init>(EventDataProvider.java:55)
+       at com.emc.xcp.runtime.provider.DataProviderFactory$Builder.build(DataProviderFactory.java:117)
+       ... 69 more
+Caused by: DfIdNotFoundException:: THREAD: default task-54; MSG: [DM_API_E_EXIST]error:  "Document/object specified by 0b0225498065d04f does not exist."; ERRORCODE: 100; NEXT: null
+       at com.documentum.fc.client.impl.docbase.DocbaseExceptionMapper.newException(DocbaseExceptionMapper.java:49)
+       at com.documentum.fc.client.impl.connection.docbase.MessageEntry.getException(MessageEntry.java:39)
+       at com.documentum.fc.client.impl.connection.docbase.DocbaseMessageManager.getException(DocbaseMessageManager.java:137)
+       at com.documentum.fc.client.impl.connection.docbase.netwise.NetwiseDocbaseRpcClient.checkForMessages(NetwiseDocbaseRpcClient.java:329)
+       at com.documentum.fc.client.impl.connection.docbase.netwise.NetwiseDocbaseRpcClient.applyForObject(NetwiseDocbaseRpcClient.java:672)
+       at com.documentum.fc.client.impl.connection.docbase.DocbaseConnection$8.evaluate(DocbaseConnection.java:1382)
+       at com.documentum.fc.client.impl.connection.docbase.DocbaseConnection.evaluateRpc(DocbaseConnection.java:1141)
+       at com.documentum.fc.client.impl.connection.docbase.DocbaseConnection.applyForObject(DocbaseConnection.java:1374)
+       at com.documentum.fc.client.impl.docbase.DocbaseApi.parameterizedFetch(DocbaseApi.java:107)
+       at com.documentum.fc.client.impl.objectmanager.PersistentDataManager.fetchFromServer(PersistentDataManager.java:191)
+       at com.documentum.fc.client.impl.objectmanager.PersistentDataManager.getData(PersistentDataManager.java:82)
+       at com.documentum.fc.client.impl.objectmanager.PersistentObjectManager.getObjectFromServer(PersistentObjectManager.java:355)
+       at com.documentum.fc.client.impl.objectmanager.PersistentObjectManager.getObject(PersistentObjectManager.java:311)
+       at com.documentum.fc.client.impl.session.Session.getObject(Session.java:965)
+       at com.emc.xcp.runtime.provider.FullFetchLoader.execute(FullFetchLoader.java:43)
+       at com.emc.xcp.runtime.provider.PersistenceDataProvider.fullFetchDataTree(PersistenceDataProvider.java:92)
+       at com.emc.xcp.runtime.provider.PersistenceDataProvider.loadDataForDataTree(PersistenceDataProvider.java:83)
+       ... 73 more
+Caused by: DfException:: THREAD: default task-54; MSG: [DM_SYSOBJECT_E_CANT_FETCH_INVALID_ID]error:  "Cannot fetch a sysobject - Invalid object ID : 0b0225498065d04f"; ERRORCODE: 100; NEXT: null
+       ... 90 more

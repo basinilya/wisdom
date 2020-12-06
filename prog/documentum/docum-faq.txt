@@ -1,3 +1,14 @@
+Q: Create object fails with error from DB:
+  ERROR: INSERT has more expressions than target columns
+  OR
+  ORA-00913: too many values
+
+A:
+  On all CS nodes:
+  API>flush,c,ddcache,object_type i.e. Where object Type is your custom type
+  
+  and restart them
+
 Q: On Postgresql, save on a locked database row  fails after 10 seconds with: canceling statement due to statement timeout
 A: 
   When you call save() on a new dm_folder object, the Content Server sends this SQL command:

@@ -1,4 +1,13 @@
 ﻿===== do not remove first line ==========
+Q: Error Message :can't parse argument number: CompositeNode [name=event]=...
+A:
+  xCP has the following bug in Business Events:
+  If in a single thread you have one session with an active transaction and one session without a transaction and in the
+  transaction you create an object with a business event and don't commit then if you try to save any other xCP object
+  in the non-transacted session, xCP will try to run the pending business events using this non-transacted session.
+  Since the session that created the new object did not commit, the business event will fail to fetch the object because
+  it's not visible yet from the non-transacted session.
+
 Q: Process ... already exists in the docbase.
 A:
   - If possible, delete the artifact from the project and deploy, then undelete the artifact and deploy again
@@ -990,7 +999,7 @@ A:
   Instead, use the "on page load" or "on fragment load" event
   set value:
     '
-    <style onload=\'this.removeAttribute("onload"); console.log(this)\'></style>
+    <style onload=\'this.removeAttribute("onload"); console.log(this);\'></style>
     '
 
   "this" evaluates to the raw <style> element.
@@ -1097,3 +1106,18 @@ A:
   xcp.event.ApplicationEvent.getEventData (name, pageContext)
   pageContext is the context in which you're reading event data, not the context when it was fired
   pageContext can be undefined
+
+Q:
+A: 
+com.emc.xcp.rest.core.commons.service.impl.BusinessDataSerializerServiceImpl.serializeJson(BaseDO, boolean)
+
+Q: Invalid configuration dir [...\target\m2e-webby\container]
+A: delete target\m2e-webby\container and refresh the xCP project
+
+Q: standard "Create" interaction result object id
+A:
+  Impossible. xCP 2.1 Self Paced Tutorial v1.1.pdf suggests returning to the search page:
+    Click on the Create button and you should see a message near the top of
+    your screen indicating that the creation of the new Policy was a success.
+    The application should redirect you back to the Policy Search page each
+    time.

@@ -1,3 +1,6 @@
+Q: exec_sql with select
+A: Since D7: execute exec_select_sql with query = '...';
+
 Q: change sysobject type (convert to another type)
 A:
   CHANGE current_type [(ALL)] OBJECT[S]
@@ -53,6 +56,9 @@ Q: date in utc
 A: select DATE('2020-12-31 12:00:00utc', 'yyyy-mm-dd hh:mi:ss') from dm_docbase_config ;
 
 Q: dual
+A: select 'aaa' as x from dm_docbase_config
+
+Q: Current CLIENT date
 A: select date(now) as x from dm_docbase_config
 
 Q: dm_relation has no r_object_type, but relation_name may differ from its actual type

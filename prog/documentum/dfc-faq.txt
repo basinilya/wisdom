@@ -1,3 +1,14 @@
+Q: Runnable that throws DfException
+A: IDfRegistryPlayback
+
+Q: large content
+A: 
+  - !!! IDfSysObject#getCollectionForContent / IDfContentCollection#seek 
+  - IDfSysObject#getFile
+  - !!! do not use IDfSysObject#getContent for large content
+  - ISysObjectInternal#getStream - if no need to seek
+  https://web.archive.org/web/20180608194643/https://blog.documentum.pro/2014/08/12/dealing-with-large-content/
+
 Q: Add C:\Documentum\config to run classpath in IDE for a Maven project
 A: 
   <properties>

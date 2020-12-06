@@ -1,3 +1,18 @@
+Q: multiple namespaces
+A:
+  If package-info.java annotated with @XmlSchema exists, the annotation must have elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED
+  otherwise marshaller will produce unqualified sub-elements (invalid)
+
+  If a default namespace is needed, add the other @XmlSchema property with an empty prefix:
+  xmlns = { @javax.xml.bind.annotation.XmlNs(prefix = "", namespaceURI = "http://some") }
+
+  If multiple java packages with an empty prefix are in JAXB context the parent element's namespace will be used as default and the others will be qualified.
+
+
+
+elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED
+
+
 Q: dynamic tag names with jaxb
 A: 
   Instantiate org.w3c.dom.Element or JAXBElement and assign to a property marked with @XmlAnyElement
