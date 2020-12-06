@@ -13,3 +13,27 @@ Q: selector for component of type
 A: just the type name, no equal sign or "xtype="
   Ex: grid.getDockedItems('pagingtoolbar')[0].setHidden(true)
 
+
+Q: add a property to existing class
+A:
+    Ext.define(null,{
+      override: "xcp_folderlist_0",
+      config : {
+        // this will generate getter/setter in .prototype
+        xcpId: null
+      },
+      constructor: function() {
+        this.callParent(arguments);
+        console.log(this.$className + " is instantiated");
+      },
+      applyXcpId: function(x) {
+        // this optional function allows check/modify value being set
+        console.log("setting xcpId" + x);
+        return x;
+      }
+    }, function() {
+      var clazz = this;
+      console.log(clazz.$className + " is overriden");
+      // do not pass getter/setter directly to allow override them.
+      Object.defineProperty(clazz.prototype, "xcpId", {configurable: true, get: function() { return this.getXcpId(); }, set: function(x) { this.setXcpId(x); } });
+    });
