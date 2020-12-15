@@ -1,3 +1,20 @@
+Q:  get sysobject attribute after calling destroy()
+A:
+  destroy() removes itself from the cache and it marks the data as stale so if you still have a reference
+  to the object with isDeleted() == true, trying to get an attribute will fail because of the refresh attempt.  
+  The only way is to read the data with reflect:
+  
+        IPersistentObject saveObj = (IPersistentObject) obj;
+        if (saveObj instanceof IProxyHandler) {
+            saveObj = (IPersistentObject) ((IProxyHandler) saveObj).____getImp____();
+        }
+        final Class<?> clazz1 = DfTypedObject.class;
+        final Field field = clazz1.getDeclaredField("m_data");
+        field.setAccessible(true);
+        final ITypedData data = (ITypedData) field.get(saveObj);
+        final String objectName = data.getString("object_name");
+        System.out.println(objectName);
+
 Q: Runnable that throws DfException
 A: IDfRegistryPlayback
 

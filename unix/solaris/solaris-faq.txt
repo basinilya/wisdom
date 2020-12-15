@@ -1,0 +1,291 @@
+Q: change timezone
+A: adjust the TZ line in /etc/default/init
+----------------------------------------------------
+Q: default ps format
+A: ps -o pid,tty,time,comm
+----------------------------------------------------
+Q: ps with -f and pgrp and -u
+A: ps -u tester -o pgid,pid,tty,time,args | sort
+----------------------------------------------------
+Q: strace
+A: truss
+----------------------------------------------------
+Q: mount -obind
+A: mount -F lofs
+----------------------------------------------------
+Q: shutdown commands 
+A: 
+# graceful:
+shutdown -i5 -g0 -y
+# quick:
+poweroff
+----------------------------------------------------
+Q: I have no network after install
+A: check /dev/{eri,pcn*,?1000*}, also 'ifconfig -a'
+----------------------------------------------------
+Q: I have /dev/pcn0 but ifconfig -a does not show it
+A: ifconfig pcn0 plumb
+if OK create /etc/hostname.pcn0 (do NOT replace "hostname" with actual host name!")
+this will tell the startup scripts to plumb this interface
+----------------------------------------------------
+Q: I don't have my adapter in /dev/
+A: ls /devices/*/*{eri,pcn,1000}*
+Then create symlinks. Example:
+ln -s "../devices/pci@0,0/pci8086,1e@3:e1000g0" /dev/e1000g0
+ln -s "../devices/pci@0,0/pci8086,1e@8:e1000g1" /dev/e1000g1
+----------------------------------------------------
+Q: how to enable dhcp client for pcn0?
+A: ifconfig pcn0 dhcp start
+if OK create /etc/dhcp.pcn0
+this will tell the startup scripts to start dhcp for pcn0
+----------------------------------------------------
+Q: initial place where the qualified host name is stored (in case that DHCP didn't provide a host name)
+A: /etc/nodename
+----------------------------------------------------
+Q: dns names not resolved
+A: cp /etc/nsswitch.dns /etc/nsswitch.conf
+----------------------------------------------------
+Q: tar + gunzip
+A: gzcat filename.tar.gz | tar -xpf -
+----------------------------------------------------
+Q: package manager
+A: pkgadd
+----------------------------------------------------
+Q: list installed packages
+A: pkginfo
+----------------------------------------------------
+Q: list regular files owned owned by package
+A: 
+pkgchk -l SMCgit | sed -n -e '/Type: regular file/{g;p;b}' -e 's/^Pathname: //;h;t L' -e 'b;:L'
+TODO: adapt for solaris sed
+----------------------------------------------------
+Q: show owner package that owns the file
+A: pkgchk -l -p path-to-file
+NOTE: this form checks installed packages only. 'man' says that with option '-d' you can search the specified repo, but actually in this case pkgchk reports that paths are in "private format", so that doesn't work
+----------------------------------------------------
+Q: install tar.gz package
+A: 
+bash -c 'd=`mktemp -d` && gzip -dc "$1" | ( cd $d && tar -xf - ) && cd $d && rm -rf ./*/ && pkgadd -d * && cd / && rm -rf $d' x SCPrap-2_7_0_12.tar.gz
+----------------------------------------------------
+Q: install gzipped package
+A:
+set "CSVNclnt-1.6.2.1-x86-local.gz"
+
+exec 3<&0 ; gzip -dc "$1" | ( exec 4<&0 0<&3 ; pkgadd -d /dev/fd/4 )
+
+PIPE=`mktemp -u`; mkfifo "$PIPE" && ( gunzip -c "$1">"$PIPE"& pkgadd -d "$PIPE"; rm "$PIPE" )
+# or more failsafe:
+#until PIPE=`mktemp -u` && mkfifo "$PIPE"; do echo tmpfifo not created; done && ( gunzip -c CSVNclnt-1.6.2.1-x86-local.gz>"$PIPE"& pkgadd -d "$PIPE"; rm "$PIPE" )
+----------------------------------------------------
+Q: unpack # PaCkAgE DaTaStReAm
+A: pkgtrans $file $dir
+----------------------------------------------------
+Q: no sudo
+A: 
+# execute without login, like normal sudo:
+su root -c "echo \$HOME; pwd"
+su root -c 'echo $HOME; pwd'
+# execute with login, NOT preserving current dir:
+su - root -c "echo \$HOME; pwd"
+su - root -c 'echo $HOME; pwd'
+# execute with login, preserving current dir:
+su - root -c "cd \"`pwd`\" || exit; echo \$HOME; pwd"
+su - root -c 'cd "'`pwd`'" || exit; echo $HOME; pwd'
+
+NOTE: even with '-' option, 'su - user -c "command"' doesn't run all profile files that normally run withoit '-c' option
+----------------------------------------------------
+Q: no "cp -a" or "cp -pPR"
+A: use /bin/tar to copy
+----------------------------------------------------
+Q: cp doesn't copy broken symlinks
+A: That's cp bug
+   use /bin/tar to copy
+----------------------------------------------------
+Q: ntp
+package: SUNWntpu
+conf: /etc/inet/ntp.conf
+    server ntp.some.org
+    driftfile /var/ntp/ntp.drift
+
+#server gate.foo.org
+#driftfile /var/ntp/ntp.drift
+
+svcadm enable ntp
+#? svcadm restart ntp
+----------------------------------------------------
+Q: samba (Solaris 10 way)
+A: 
+pkgadd SUNWsmbac SUNWsmbar SUNWsmbau
+cat /etc/sfw/smb.conf
+svcadm disable samba
+svcadm enable samba
+svcadm restart samba
+ps -Af | grep mbd
+svcs -x samba
+
+
+## re-read config
+ kill -HUP `cat /var/samba/locks/smbd.pid`
+ kill -HUP `cat /var/samba/locks/nmbd.pid`
+
+tail -f /var/samba/log/log.smbd
+
+
+----------------------------------------------------
+Q: samba service exits with err 255
+A: try cleaning: rm -rf /var/samba /etc/sfw/private/secrets.tdb /etc/sfw/private/smbpasswd
+ and reinstall packages:
+pkgadd SUNWsmbac SUNWsmbar SUNWsmbau
+mkdir -p /var/samba/log
+----------------------------------------------------
+Q: Why can't I create a home directory under /home? 
+A: not recommended: remove the "/home" entry from /etc/auto_master (and issue the command "automount -v" to force the file to be reread, or reboot). 
+----------------------------------------------------
+Q: add user (autofs way)
+A:
+ TEHUSER=tester
+ # create home dir and copy profile skeleton
+ useradd -m -d /export/home/$TEHUSER -s /bin/bash $TEHUSER
+ # change home dir to auto_fs
+ usermod -d /home/$TEHUSER $TEHUSER
+ # enable automount of home dir
+ echo "$TEHUSER localhost:/export/home/&" >> /etc/auto_home
+ # re-read /etc/auto_home
+ svcadm restart autofs
+ # unlock user
+ passwd -u $TEHUSER
+ # set user password
+ passwd $TEHUSER
+ # test user
+ su - $TEHUSER
+----------------------------------------------------
+Q: delete user (autofs way)
+A:
+ TEHUSER=someuser
+ # unmount home dir
+ umount /home/$TEHUSER
+ # remove from automount
+ grep -v "$TEHUSER " /etc/auto_home | ( rm /etc/auto_home && cat > /etc/auto_home )
+ # delete user
+ userdel $TEHUSER
+ # re-read /etc/auto_home
+ svcadm restart autofs
+----------------------------------------------------
+Q: no sshd log
+A: Add to /etc/syslog.conf:
+auth.info			/var/log/authlog
+
+and restart syslog service by
+svcadm restart svc:/system/system-log:default
+----------------------------------------------------
+Q: sshd-pubkey attempting to validate locked account
+A: passwd -u $user
+----------------------------------------------------
+Q: mount iso image
+A: 
+mkdir /mnt/iso1
+lofiadm -a /mnt/there/sol-10-u6-ga1-sparc-v1.iso
+mount -F hsfs /dev/lofi/1 /mnt/iso1
+----------------------------------------------------
+Q: solaris sed features
+A:
+not working: 
+ - end of line in group: \($\)
+ - logical or: \|
+ - semicolon after label: :foo;
+----------------------------------------------------
+Q: partition & format tools
+A: prtvtoc, fdisk (x86 only), format
+----------------------------------------------------
+Q: adding swap file
+A:
+# # Use mkfile to create a file suitable for a local swap area
+# /usr/sbin/mkfile 1024m /swap
+# # Tell the system to start using the file as swap
+# /usr/sbin/swap -a /swap
+# # Use swap -l to verify that the swap file has been activated
+# swap -l
+# # Add an entry for the swap file in the /etc/vfstab
+# echo "/swap   -      -       swap     -     no     -" >>/etc/vfstab
+----------------------------------------------------
+Q: no top
+A: prstat
+----------------------------------------------------
+Q: no free
+A: vmstat
+----------------------------------------------------
+Q: no ping
+A:
+----------------------------------------------------
+Q: no UTF-8 locales in `locale -a` output
+A: pkgadd -d /cdrom/cdrom0/Solaris_10/Product $pkgname
+
+  !!! if pkgadd prints: WARNING: xxx is a prerequisite package and should be installed
+  !!! then install the prerequisite first. It's not installed automatically
+
+  Leaf Packages:
+    American English/UTF-8
+    SUNWweuos 
+    en_GB.UTF-8
+    
+    Northern America OS Support
+    SUNWnamos
+    en_US.ISO8859-1
+    
+    American English/UTF-8
+    SUNWeu8os
+    en_US.UTF-8
+
+----------------------------------------------------
+Q: restart nfsmapid
+A:
+svcadm restart mapid
+svcs -x mapid
+----------------------------------------------------
+Q: My unqualified host name (localhost) unknown; sleeping for retry
+A: /etc/hosts: 127.0.0.1 localhost my my.localnet
+----------------------------------------------------
+Q: find cdrom device
+A: iostat -En
+----------------------------------------------------
+Q: ssh
+A: server SUNWsshdr
+   client SUNWsshu
+
+# Generate host keys;
+/lib/svc/method/sshd -c
+# start daemon
+svcadm enable ssh
+svcadm restart ssh
+----------------------------------------------------
+Q: ssh delay Between issuing the ssh command and getting a login prompt
+A: try to start ssh daemon in debug mode: /usr/lib/ssh/sshd -D -ddd
+And try to connect.
+The last line of debug output may contain the cause.
+The most common cause of delay is an attempt to reverse the client address.
+On modern OpenSSH you can 'UseDNS no' in sshd_config.
+On older OpenSSH add client ip to /etc/hosts
+----------------------------------------------------
+Q: ps -f truncates command line
+A: /usr/ucb/ps -auxww
+----------------------------------------------------
+Q: print binary rpath
+A: /usr/ccs/bin/dump -Lv /usr/local/bin/git | egrep 'RPATH|RUNPATH'
+----------------------------------------------------
+Q: development tools
+A:
+  two options: UCB or GCC
+  
+  UCB:
+    The wrapper script /usr/ucb/cc simply calls /usr/ccs/bin/ucbcc which is part of SPROcc
+    The package SPROcc is not bundled with Solaris. Probably available as part of SolarisStudio12.3-solaris-x86-pkg.tar.bz2
+  
+  GCC:
+    Install from DVD:
+    SUNWgcc SUNWgmake SUNWgtar
+    installed to /usr/sfw/bin/
+    gmake gtar gar etc. binaries have the 'g' prefix
+----------------------------------------------------
+Q: git 1.7 over http truncates password entered in terminal
+A: On Solaris getpass(3) silently truncates to 8 chars, Git needs a patch to use getpassphrase() instead.
+----------------------------------------------------
