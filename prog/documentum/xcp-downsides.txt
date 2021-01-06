@@ -1,0 +1,101 @@
+DRAFT
+
+Maximum artifact system name length is too small, especially for UI events and Action Flow Steps
+
+Hard to find a widget by id when designing a page
+
+Hard to drag Column Boxes with blank title
+
+Fragment Containers do not respect parent's Margin Left value
+
+Unable to categorize artifacts in folders, especially Processes and UI Events
+
+Data Source identifiers used in expressions are not descriptive and are not renamed when a data source label changes
+
+Having only one active user role at time is inconvenient
+
+Cannot clear button action, have to switch to another action and then delete that action
+
+Confirmation and success message setup differ for buttons with actions and actions subscribed to button click event
+
+Action Flow cannot be configured to publish an event on cancel
+
+Weak and buggy expression language:
+- Cannot use a variable as an array index
+- The word 'return' in string literals makes the expressions fail to compile
+- { '42' }[0] evaluates to '4' instead of '42'
+- empty array is forbidden: {}
+- no implicit cast of ANY to expected function parameter type
+- The unique id of the current page instance cannot be determined. Have to use the arguments.callee.caller.arguments hack as in xcp.functions.event.getLastEventData
+
+Cannot pass observables as outputs of nested Page Fragments
+
+Cannot reorder columns in design mode
+
+Not all expressions are validated. For instance, data action Custom Error Message is not
+
+Relations can't have "Create" UI with automatic load of defaults
+
+Cannot get r_object_id of an object created with the standard "Create" data action.
+
+Cannot obtain the path of the currently selected object in a Folder View in case it has multiple parents.
+
+Cannot programmatically select a non-folder object in a Folder View
+
+Cannot increase the Preview Mode Console Buffer size
+
+Cannot remove a corrupted project from Recent Applications
+
+Fragment Outputs of type Model cannot be stateless process results
+
+Fragment Outputs of type Model cannot be repeating
+
+Statless Processes cannot have context menus
+
+Identically named widgets in a Page Fragment and its parent page cause glitches
+
+Can only use Outputs in expressions inside Results List columns. Cannot use other widgets or data actions 
+
+xCP lacks the concept of constants. As a workaround, we use session variables with pre-defined values and make sure we never assign these variables. The Application Parameters aren't suitable for that purpose becuase previously set values are not replaced with the new values on deploy.
+
+Cannot use Picklist values or labels in expressions (to make sure at compile time a value is contained in a picklist).
+
+Maximum Picklist value or label length of 60 characters is too small.
+
+Hidden Results List columns not exported to CSV.
+
+Radio Group cannot be cleared programmatically
+
+Radio Group cannot treat its labels as HTML and render without escaping
+
+Cannot handle Destroy or Destroy All Versions with business events
+
+"Unrelated" business event is not fired when a related object is destroyed
+
+Cannot edit custom attributes of relations. Have to unrelate/relate again.
+
+Number Input cannot be cleared programmatically
+
+Drop-down List lacks the public and subscribable "selectedchange" event
+
+Events are reordered in XML when edited (bad for version control)
+
+Random XML elements disappear or appear with a blank value in XML when saving an artifact (bad for version control)
+
+Process Activity XML is a one long line instead of CDATA (bad for version control)
+
+An expression is a one long line instead of CDATA (bad for version control)
+
+When working with huge forms (20+ input fields) have to repeat same set of actions:
+- add a process variable (and mark as input)
+- map a field to the process input
+- map the process variable to a java property with the copy function
+The mapping page becomes a mess because the variables and the java properties aren't sorted.
+
+
+We can't use a Page Fragment inside a Results List cell.
+We often need to display some tabular data in a one-column grid putting multiple widgets in a single cell. Now we resort to raw HTML inputs, but we lose the ability to calculate, validate, and react to events.
+
+Page Fragment inputs (even static values) are blank at time of Page Load and Fragment Load events. Data Actions marked "On Page Load" often send blank values because of that.
+
+Cannot use other attributes in the Attribute Default Value expression

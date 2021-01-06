@@ -1121,3 +1121,6 @@ A:
     your screen indicating that the creation of the new Policy was a success.
     The application should redirect you back to the Policy Search page each
     time.
+
+Q: detect designer mode design mode
+A: two flags exist with opposite meaning: xcp.isDesignMode === !xcp.runtimeMode
