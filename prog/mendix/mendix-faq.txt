@@ -1,0 +1,114 @@
+default administrator credentials, username: MxAdmin and password: 1
+
+Q: Before Commit returning false, but without error does not stop a microflow (it prevents "Save changes" on click action though)
+Some autocommitted objects still existed on logout for session 'demo_administrator'.
+Autocommitted objects are newly created objects which were not yet committed, but are inserted into the database because an associated object was committed.
+Autocommitted objects should explicitly have been committed, please check your model and apply the necessary changes. The autocommitted objects have been deleted from the database to prevent database corruption.Number of autocommitted objects per type which still existed for this session:
+- Expenses.TeamMember: 1 object(s).
+
+
+Q: Image Viewer not updated when new image is selected in Image Uploader widget
+
+Q: how to cancel changes when editor page abandoned by clicking navigation menu?
+
+
+Q: Theme Customizer page
+A: Mendix Studio, "brush" button at bottom-left
+
+Q: "Edit in Studio" button is missing
+A: Go to "My Apps", invoke the ellipsis "..." menu and click "Edit in Studio"
+
+Q: "Mendix Studio is not enabled for this app. Read how to enable Mendix Studio in https://docs.mendix.com/developerportal/settings/general-settings"
+A: In App Settings/General click "Enable Mendix Studio"
+
+Q: No Development Line Selected
+  Mendix Studio is not yet enabled for a development line of this app.
+  Assign it to a specific development line in Mendix Studio Pro to start
+  collaborative development!
+  https://docs.mendix.com/refguide/collaborative-development
+
+Q: "Could not enable the branch for Mendix Studio"
+
+Q: Regular input widgets label width
+
+Q:
+  From "Unlocking True Collaboration"
+  > Now you should be able to see the file in your project directory if you follow the path: Project directory/javasource/myfirstmodule/datasets/
+  Actually the data set is stored in the project .mpr file
+
+Q: This code from Crash Course needs a comment why "==" is used instead of equals():
+        public boolean hasRequiredSkill() {
+            return employee.getSkill().toString() == this.skill;
+        }
+        
+Q: Non-descriptive field names in generated code:
+  public class Java_action extends CustomJavaAction<java.util.List<IMendixObject>>
+  {
+  	private IMendixObject __Parameter;
+  	private usermanager.proxies.Employee Parameter;
+      private IMendixObject __Parameter_2;
+    
+
+Q: escaping in XPath and OQL
+
+Q: Why can I compare '[%CurrentUser%]' with the association Xxx.Xxx_Account and not Xxx.Xxx_Account/System.Account ?
+
+Q: unsaved changes on an in-memory object remain when you cancel editing
+
+Q: how to bookmark an application page?
+
+Q: Mobile-specific homepage only displayed in Mendix Mobile app, but not in mobile Chrome
+A:
+  There are eight Navigation Profiles that Mendix offers:
+      Responsive
+      Hybrid tablet app online
+      Hybrid tablet app offline
+    ! Hybrid phone app online
+      Hybrid phone app offline
+      Tablet browser
+    ! Phone browser
+      Native phone
+
+Q: My app doesn't have user management pages
+
+Q: "Free App" "Mxadmin" unknown user
+A: login as demo_administrator
+
+Q: two texts in one cell are sometimes positioned in one line
+A: change the Render mode from Text to Paragraph for text widgets so they will show up as separate pieces of text instead of on the same line
+
+Q: validation rule "unique" case sensitive?
+
+Q: run microflow on change of object attribute without Save changes
+
+Q: all validation messages from a microflow disappear if another microflow called "Change Object" with "Refresh on client"
+
+Q: refer "Done" stories in a commit?
+
+Q: add multiple tags to glyphicons and search by tags?
+
+Q: validation messages make page resize and the save button escapes from under the mouse cursor when trying to save
+
+Q: How to move arrows in Domain Model?
+A: Select the arersd and then drag its end along the border of an entity
+
+
+Q:
+  During the development of your app, you can preview it whenever you like. As long as nobody is using the app yet, this is perfectly safe to do. Once the app is in production” (meaning, it is being used by end-users), be careful to only publish the app once a feature is built completely. Otherwise, your end-users could be confronted with incomplete functionalities.
+  
+  Studio Pro will not allow you to preview while there are errors in your app, so you can’t accidentally break an app that’s running in production.
+
+  What?
+
+
+Q:
+Repeat these steps for the caption of the button.
+What?
+
+
+
+addDays($TrainingEvent/StartDate,
+$TrainingEvent/
+MyFirstModule.TrainingEvent_Course/
+MyFirstModule.Course/Duration)
+

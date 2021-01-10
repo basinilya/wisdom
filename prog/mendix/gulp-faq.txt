@@ -1,0 +1,34 @@
+Installation:
+Windows 7: node-v12.20.1-x64.msi
+Windows 10: node-v14.15.4-x64.msi
+
+https://github.com/mendix/ux-theming
+download latest Gulp.zip from Releases (tags)
+
+Extract Gulp.zip to project folder
+
+cd C:\project\folder
+npm install
+
+Add to svn:ignore:
+  Gulpfile.js
+  node_modules
+  package.json
+  package-lock.json
+
+
+npm run dev
+
+
+Q: Error: ENAMETOOLONG: name too long, stat 'C:\Users\il\Documents\Mendix\ExpensesApp-main\theme\styles\sass\theme\styles\sass\theme...
+A: 
+  
+  Gulpfile.js:
+  
+   // What is the name of the style folder in this theme folder?
+  -var sourceStyleFolder = 'theme/styles';
+  +var sourceStyleFolder = 'theme/styles/web';
+   
+   // What is the name of the style folder in the deployment folder?
+  -var deploymentStyleFolder = 'styles';
+  +var deploymentStyleFolder = 'styles/web';
