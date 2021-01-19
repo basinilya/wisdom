@@ -1,6 +1,6 @@
 DRAFT
 
-It's really hard to create chains of actions on client (especially with branching)
+It's really inconvenient to chain data actions on client (especially with conditionals and branching)
 
 Maximum artifact system name length is too small, especially for UI events and Action Flow Steps
 
