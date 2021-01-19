@@ -1,5 +1,7 @@
 DRAFT
 
+It's really hard to create chains of actions on client (especially with branching)
+
 Maximum artifact system name length is too small, especially for UI events and Action Flow Steps
 
 Hard to find a widget by id when designing a page
