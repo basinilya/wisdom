@@ -1,5 +1,123 @@
 default administrator credentials, username: MxAdmin and password: 1
 
+Q: When are alerts cleared?
+
+Q: if starting with Mendix 7 the object cache only exists on client how does the cached retrieve by association work?
+
+Q: Does "Custom with Rollback" rolls back the additional transactions created by "Custom without Rollback"?
+
+Q: Why at https://gettingstarted.mendixcloud.com/link/module/32/lecture/207/4.3-Knowledge-Check-%E2%80%93-Advanced-Error-Handling-Situations
+  Question 1: Consider the following scenario, in which the main microflow and the sub-microflow are invoked by the user. The main microflow has Custom without Rollback error handling, and the sub-microflow has Custom with Rollback error handling. In the sub-microflow below, what does the error event achieve?
+  [x]It causes the sub-microflow action in the main microflow to throw an error.
+  ?
+  "Custom without Rollback" does not throw, does it?
+
+
+Q: Why at https://gettingstarted.mendixcloud.com/link/module/32/lecture/207/4.3-Knowledge-Check-%E2%80%93-Advanced-Error-Handling-Situations
+  Question 4: What happens if the same microflows are used, but the error handling on the main microflow is Custom with Rollback and the error handling on the sub-microflow is Custom without Rollback?
+  [x]The Order, OrderLine, and Log objects are rolled back while the Customer object is committed to the database
+  ?
+  The accepted answer is the same as for Question 3 although the error from the java action is now handled with "Custom without Rollback" which should create a concurrent transaction for the "Create Log" action.
+  So the Log object should not be rolled back.
+  
+TBD: Savepoints or multiple transactions?
+If savepoints aren't used then a "Without rollback" error handling creates a new transaction while keeping the old transaction and both transactions are committed unless the calling microflow rolls back the first transaction. Then only the second transaction is committed.
+It seems that "With rollback" does not create a new transaction if there's a savepoint and continues in the same transaction from the savepoint. If there's no savepoint a new transaction is created.
+It seems that a savepoint is created before "Without rollback", but it's not created before "With rollback"
+    Q: What does Rollback do?
+    A: It rolls back to the most recent savepoint. If there's no savepoint the whole transaction is rolled back and a new transaction is started.
+    
+    Q: When is a savepoint created?
+    A: It's created before an action with a "Without rollback" error handling.
+
+Q: What if a sub-microflow saves to DB after error with or without rollback, then re-throws and the calling microflow rolls back?
+  https://gettingstarted.mendixcloud.com/link/module/32/lecture/294/4.1-Advanced-Error-Handling-Situations
+    https://gettingstarted.mendixcloud.com/file?guid=4222124650660791&changedDate=1611130719644
+    What happens to the $NewEmailError object?
+
+Q: What happens to non-persistable objects on transaction rollback?
+
+Q: why at https://gettingstarted.mendixcloud.com/link/module/31/lecture/292/3.5-Knowledge-Check-%E2%80%93-Error-Handling-Basics
+Question 2: What best describes the Custom without Rollback error handling option?
+[x]A new transaction is initiated, the microflow follows the designated error flow, and all the database commits preceding the error action are preserved.
+and not
+[ ]The existing transaction is continued, and all the changes made before and after the error will be committed to the database.
+
+Q: What happens to values of attributes of an object variable in a microflow after rollback? What happens to the cached objects after rollback?
+
+Q: View the development database
+A: Console view: Advanced/Start built-in database viewer (maybe requires a running app)
+
+Q: how to debug custom java
+
+Q: https://gettingstarted.mendixcloud.com/link/module/37/lecture/3066/4.4-Summary
+  > and discussed utilizing the power of the single sign-on
+  Where?
+
+Q: Why at https://gettingstarted.mendixcloud.com/link/module/36/lecture/200/3.4-Knowledge-Check
+  Question 4: In which of the following microflows would applying entity access NOT be recommended?
+  [x]A microflow to display a company overview to anonymous users.
+  and not
+  [ ]A microflow that generates a report on the productivity of all the app users.
+
+Q: How does Retrieve work in case of no read access to _some_ attributes?
+
+Q: Does Entity Access apply to Retrieve in Microflows without that checkbox checked?
+A: looks like it doesn't
+
+Q: Do Log Levels persist between runs in Studio Pro?
+
+Q: Why at https://gettingstarted.mendixcloud.com/link/module/374/lecture/3053/7.8-Knowledge-Check
+  Question 1: When localize is set to No, the date displayed in the client is based on the:
+  [x]Client time zone
+  and not
+  [ ]UTC value
+  ?
+
+  Question 3: If both the Project and User time zone are set, the value of the localized DateTime attribute displayed in the client is according to:
+  [x]The Client timezone
+  and not
+  [ ]The User timezone
+  ?
+
+
+Q: In what timezone do date arithmetic functions in microflows work, especially when working with non-localized date attributes?
+A: in the caller timezone. Alternatively, use the xxxUTC() variants of the functions like addDaysUTC()
+
+Q: how to change association direction in domain model?
+
+Q: how to change association owner in domain model?
+
+Q: Do non-persistable objects stay after page refresh?
+
+Q: When retrieving in batches with custom Limit/Offset it's very easy to miss some objects or process them twice if the records were deleted/inserted during retrieval
+
+Q: How to filter in Retrieve by ID? How to obtain the ID of an object? How to sort in Retrieve by ID?
+
+Q: Integrate Java Actions that use other logging frameworks
+
+Q: Jave Thread name in log messages to extract message sequences for specific threads.
+
+Q: Why instead of setting a role-based home page for Anonymous I have to make the login page default home page and set the role-based home page for every other role?
+
+Q: When uploading a logo via Theme Customizer (web) a GUID is appended to the file path in the .scss file. What is it?
+
+Q: Check the state of an object ("Instantiated", "Committed") without using java
+
+Q: ???
+A: data grid button "New" pre-associates the new object when the grid datasource is "By Association". It can't do that for other data sources.
+
+Q:
+  https://gettingstarted.mendixcloud.com/link/module/184/lecture/1440/4.3-The-Reference-Set-Selector
+  > The reference set selector is the widget you use in Mendix to select associated objects ...
+  > You can configure the widget to show the options in a dropdown or in a select page
+  You can't make it dropdown
+
+
+Q: buttons with pull-right class have inverted order in design mode
+
+Q: New pages not listed in "page access"
+
 Q: Before Commit returning false, but without error does not stop a microflow (it prevents "Save changes" on click action though)
 Some autocommitted objects still existed on logout for session 'demo_administrator'.
 Autocommitted objects are newly created objects which were not yet committed, but are inserted into the database because an associated object was committed.

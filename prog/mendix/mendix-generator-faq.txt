@@ -1,0 +1,28 @@
+## Install
+> npm install -g yo @mendix/generator-widget
+...
+Everything looks all right!
++ yo@3.1.1
++ @mendix/generator-widget@8.14.0
+
+
+## Create new widget in current folder
+#> yo @mendix/widget [widget-folder-name]
+
+> yo @mendix/widget enter-to-action
+...
+? What is the name of your widget? EnterToAction
+? Mendix project path C:\Users\il\Documents\Mendix\PluggableWidgetMicroLearning
+? Which type of widget are you developing? For web and hybrid mobile apps
+? Which template do you want to use for the widget? Empty widget (recommended for more experienced developers)
+? Add unit tests for the widget ? (recommended for Full Boilerplate) No
+? Add End-to-end tests for the widget ? (recommended for Full Boilerplate) No
+
+
+## Add
+# Refresh in Mendix Studio Pro (F4)
+# Right click a container, "Add widget", widget name: Enter To Action
+
+## Open in Visual Studio Code
+> code .\enter-to-action\
+

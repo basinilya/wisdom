@@ -1,0 +1,4 @@
+Stateless Process -> Microflow
+Activity -> Action
+Fragment -> Snippet
+Parameters -> "Constants"
