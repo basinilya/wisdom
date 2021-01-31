@@ -8,6 +8,9 @@ Everything looks all right!
 
 ## Create new widget in current folder
 #> yo @mendix/widget [widget-folder-name]
+# (generator 2x instructs:
+#> yo mendix
+# but this does not work in generator 8x)
 
 > yo @mendix/widget enter-to-action
 ...
@@ -26,3 +29,31 @@ Everything looks all right!
 ## Open in Visual Studio Code
 > code .\enter-to-action\
 
+
+
+
+project path goes to package.json
+Description goes to src/EnterToAction.xml
+
+Widget properties are defined in src/EnterToAction.xml
+See https://docs.mendix.com/apidocs-mxsdk/apidocs/property-types-pluggable-widgets-8#1-introduction
+
+
+
+
+Widget properties are accessible via component's this.props dictionary
+
+Main component class defined in src/EnterToAction.jsx
+Subcomponents defined in src/components/*.jsx
+
+
+## Build widget .mpk
+> cd enter-to-action
+> npm run build
+
+
+# If only javascript has changed, but not the widget definition, then it's enough to hard refresh the browser page after npm run build without restarting the app.
+
+
+javascript APIs:
+https://docs.mendix.com/apidocs-mxsdk/apidocs/client-apis-for-pluggable-widgets-8

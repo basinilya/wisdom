@@ -1,5 +1,47 @@
 default administrator credentials, username: MxAdmin and password: 1
 
+Q: get current request
+A:
+	// BEGIN EXTRA CODE
+	private String getClientIp() {
+		IContext ctx = getContext();
+		Optional<IMxRuntimeRequest> orr = ctx.getRuntimeRequest();
+		String realIP = null;
+		if (orr.isPresent()) {
+		    IMxRuntimeRequest rr = orr.get();
+		    HttpServletRequest request = rr.getHttpServletRequest();
+		    realIP = rr.getHeader("X-Real-IP");
+		    if( realIP == null )
+		        realIP = rr.getHeader("X-Forwarded-For");
+		    if( realIP == null )
+		        realIP = rr.getRemoteAddr();
+		}
+		return realIP;
+	}
+	// END EXTRA CODE
+
+Q: list view classes
+A: 
+  ,
+
+Q: Ternary operator (?:) in expressions
+A: In Mendix if-then-else is not void and can be used in expressions: 'c' + (if true then 'a' else 'u') + 't'
+
+Q: What kind of tokens does the at-sign (@) precede in expressions? Ex:
+  @EPM_REF_APPS_PROD_MAN_SRV.EPM_REF_APPS_PROD_MAN_SRV + '/' + toString (EPM_REF_APPS_PROD_MAN_SRV.EntitySetNames.Products) + '?$filter=substringof(SubCategoryName,''' + urlEncode($SearchCriteria/Term) + ''')'
+A: Constants
+
+Q: How to implement a custom microflow activity that runs other activities placed in it just like the Loop activity does?
+
+Q: Custom functions in expressions (client or runtime or both)?
+
+Q: How to delay searching in a data widget until the search button is pressed?
+
+Q: Custom widget with a property where I select another widget on the page?
+A: You can't. Instead use a string property and use the widget name. See List View Swipe/Target list view.
+  Or have no property and just dynamically find the adjacent widget. See List View controls.
+  Or if the widget to choose is an input widget then use a property of type "Attribute" and set it to the same attribute as the input widget. Then find the widget by the attribute.
+
 Q: When are alerts cleared?
 
 Q: if starting with Mendix 7 the object cache only exists on client how does the cached retrieve by association work?
@@ -127,6 +169,8 @@ Autocommitted objects should explicitly have been committed, please check your m
 
 Q: Image Viewer not updated when new image is selected in Image Uploader widget
 
+Q: How does the Image Uploader widget subscribe to the form submit and how does it distinguish real submit and the cancel action? How does it make sure the upload precedes the user-configured action?
+
 Q: how to cancel changes when editor page abandoned by clicking navigation menu?
 
 
@@ -168,6 +212,12 @@ Q: Non-descriptive field names in generated code:
     
 
 Q: escaping in XPath and OQL
+
+Q: escaping in expressions
+A: partial answer: SQL-like
+  @GWSAMPLE_BASIC.GWSAMPLE_BASIC + '/' + toString(GWSAMPLE_BASIC.EntitySetNames.ProductSet) + '(''HT-1000'')'
+  This produces the GET request https://sapes5.sapdevcenter.com/sap/opu/odata/iwbep/GWSAMPLE_BASIC/ProductSet('HT-1000')
+
 
 Q: Why can I compare '[%CurrentUser%]' with the association Xxx.Xxx_Account and not Xxx.Xxx_Account/System.Account ?
 
@@ -222,6 +272,8 @@ Q:
 Q:
 Repeat these steps for the caption of the button.
 What?
+
+
 
 
 
