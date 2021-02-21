@@ -1,3 +1,52 @@
+Q: Scene detection
+A:
+https://stackoverflow.com/a/38205105/447503
+
+Combining the scene filter (for detecting scene changes) and the showinfo filter should achieve what you want:
+
+    ffmpeg -i input.flv  \
+           -filter:v "select='gt(scene,0.4)',showinfo" \
+           -f null \
+           - 2> ffout
+
+This command extracts all frames that differ from the previous frame by more than (gt) 0.4 (on a scale from 0 to 1). For these frames, information is printed out (showinfo) like this       
+
+    [Parsed_showinfo_1 @ 0x2d85e60] n:   0 pts:2537204 pts_time:2.5372  pos:  2998114 fmt:rgb24 sar:1/1 s:1920x1200 i:P iskey:1 type:I checksum:5616582E plane_checksum:[5616582E]
+
+Now you only have to extract the timestamp. I think you're interested in pts_time. You could do it like this:
+
+    grep showinfo ffout | grep pts_time:[0-9.]* -o | grep [0-9.]* -o > timestamps
+
+This will give you the list of all timestamps:
+
+    2.5372
+    4.37799
+    6.65301
+    8.09344
+
+For this approach to work, you must have a version of FFmpeg that implements the scene detection. Also, you have to select a suitable value for the threshold (0.4 in the first command). You can try to find an optimal threshold by extracting frames for different thresholds (and afterwards examine the frames manually) like this
+
+    ffmpeg -i input.flv \
+           -filter:v "select='gt(scene,0.1)',showinfo" \
+           -vsync 0 frames/%05d.jpg
+       
+
+I don't have the rep to post a comment on the above answer but I wanted to point out that the grep posted by both @ckoehn and @keypulsations will only grab timestamps which are floating point. To grab both floating point and integer timestamps use the following regex
+
+    grep showinfo ffout | grep pts_time:[0-9.]* -o | grep -E '[0-9]+(?:\.[0-9]*)?' -o > timestamps
+
+You can simply use the command:
+
+ffmpeg inputvideo.mp4 -filter_complex "select='gt(scene,0.3)',metadata=print:file=time.txt" -vsync vfr img%03d.png
+
+This will save just the relevant information in the time.txt file like below.
+
+    frame:0    pts:108859  pts_time:1.20954
+    lavfi.scene_score=0.436456
+    frame:1    pts:285285  pts_time:3.16983
+    lavfi.scene_score=0.444537
+
+
 Q: remove audio track
 A: ffmpeg -i example.mkv -c copy -an example-nosound.mkv
 

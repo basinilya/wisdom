@@ -1,0 +1,250 @@
+At time Orange Pi Lite wi-fi only works in Armbian. The debian image does not detect the device
+journalctl for NetworkManager shows the wlan model: rtl871x
+
+# Download
+https://www.armbian.com/orange-pi-lite/
+Scroll to the bottom, choose the stable image. Buster Desktop is the biggest.
+
+https://armbian.hosthatch.com/dl/orangepilite/archive/Armbian_21.02.1_Orangepilite_buster_current_5.10.12_desktop.img.xz
+
+! important, check in Disk Management !
+sdcard=/dev/sdc
+
+dd if=/dev/zero count=1 of="${sdcard:?}"
+
+sync
+
+# reload without replug
+diskaprt blah blah
+
+# Write to sd-card
+<Armbian_21.02.1_Orangepilite_buster_current_5.10.12_desktop.img.xz pv -B1m | xz -dc | dd bs=1M of="${sdcard:?}"
+
+sync
+
+==== BEGIN: Optional: Connect wi-fi before 1st boot ======
+
+==== Armbian way
+
+Mount (armbian does not have separate /boot partition)
+edit boot/armbian_first_run.txt
+( boot/armbian_first_run.txt.template )
+
+FR_net_wifi_enabled=1
+FR_net_wifi_ssid='MySSID'
+FR_net_wifi_key='MyWiFiKEY'
+
+====
+
+
+
+# reload without replug
+diskaprt blah blah
+
+Mount,
+
+/etc/rc.local :
+sleep 10 # just in case since this is a dirty workaround
+nmcli dev wifi connect "mySSID" password "mypwd" 
+#nmcli device wifi connect UUID
+#echo "password"| nmcli --ask c up UUID
+
+==== END: Optional: Connect wi-fi before 1st boot ======
+
+Unplug
+
+First boot
+
+- Auto expands the partition to the entire sd-card
+- Prompts to create the new root password
+- Prompts to enable desktop
+- Prompts to create the new regular user name
+- Prompts to create the new regular user password
+
+
+Login to xfce as regular user
+
+Settings Manager/Accessibility/Mouse/Enable emulation
+
+
+Setup Wi-Fi
+
+Connect with SSH. Host name: orangepilite
+
+# in case you have more than MaxAuthTries=6 keys in your agent
+SSH_AUTH_SOCK= ssh -i /dev/null root@orangepilite
+
+- install ssh key
+fn_commands() {
+cat <<'EOFCONF'
+    key='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC3rIgFDr6UGsBvXDPj+c2fxnORCdW4tYzGbrvonoxDXADGo4MJMulfKsVyI3HJZ4vO6asx4q8X13NAWXL/KXc6hnd/5qA4lmamY/X0niY1jkfApmrkhFohiDtly23onT6LetK8/kAsfG7ltTghkZkYSk7MxYMqv8j9XR8MqftjhwyiIWV7K0bf4XF8aJRN8T2f69se9pVpqxNUCVi2slRUXK8qtcxLWPdVK6o0lxGqru7cIkBRHtmA/DKdrOnCoT2SUE9OgmKJuKXMr1p640IDqWbXy0lDHaVPrgSZ9ykHZFaqlamMtuCiPcLxccVfOKIW3iC7wbp/SNQaRe4u0d//oBksxCk2DK5P/AqfHAiG/KJTMPdd0VS17JteVIt1dgCTrDQXX4Ss19RvcmXbpOL5ZALdh9f3mGP9qSS/aMFoDKSvquqk066QW/VK4iXM0CW8443yEoxNGvSJN7VkzPZLsxxCstLA9vfD3m2YJdYMv+zM3S91OKPoCXSht1L//wpnHEOXcAHC7wDogJW6SyBdKLWV3HXZ6luZD1BjoRdcdnvt97dRGu8kg1L2xFkodAWC7JQ1VxfVyCz9eFIEA+xG8EG5IQAIiFEdeE6DVBBiH6ROebRe+mEcg/uChouv3/RVK+cAN/ycBFLaKikAAFPaeVx1TDP96Kyh+cJXcXVAOQ== user'
+    sh -c 'mkdir -p $HOME/.ssh/; chmod 700 $HOME/.ssh; /sbin/restorecon -R -v $HOME/.ssh; echo "'"$key"'" >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys'
+EOFCONF
+}
+
+fn_commands | sh
+fn_commands | su - il
+
+==== BTRFS ========
+
+Some articles say that u-boot supports btrfs. It doesn't. You need a separate ext4 or fat boot partition.
+Armbian initramfs (at least, 21.02.1) *does* support btrfs. No need to call mkinitramfs/mkimage
+
+Plug the sd-card into a Linux PC. /dev/mmc* devices should appear.
+
+We need to save the filesystem UUID. Run the following:
+
+    blkid -o export /dev/mmcblk0p1
+
+Save the printed UUID= in a safe place or run as:
+
+    eval `blkid -o export /dev/mmcblk0p1`
+
+
+Now convert the filesystem. Run the following:
+
+    btrfs-convert --copy-label /dev/mmcblk0p1
+
+Older versions of btrfs-convert don't keep the filesystem UUID. To check, run the following:
+
+    btrfs filesystem show
+
+If it's changed, we need to restore it:
+
+    btrfstune -U "$UUID"
+
+where $UUID is the previously saved UUID of the ext4 root partition.
+
+Alternatively, we will need to update the UUID in /boor/armbianEnv.txt and /etc/fstab. See below.
+
+
+
+
+Now we need to *move* the root partition 512Mb forward to free-up space for the boot partition.
+
+As Armbian automatically expanded the root partition during the first boot it's inconvenient to use dd for backup.
+partclone.btrfs (from partclone) is a good tool for the task because it does not copy the unoccupied blocks.
+
+I haven't tried restoring a partclone backup to a smaller partition. As a precaution we can shrink it:
+
+    btrfs filesystem resize -600M /dev/mmcblk0p1
+
+To actually move the partition we create the image file:
+
+    cd /path/to/backups
+    partclone.btrfs --clone --source /dev/mmcblk0p1 | gzip -c >armbian_root.partclone.gz
+
+Next, repartition the sd-card. Make sure the sd-card is not mounted. It's important for the boot partition to start at the same offset as the former root partition.
+With the cfdisk tool it's solved like this:
+
+    cfdisk /dev/mmcblk0
+
+This will open a pseudo-graphic interface listing the only partition on the sd-card.
+Select the partition and choose "Resize" and enter the new size: 512M
+
+Now select the free space below and choose "New" to create the new root partition. Enter the dos partition type: primary, type: 83 (Linux) and keep the default size.
+
+Choose "Write" to write the changes and type "yes" on your keyboard to confirm the changes. The new device nodes mmcblk0p2 and mmcblk0p1 were created.
+
+Create the /boot filesystem. As a precaution we choose a bigger block size:
+
+    mkfs.ext4 -b 4096 /dev/mmcblk0p1
+
+Confirm to overwrite the existing btrfs signature.
+
+Restore the root partition:
+
+    cd /path/to/backups
+    gzip -dc armbian_root.partclone.gz | partclone.btrfs --restore --output /dev/mmcblk0p2
+
+Mount the new root:
+
+    mount /dev/mmcblk0p2 /mnt
+
+If the command above fails with "mount(2) system call failed: File exists." it means that the kernel "thinks" there's another device with the same btrfs uuid.
+Make sure no visible block devices contain other copies of the root filesystem. However, this error may also be cause by the certain bug in older kernels.
+Run `btrfs device --forget` if it supports this flag. Otherwise reboot.
+
+After successfully mounting the new root we need to populate the /boot partition.
+
+    cd /mnt
+    mv --no-target-directory ./boot ./boot.old
+    mkdir ./boot
+    mount /dev/mmcblk0p1 ./boot
+    cp -a --no-target-directory ./boot.old ./boot
+
+Instruct u-boot to load Linux with the new root. Edit /mnt/boot/armbianEnv.txt and change `rootfstype=ext4` to `rootfstype=btrfs`.
+If the UUID of the root partition changed (see above) then we also need to update the line `rootdev=UUID=...`.
+
+Edit the root FS entry in /mnt/etc/fstab.
+
+In modern Linux the first field (fs_spec) for the root FS does not have to be updated every time the device path or label or UUID is changed. To avoid being misled in the future replace the first field with the word "dummy".
+
+Update the third field (fs_vfstype). Instead of "ext4" you can place either "btrfs" or "auto".
+
+Update the fourth field (fs_mntops). IMPORTANT: remove `,errors=remount-ro`. It's not supported by btrfs. If kept, the OS will boot with a readonly root.
+
+Update the sixth field (fs_passno). Instead of "1" enter "0" because fsck should not be run for btrfs.
+
+Lastly, add the entry for the /boot partition. The final result can look like this:
+
+
+    dummy / auto defaults,noatime,nodiratime,commit=600 0 0
+    #UUID=f5f78a6a-fd43-489f-8c0b-0f46a631fe0b / ext4 defaults,noatime,nodiratime,commit=600,errors=remount-ro 0 1
+
+    UUID=a3867f02-ce79-4a68-8ef7-8361fcc4c2a5 /boot ext4 defaults,noatime,nodiratime,commit=600,errors=remount-ro 0 2
+
+    tmpfs /tmp tmpfs defaults,nosuid 0 0
+
+Unmount the partitions:
+
+    umount /mnt/boot
+    umount /mnt
+
+
+Further steps: keeping the OS files on the default subvolume does not let you quickly switch between snapshots.
+Probably create a root subvolume and make it the new default.
+
+    btrfs sub snapshot / /initial_root
+
+Linux can be instructed to boot from a non-default subvolume, but it's easier to just set another default subvolume:
+
+    btrfs sub list /
+    btrfs sub set-default NUMBER /
+
+
+If you still want to boot from a non-default subvolume, the boot parameters need: `rootflags=subvol=subvolname`.
+I haven't tried it yet, but to add this without recompiling boot.scr you can add a new line to `armbianEnv.txt`:
+
+    extraargs=rootflags=subvol=subvolname
+
+However, it's unclear what will happen when a new u-boot script is generated from the OS booted from the new default subvolume. Will it contain explicit rootflags? Running `mount` on such system shows `subvol=` among the mount flags.
+
+
+
+The top-level subvolume has no name, but its id is always 5. It can be accessed as following:
+
+    mount -t btrfs /dev/blahblag /mnt -osubvolid=5
+
+After booting from a subvolume you can mount subvol 5 and move its direct children (except initial_root and ext2_saved) into the .todelete/ directory and delete it later.
+
+Finally, install some btrfs backup package.
+Now switching to a snapshot means creating a writable snapshot out of a readonly snapshot created by the backup software (`btrfs sub snapshot` without the '-r' flag).
+
+The .sxbackup subvol created by the software can be moved with the `mv` command: `mv /mnt/volroot/.sxbackup /mnt/`.
+
+To access .sxbackup when volroot is mounted as root you can add to fstab:
+
+    UUID=blah-blah /.sxbackup btrfs nofail,subvol=.sxbackup
+
+
+
+
+
+References:
+
+https://forum.armbian.com/topic/16111-howto-btrfs-root-filesystem/
+
+https://forum.armbian.com/topic/2369-btrfs-as-root-filesystem/
+
+==== END BTRFS ========
