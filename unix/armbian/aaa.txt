@@ -1,3 +1,19 @@
+Important: in Orange Pi Lite the Wi-Fi antenna cable spans over the board when marketed.
+It can be carefully unplugged and re-plugged so the antenna can be placed outside of the board.
+
+Important: in Orange Pi Lite the CPU could use a better cooling. Install a 14x14x10 mm passive heat sink.
+To do that stick small pieces of electrical tape around the chip to protect the board from the glue.
+Cover the board with a PE foil with a hole a little bigger than the chip and stick a few more pieces of electrical tape to fixate the foil.
+Prepare a 1 Kg weight to make the glue dry well. Make sure it's stable and it doesn't touch the surrounding components.
+Prepare a room where it can dry safely.
+Cut a cotton swab in half to get plastic stick for measuring the glue. 
+Clean the surfaces of the heat sink and the chip using a cotton swab with ethanol.
+Do not withdraw the glue directly on the surface.
+Withdraw a small amount to something that can serve as a paint tray and use the plastic stick to apply the needed dose to one of the surfaces (usually 0.05 ml, see the glue manual).
+Stick the heat sink, press and adjust until the glue is seen on all four sides.
+Place the weight and let it dry. 
+
+
 At time Orange Pi Lite wi-fi only works in Armbian. The debian image does not detect the device
 journalctl for NetworkManager shows the wlan model: rtl871x
 
@@ -20,6 +36,9 @@ diskaprt blah blah
 # Write to sd-card
 <Armbian_21.02.1_Orangepilite_buster_current_5.10.12_desktop.img.xz pv -B1m | xz -dc | dd bs=1M of="${sdcard:?}"
 
+# reload without replug
+diskaprt blah blah
+
 sync
 
 ==== BEGIN: Optional: Connect wi-fi before 1st boot ======
@@ -37,9 +56,6 @@ FR_net_wifi_key='MyWiFiKEY'
 ====
 
 
-
-# reload without replug
-diskaprt blah blah
 
 Mount,
 
@@ -248,3 +264,123 @@ https://forum.armbian.com/topic/16111-howto-btrfs-root-filesystem/
 https://forum.armbian.com/topic/2369-btrfs-as-root-filesystem/
 
 ==== END BTRFS ========
+
+==== BEGIN WiringPI/WiringOP =====
+
+    git clone https://github.com/orangepi-xunlong/WiringOP
+    cd WiringOP
+    ./build clean
+    ./build
+    
+    gpio readall
+
+prints a table of the pins. Most have Mode=OFF by default.
+
+https://orangepi.su/content.php?p=112
+
+==== END WiringPI/WiringOP =====
+
+
+==== BEGIN uart1 (/dev/ttyS1) =====
+
+    less /boot/dtb/overlay/README.sun8i-h3-overlays
+    
+    vim /boot/armbianEnv.txt
+
+Add the line if not present: `overlays=...`
+Add the overlay: `overlays=uart1`
+
+Save and reboot. Now `gpio readall` shows Mode=ALT2 for TXD.1 and RXD.1
+
+The arrow (triangle) on the board marks pin1 on GPIO 40 pin.
+On Orange Pi Lite GND, TXD.1, RXD.1 are pins 34,38,40 (see the scheme below):
+
+
+        +OrangePiH3+----------+
+        | Physical | Name     |
+        +----++----+----------+
+      > |  1 || 2  |          |
+        |  3 || 4  |          |
+        |  5 || 6  |          |
+        |  7 || 8  |          |
+        |  9 || 10 |          |
+        | 11 || 12 |          |
+        | 13 || 14 |          |
+        | 15 || 16 |          |
+        | 17 || 18 |          |
+        | 19 || 20 |          |
+        | 21 || 22 |          |
+        | 23 || 24 |          |
+        | 25 || 26 |          |
+        | 27 || 28 |          |
+        | 29 || 30 |          |
+        | 31 || 32 |          |
+        | 33 || 34 | GND      |
+        | 35 || 36 |          |
+        | 37 || 38 | TXD.1    |
+        | 39 || 40 | RXD.1    |
+        +----++----+----------+
+        | Physical | Name     |
+        +OrangePiH3+----------+
+
+
+
+
+Optionally set the speed (unlike ttyS0 it's 9600 by default)
+
+    stty -F /dev/ttyS1 115200
+
+
+https://pcminipro.ru/orangepi/raspinovka-razemov-gpio-orange-pi/
+
+https://4pda.ru/forum/index.php?showtopic=782242&view=findpost&p=60805497
+
+The following did not work for me. 
+
+Convert with `dtc` (part of pre-installed `device-tree-compiler`)
+
+    cd /boot/dtb/
+    dtc -I dtb -O dts -o sun8i-h3-orangepi-lite.dtb{.dts,}
+    vim sun8i-h3-orangepi-lite.dtb.dts
+
+
+Find block:
+    
+                    serial@1c28400 {
+                            compatible = "snps,dw-apb-uart";
+                            reg = < 0x1c28400 0x400 >;
+                            interrupts = < 0x00 0x01 0x04 >;
+                            reg-shift = < 0x02 >;
+                            reg-io-width = < 0x04 >;
+                            clocks = < 0x03 0x3f >;
+                            resets = < 0x03 0x32 >;
+                            dmas = < 0x13 0x07 0x13 0x07 >;
+                            dma-names = "rx\0tx";
+                            status = "disabled";
+                            phandle = < 0x64 >;
+                    };
+    
+
+Change `status = "disabled"` to `status = "okay"`
+
+Convert back:
+
+    cp --backup=numbered sun8i-h3-orangepi-lite.dtb{,.save}
+    dtc -I dts -O dtb -o sun8i-h3-orangepi-lite.dtb{,.dts}
+
+
+
+
+==== END uart1 (/dev/ttyS1) =====
+
+==== BEGIN 1-Wire =====
+
+    less /boot/dtb/overlay/README.sun8i-h3-overlays
+    
+    vim /boot/armbianEnv.txt
+
+Add the line if not present: `overlays=...`
+Add the overlay: `overlays=w1-gpio`
+
+==== END 1-Wire =====
+x
