@@ -382,5 +382,31 @@ Convert back:
 Add the line if not present: `overlays=...`
 Add the overlay: `overlays=w1-gpio`
 
+    reboot
+
+https://micro-pi.ru/%D1%81%D1%87%D0%B8%D1%82%D1%8B%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D1%82%D0%B5%D0%BC%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D1%83%D1%80%D1%8B-ds18b20-orange-pi/#_DS18B20_Orange_Pi_PC
+
+    lsmod | grep -E 'w1|wire'
+      w1_therm               24576  0
+      w1_gpio                16384  0
+      wire                   32768  2 w1_gpio,w1_therm
+      cn                     16384  1 wire
+
+    dmesg | grep -E 'w1|wire'
+      [    6.779019] Driver for 1-wire Dallas network protocol.
+      [    6.787981] gpio-110 (onewire@0): enforced open drain please flag it properly in DT/ACPI DSDT/board file
+      [    6.821971] w1_master_driver w1_bus_master1: Attaching one wire slave 28.00000c71ddc0 crc af
+
+    ls -Al /sys/bus/w1/devices
+      total 0
+      lrwxrwxrwx 1 root root 0 Feb 23 16:41 28-00000c71ddc0 -> ../../../devices/w1_bus_master1/28-00000c71ddc0
+      lrwxrwxrwx 1 root root 0 Feb 23 15:17 w1_bus_master1 -> ../../../devices/w1_bus_master1
+
+    cat /sys/bus/w1/devices/28-00000c71ddc0/w1_slave
+      79 01 4b 46 7f ff 07 10 0a : crc=0a YES
+      79 01 4b 46 7f ff 07 10 0a t=23562
+
+    "t=" is the temperature.
+
 ==== END 1-Wire =====
 x
