@@ -245,6 +245,9 @@ A:
 - right click r_object_id with shortest version
 - content/edit
 
+Q: API command to cancel checkout
+A: unlock
+
 Q: debug process builder
 A: 
     C:\Program Files\Documentum\bpm\classes\debug.bat :

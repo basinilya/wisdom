@@ -53,7 +53,8 @@ A: ... enable(return_top 10);
 
 
 Q: date in utc
-A: select DATE('2020-12-31 12:00:00utc', 'yyyy-mm-dd hh:mi:ss') from dm_docbase_config ;
+A: select DATE('2020-12-31 12:00:00utc', 'yyyy-mm-dd hh:mi:ss') as x from dm_docbase_config ;
+  (Without a column alias selecting date('...') in result columns works in PostgreSQL, but not in Oracle: [DM_API_E_BADATTRNAME]error: Bad attribute name)
 
 Q: dual
 A: select 'aaa' as x from dm_docbase_config

@@ -1,4 +1,9 @@
 ﻿===== do not remove first line ==========
+Q: xda log
+ Failed to obtain session for dynamic handle
+ Caused by: java.util.concurrent.ExecutionException: java.lang.NumberFormatException: For input string: "S"
+ at com.documentum.fc.client.impl.objectprotocol.ObjectProtocolV1.deserializeAspects
+
 Q: Error Message :can't parse argument number: CompositeNode [name=event]=...
 A:
   xCP has the following bug in Business Events:

@@ -1,5 +1,11 @@
 DRAFT
 
+"Select Package Object" dialog in Process Debugger does not allow searching by r_object_id or full object path. It does not allow typing in the list view to quickly select the needed object.
+
+A stateless process can't return multivalue variables with different number of elements
+
+"Perform as" is meaningless in a stateless process. You cannot change the activity performer.
+
 It's really inconvenient to chain data actions on client (especially with conditionals and branching)
 
 Maximum artifact system name length is too small, especially for UI events and Action Flow Steps
@@ -38,7 +44,7 @@ Not all expressions are validated. For instance, data action Custom Error Messag
 
 Relations can't have "Create" UI with automatic load of defaults
 
-Cannot get r_object_id of an object created with the standard "Create" data action.
+Cannot get r_object_id of an object created with the standard "Create" data action. (Maybe you can subscribe to "Object Created" event instead of action.success, but it will fire on any action)
 
 Cannot obtain the path of the currently selected object in a Folder View in case it has multiple parents.
 

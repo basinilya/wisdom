@@ -5,3 +5,7 @@ A published event is not deferred. Its subscribers are executed in the same call
 For deferring use "set value" and "change" of a hidden value display. The "set value" subscriber is executed synchronously itself, but it defers the setValue() call. The evaluation of the  "set value" expression is deferred too. The condition is not deferred.
 
 The position of a "set value" subscriber may affect the expressions result.
+
+
+Q: get UI event property in javascript
+A: 
