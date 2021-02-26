@@ -1,0 +1,19 @@
+#!/bin/bash
+
+shopt -s nullglob
+
+set -e
+
+rm -rf vhs*.txt vhs*.avi/
+
+for f in ../vhs/vhs.??.*; do
+
+  s=${f##*/}
+  txt=$s.txt
+  echo "$f"
+  mkdir -p "$s"
+  ffmpeg -hide_banner -i "$f" -filter_complex "select='gt(scene,0.25)',metadata=print:file=$txt" -vsync vfr "$s/img%03d.jpg"
+  #ffmpeg -hide_banner -i "$f" -filter_complex "select='gt(scene,0.3)',metadata=print:file=$txt" -f null -
+  #break
+  
+done

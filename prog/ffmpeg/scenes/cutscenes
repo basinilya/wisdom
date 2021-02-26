@@ -1,0 +1,38 @@
+#!/bin/bash
+
+shopt -s nullglob
+
+set -e
+
+rm -rf segs/
+mkdir -p segs
+
+foo() {
+s=${f%.txt}
+s2=${s%.avi}
+s=../vhs/$s
+s3=$(printf "%03d" $i)
+ffmpeg -hide_banner -i "$s" $ssarg $targ -c copy "segs/$s2-${s3}.mkv"
+}
+
+IFS=" :="
+for f in vhs.??.avi.txt; do
+  i=0
+  ss=0.0
+  ssarg=
+  while true; do
+    if read -r x frame x pts x pts_time && read -r x scene_score; then
+      
+      targ="-t $(awk "BEGIN {print $pts_time-$ss}")"
+      foo
+      ss=$pts_time
+      ssarg="-ss $pts_time"
+    else
+      targ=
+      foo
+      break
+    fi
+    i=$((i+1))
+  done<"$f"
+done
+
