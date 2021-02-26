@@ -471,4 +471,109 @@ References:
 https://micro-pi.ru/%D1%81%D1%87%D0%B8%D1%82%D1%8B%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D1%82%D0%B5%D0%BC%D0%BF%D0%B5%D1%80%D0%B0%D1%82%D1%83%D1%80%D1%8B-ds18b20-orange-pi/#_DS18B20_Orange_Pi_PC
 
 ==== END 1-Wire =====
-x
+
+==== BEGIN soctemp =====
+
+After attaching an external thermal sensor the "CPU temp" line wrongly shows this sensor temperature.
+It's because the unstable path `hwmon0/temp1_input` path wins over the persistent path `virtual/thermal/thermal_zone0/temp` in `/usr/lib/armbian/armbian-hardware-monitor`:
+
+        elif [[ -f /sys/class/hwmon/hwmon0/temp1_input && ${BOARDFAMILY} != "mvebu" ]]; then
+                # usual convention with modern kernels
+                ln -fs /sys/class/hwmon/hwmon0/temp1_input /etc/armbianmonitor/datasources/soctemp
+        else
+                # all other boards/kernels use the same sysfs node except of Actions Semi S500:
+                [[ ${BOARDFAMILY} == s500 ]] && THERMAL_ZONE="thermal_zone1" || THERMAL_ZONE="thermal_zone0"
+                ln -fs /sys/devices/virtual/thermal/${THERMAL_ZONE}/temp /etc/armbianmonitor/datasources/soctemp
+        fi
+
+To fix this add an extra condition near "mvebu" with our board family: sun8i
+
+
+==== END soctemp =====
+
+
+==== BEGIN Openvpn =====
+Go to the VPN server
+
+    cd /etc/openvpn/easy-rsa/
+    source ./vars
+    ./build-key client-smarthome
+
+    echo "ifconfig-push 10.8.1.34 10.8.1.5" >/etc/openvpn/ccd/client-smarthome
+    
+
+Copy `/etc/openvpn/easy-rsa/keys/client-smarthome.crt` and `/etc/openvpn/easy-rsa/keys/client-smarthome.key` to Orange Pi into `/etc/openvpn/client/`
+
+    chmod 600 /etc/openvpn/client/client-smarthome.key
+
+    systemctl start openvpn-client@smalldisk
+    systemctl enable openvpn-client@smalldisk
+
+==== END Openvpn =====
+
+
+==== BEGIN pip3 =====
+apt install python3-setuptools python3-wheel python3-pip
+
+
+==== END pip3 =====
+
+==== BEGIN btrfs-sxbackup =====
+
+    pip3 install btrfs-sxbackup
+    
+    
+    btrfs-sxbackup init /
+    mount /dev/mmcblk0p2 /mnt -osubvolid=5
+    mv /mnt/initial_root/.sxbackup /mnt/
+    umount /mnt
+    mkdir /.sxbackup
+    
+    echo "UUID=a3867f02-ce79-4a68-8ef7-8361fcc4c2a5 /.sxbackup btrfs nofail,subvol=.sxbackup" >>/etc/fstab
+    
+    mount /.sxbackup
+    
+    btrfs-sxbackup run /
+
+==== END btrfs-sxbackup =====
+
+==== BEGIN watchdog =====
+
+Check the files
+/etc/default/watchdog
+/etc/watchdog.conf
+
+apt install watchdog
+
+sync
+echo 1 >/dev/watchdog
+# wait to see if it reboots
+
+systemctl start watchdog
+
+sync
+#pkill -x watchdog
+# wait to see if it reboots
+
+
+systemctl enable watchdog
+
+You also need a software that reboots the board when it's offline (with a status file to prevent frequent reboots).
+
+
+
+==== END watchdog =====
+
+# enable PC04
+gpio mode 9 OUT
+
+# power on PC04
+gpio write 9 1
+
+# The following will freeze your board:
+#gpio mode 9 OFF
+
+
+
+owfs + w1_gpio
+https://www.linux.org.ru/forum/general/12327772

@@ -1,3 +1,6 @@
+Q: no logo
+A: -hide_banner
+
 Q: Scene detection
 A:
 https://stackoverflow.com/a/38205105/447503
