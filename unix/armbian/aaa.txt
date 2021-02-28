@@ -549,14 +549,22 @@ sync
 echo 1 >/dev/watchdog
 # wait to see if it reboots
 
+/etc/watchdog.conf
+Uncomment:
+watchdog-device = /dev/watchdog
+
+To eliminate "cannot set timeout 60 (errno = 22 = 'Invalid argument" add:
+watchdog-timeout = 15
+
+
 systemctl start watchdog
 
 sync
 #pkill -x watchdog
 # wait to see if it reboots
 
-
-systemctl enable watchdog
+# "enable" not needed because it's already in /etc/default/watchdog
+#systemctl enable watchdog
 
 You also need a software that reboots the board when it's offline (with a status file to prevent frequent reboots).
 
@@ -577,3 +585,23 @@ gpio write 9 1
 
 owfs + w1_gpio
 https://www.linux.org.ru/forum/general/12327772
+
+
+
+
+
+apt install owserver owhttpd
+
+/etc/owfs.conf
+  #server: FAKE = DS18S20,DS2405
+  server: w1
+
+
+systemctl start owserver
+systemctl start owhttpd
+systemctl enable owserver
+systemctl enable owhttpd
+
+http://localhost:2121/
+
+Set-up reverse proxy on a white ip

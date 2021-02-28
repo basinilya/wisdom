@@ -1,0 +1,46 @@
+yum install mod_proxy_html
+
+
+/etc/httpd/conf/web-80-443.conf
+
+    <Location /owhttpd>
+        ProxyPass http://smarthome:2121
+        ProxyPassReverse /
+    
+        ProxyHTMLEnable On
+        # ProxyHTMLEnable above replaces SetOutputFilter below
+        #SetOutputFilter proxy-html
+    
+        ProxyHTMLURLMap / /owhttpd/
+        # for the settings form action:
+        ProxyHTMLURLMap http://smarthome:2121 /owhttpd
+    </Location>
+
+
+The following file is usually missing in CentOS:
+/etc/httpd/conf.d/proxy-html.conf
+
+    # Here's the declaration for W3C HTML 4.01 and XHTML 1.0
+    
+    ProxyHTMLLinks  a       href
+    ProxyHTMLLinks  area        href
+    ProxyHTMLLinks  link        href
+    ProxyHTMLLinks  img     src longdesc usemap
+    ProxyHTMLLinks  object      classid codebase data usemap
+    ProxyHTMLLinks  q       cite
+    ProxyHTMLLinks  blockquote  cite
+    ProxyHTMLLinks  ins     cite
+    ProxyHTMLLinks  del     cite
+    ProxyHTMLLinks  form        action
+    ProxyHTMLLinks  input       src usemap
+    ProxyHTMLLinks  head        profile
+    ProxyHTMLLinks  base        href
+    ProxyHTMLLinks  script      src for
+    
+    # To support scripting events (with ProxyHTMLExtended On),
+    # you'll need to declare them too.
+    
+    ProxyHTMLEvents onclick ondblclick onmousedown onmouseup \
+            onmouseover onmousemove onmouseout onkeypress \
+            onkeydown onkeyup onfocus onblur onload \
+            onunload onsubmit onreset onselect onchange
