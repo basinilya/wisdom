@@ -26,12 +26,13 @@ _mysleep() {
   read -t "${1:?}" <&"${HUNGP[0]}" || [ $? = 142 ]
 }
 
+
 mysleep() {
   echo "sleeping ${1:?}s"
   _mysleep "$@"
 }
 
-
+exec 4<&0
 
 set_on() {
   :
@@ -62,15 +63,17 @@ if [ x"$EMULATE" = x"yes" ]; then
 
   echo 20000 >/dev/shm/heatrobot-temp
 
-  tty_settings=`stty -g`
-  stty -icanon -echo
+  iftty=
+  tty_settings=`stty -g` || iftty=:
+  $iftty stty -icanon -echo
 
   kill_kbd() {
     {
       kill $KBD_PID
       wait $KBD_PID
     } 2>/dev/null
-    stty "$tty_settings"
+    # if interrupted during `read` built-in command then ERR trap stdin is the `read` input.
+    $iftty stty "$tty_settings" <&4
   }
 
   KBD_PID=
@@ -128,7 +131,7 @@ else
   exit 1
 fi # EMULATE
 
-#exec 0<&-
+exec 0<&-
 
 # set -E # inherit ERR trap
 
