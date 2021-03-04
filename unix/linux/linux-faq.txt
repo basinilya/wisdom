@@ -1,3 +1,21 @@
+Q: remount root readonly
+A:
+
+
+# find files open for write:
+lsof | grep -e "[[:digit:]]\+w"
+
+# Hint: lsof does not display some files here
+- samba shares; stop samba
+- loop devices, use `losetup -a` to list
+- memory mapped writable files (FD=mem). Ex: journald files in /var/log/journal/
+
+# If you use systemd then disk writes are stopped by stopping systemd-journald.
+
+systemctl stop systemd-journald.socket; systemctl stop systemd-journald.service; mount -o ro,remount /
+
+
+
 Q: ntfs change uuid change volume serial number
 A: ntfslabel --new-serial device
 
