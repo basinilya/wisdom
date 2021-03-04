@@ -535,6 +535,52 @@ apt install python3-setuptools python3-wheel python3-pip
     
     btrfs-sxbackup run /
 
+# end of local snapshots
+
+# remote backups
+
+    # Need to destroy local configuration
+    btrfs-sxbackup destroy /
+
+
+Login to NAS
+
+Mount a btrfs partition (/media/backups/)
+
+Configure endpoint compression. /root/.ssh/config :
+
+    Host smarthome
+            Compression yes
+
+Configure the SSH jump station if necessary. /root/.ssh/config :
+
+    Host smarthome
+            ProxyCommand ssh -oCompression=no -q nobody@jumpstation -W %h:%p
+
+
+Make sure you can login to the board as cron:
+
+    SSH_AUTH_SOCK= ssh://root@smarthome date
+
+Configure
+
+    SSH_AUTH_SOCK= btrfs-sxbackup init ssh://root@smarthome:/ /media/backups/smarthome/ -sr 3 -dr "1d:daily, 1w:weekly, 1m:monthly, 12m:none"
+
+Run
+
+    screen
+    SSH_AUTH_SOCK= btrfs-sxbackup run /media/backups/smarthome/
+
+Schedule
+
+( set +o noclobber
+cat <<'EOFCONF' >/etc/cron.d/btrfs-sxbackup
+PATH="/usr/sbin:/usr/bin:/sbin:/bin"
+30 2    * * *     root     ssh root@smarthome "rsync -a --delete /boot/ /boot-backup/" && btrfs-sxbackup --quiet run /media/backups/smarthome/
+EOFCONF
+) 
+
+
 ==== END btrfs-sxbackup =====
 
 ==== BEGIN watchdog =====
