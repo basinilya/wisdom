@@ -1,7 +1,8 @@
+Q: prepend program output with timestamp 
+A: ts from moreutils
+
 Q: remount root readonly
 A:
-
-
 # find files open for write:
 lsof | grep -e "[[:digit:]]\+w"
 

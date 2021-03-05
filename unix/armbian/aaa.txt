@@ -82,6 +82,10 @@ Login to xfce as regular user
 
 Settings Manager/Accessibility/Mouse/Enable emulation
 
+Set timezone
+
+    timedatectl set-timezone Europe/Moscow
+
 
 Setup Wi-Fi
 

@@ -1,18 +1,21 @@
 #!/bin/bash
 
-stty sane
+# Millidegrees Celsius
+TEMP_MIN=19000
+TEMP_MAX=28000
 
-TEMP_MIN=15000
-TEMP_MAX=24000
+# Seconds
+DELAY_COOLOFF=450
+DELAY_WARMUP=900
+CHECK_PERIOD=120
 
-DELAY_OFF=60
-DELAY_ON=600
-
-EMULATE=yes
+EMULATE=
+#EMULATE=yes
 
 if [ x"$EMULATE" = x"yes" ]; then
-  DELAY_OFF=6
-  DELAY_ON=10
+  DELAY_COOLOFF=5
+  DELAY_WARMUP=10
+  CHECK_PERIOD=2
 fi
 
 coproc HUNGP {
@@ -126,9 +129,30 @@ if [ x"$EMULATE" = x"yes" ]; then
   set_on
   
 else
-  >&2 echo "Not implemented"
-  false
-  exit 1
+
+  WPI_PIN=9
+
+  gpio mode "${WPI_PIN:?}" OUT
+
+  get_temp() {
+    temp=$(< /sys/bus/w1/devices/28-00000c71ddc0/temperature)
+  }
+  
+  set_off() {
+    :
+    #gpio write "${WPI_PIN:?}" 1
+  }
+
+  set_on() {
+    gpio write "${WPI_PIN:?}" 0
+  }
+  
+  is_on() {
+    local res;
+    res=$(gpio read "${WPI_PIN:?}")
+    return $res
+  }
+
 fi # EMULATE
 
 exec 0<&-
@@ -137,9 +161,9 @@ exec 0<&-
 
 while true; do
   if is_on; then
-    mysleep $DELAY_ON
+    mysleep $DELAY_WARMUP
   else
-    mysleep $DELAY_OFF
+    mysleep $DELAY_COOLOFF
   fi
   
   while true; do
@@ -163,6 +187,6 @@ while true; do
       fi
     fi
     
-    _mysleep 2
+    _mysleep "$CHECK_PERIOD"
   done
 done
