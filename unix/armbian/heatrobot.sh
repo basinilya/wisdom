@@ -15,6 +15,9 @@ DELAY_COOLOFF=450
 DELAY_WARMUP=900
 CHECK_PERIOD=120
 
+# see: `gpio readall`
+WPI_PIN=9
+
 # Must be either a persistent device path or its hwmon symlink like: /sys/class/hwmon/hwmon[0-9]*/device
 BLACKLIST_SENSORS=(
   /sys/devices/virtual/thermal/thermal_zone0
@@ -72,7 +75,7 @@ if [ x"$EMULATE" = x"yes" ]; then
     read _temp </dev/shm/heatrobot-temp
     temp=$((_temp - 0))
     if [ $temp = 0 -a x"$_temp" != x"0" ]; then
-      >&2 echo "Invalid integer vailue: $_temp"
+      >&2 echo "Invalid integer value: $_temp"
       false
       exit 1
     fi
@@ -144,8 +147,6 @@ if [ x"$EMULATE" = x"yes" ]; then
   set_on
   
 else
-
-  WPI_PIN=9
 
   gpio mode "${WPI_PIN:?}" OUT
 
