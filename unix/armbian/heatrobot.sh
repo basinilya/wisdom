@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Usage: heatrobot.sh | ( trap '' INT; ts )
+# OR
+# as a systemd service
+
 # Millidegrees Celsius
 TEMP_MIN=19000
 TEMP_MAX=28000
@@ -140,7 +144,7 @@ else
   
   set_off() {
     :
-    #gpio write "${WPI_PIN:?}" 1
+    gpio write "${WPI_PIN:?}" 1
   }
 
   set_on() {
@@ -161,8 +165,10 @@ exec 0<&-
 
 while true; do
   if is_on; then
+    echo "power is initially on"
     mysleep $DELAY_WARMUP
   else
+    echo "power is initially off"
     mysleep $DELAY_COOLOFF
   fi
   
