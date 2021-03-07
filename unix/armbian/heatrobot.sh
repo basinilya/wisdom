@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Usage: heatrobot.sh | ( trap '' INT; ts )
+# Turn switch off and on when temperature not within range.
+#
+# Usage: heatrobot.sh 2>&1 | ( trap '' INT; ts )
 # OR
 # as a systemd service
 
@@ -12,6 +14,15 @@ TEMP_MAX=28000
 DELAY_COOLOFF=450
 DELAY_WARMUP=900
 CHECK_PERIOD=120
+
+# Must be either a persistent device path or its hwmon symlink like: /sys/class/hwmon/hwmon[0-9]*/device
+BLACKLIST_SENSORS=(
+  /sys/devices/virtual/thermal/thermal_zone0
+  #/sys/bus/w1/devices/28-00000c71ddc0
+  #/sys/class/hwmon/hwmon0/device
+  #/sys/class/hwmon/hwmon1/device
+)
+
 
 EMULATE=
 #EMULATE=yes
@@ -139,7 +150,46 @@ else
   gpio mode "${WPI_PIN:?}" OUT
 
   get_temp() {
-    temp=$(< /sys/bus/w1/devices/28-00000c71ddc0/temperature)
+    local d canon h _temp
+    local -A BLACKLIST_SENSORS_CANON
+    BLACKLIST_SENSORS_CANON=()
+    
+    shopt -s nullglob
+    for d in "${BLACKLIST_SENSORS[@]}"; do
+      #echo "add blacklisted: $d"
+      if ! canon=$(readlink -f "$d"); then
+        >&2 echo "path check failed for $d"
+        continue
+      fi
+      for h in "$canon"/hwmon[0-9]*/temp1_input "$canon"/hwmon/hwmon[0-9]*/temp1_input; do
+        #echo "found temp1_input as: $h"
+        BLACKLIST_SENSORS_CANON["$h"]=x
+        continue 2
+      done
+      >&2 echo "failed to find temp1_input for $d"
+    done
+    
+    temp=999999
+    shopt -s nullglob
+    for d in /sys/class/hwmon/hwmon[0-9]*/temp1_input; do
+      #echo "checking temperature of: $d"
+      canon=$(readlink -f "$d")
+      if [[ -v "BLACKLIST_SENSORS_CANON[$canon]" ]]; then
+        :
+        #echo "is blacklisted"
+      else
+        _temp=$(< "$d")
+        if [ "$temp" -gt "$_temp" ]; then
+          temp=$_temp
+        fi
+      fi
+    done
+  
+    # if no sensors, then power must always be on
+    if [ 999999 = "$temp" ]; then
+      >&2 echo "No sensors found"
+      temp=-999999
+    fi  
   }
   
   set_off() {
