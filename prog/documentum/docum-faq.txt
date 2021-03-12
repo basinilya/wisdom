@@ -1,3 +1,6 @@
+Q: rename attr
+A:
+
 Q: Create object fails with error from DB:
   ERROR: INSERT has more expressions than target columns
   OR

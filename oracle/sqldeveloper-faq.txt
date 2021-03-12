@@ -3,3 +3,10 @@ A: c:\Users\basin\AppData\Roaming\SQL Developer\
 
 Q: File open dialog freeze
 A: Check OpenedFilesHistory* in ide.properties
+
+Q: default max result rows
+A: 
+  Tools -> Preferences -> Database -> Advanced -> Sql Array Fetch Size (Max. 500)
+  %APPDATA%\SQL Developer\system3.2.20.09.87\o.sqldeveloper.11.2.0.9.87\product-preferences.xml
+
+
