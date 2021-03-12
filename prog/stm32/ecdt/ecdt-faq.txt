@@ -1,0 +1,63 @@
+Q: ???
+A: handle SIGTRAP nostop
+
+Q: ???
+A: 
+  Startup tab, above "Enable Arm semihosting" or in the "Run/Restart commands" block
+  monitor arm semihosting_cmdline argv0 argv1 argv2 argv3
+  https://gnu-mcu-eclipse.github.io/blog/2018/01/23/openocd-v0-10-0-7-20180123-released/
+
+
+Q: HAL_RTC_WaitForSynchro() fails after full poweroff.
+  RTC->CNTL not incrementng,
+  The bits RTC_CRL_RSF and RTC_CRL_SECF aren't set in RTC->CRL.
+
+A: Make sure HAL_RTC_MspInit() (the overriden version from rtc.c) was called. It calls these macros:
+    HAL_PWR_EnableBkUpAccess();
+    __HAL_RCC_BKP_CLK_ENABLE();
+    __HAL_RCC_RTC_ENABLE();
+
+  May happen when hrtc->State not initialized to 0 (HAL_RTC_STATE_RESET)
+
+Q: enable/disable semihosting
+A:
+
+  In stm32f1xx_it.c from CubeMX we have a dumb HardFault_Handler that overrides the one in system/src/cortexm/exception-handlers.c
+  With it, the program cannot recover from call_host fault when no debugger is attached.
+
+  stm32f1xx_it.c needs to be renamed to *.bak.
+  However, it has the proper implementation of SysTick_Handler. This needs to be copied to main.c
+
+  Project properties -> C/C++ General -> Settings -> Tool Settings -> Optimization
+    Uncheck "Assume freestanding environment"
+
+  Project properties -> C/C++ General -> Paths and Symbols -> Symbols
+  
+  After pressing "Add" try checking "Add to all languages" and "Add to all configurations" checkboxes.
+  
+  Assembly
+  GNU C
+  GNU C++
+  
+    Configuration: Debug
+      OS_USE_SEMIHOSTING
+      OS_USE_TRACE_SEMIHOSTING_DEBUG
+  
+  
+    Configuration: Release
+      OS_USE_SEMIHOSTING
+
+
+  main.c:
+  
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include "diag/trace.h"
+  
+    ...
+  
+    // Send a greeting to the trace device (skipped on Release).
+    trace_puts("Hello Arm World!");
+  
+    // Send a message to the standard output.
+    puts("Standard output message.");
