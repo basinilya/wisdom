@@ -1,0 +1,62 @@
+These are actual test results
+================================================================================================
+When a sub-microflow is called by an action with "Custom without rollback" handling, the objects saved in that sub-microflow are rolled back while the objects saved by the caller microflow before and after the sub-microflow are committed.
+Even if the sub-microflow has its own error handling, the objects saved in that error sequence flow are also rolled back regardless of the error handling type.
+
+CoreAction.getContext().getTransactionId() returns the same value in both microflows in both normal and error sequence flows
+
+Conclusion: an action with "Custom without rollback" creates a savepoint
+================================================================================================
+When a sub-microflow is called by an action with "Custom with rollback" handling, the objects saved in that sub-microflow and the objects previously saved in the caller microflow are rolled back and only the objects saved after the error in the caller microflow are committed.
+Even if the sub-microflow has its own error handling, the objects saved in that error sequence flow are also rolled back regardless of the error handling type.
+
+CoreAction.getContext().getTransactionId() returns the same value until the "Custom with rollback" flow in the callee. Then another transaction id is returned, but if both microflows have "Custom with rollback" and when the error flow starts in the caller then a third transaction id is returned.
+================================================================================================
+The insteresting part is that if the callee ends with a normal end event it still rolls back the whole transaction if the savepoint does not exist.
+It means that a sub-microflow could rollback more objects than you want.
+
+
+
+Q: Why at https://gettingstarted.mendixcloud.com/link/module/32/lecture/207/4.3-Knowledge-Check-%E2%80%93-Advanced-Error-Handling-Situations
+  Question 1: Consider the following scenario, in which the main microflow and the sub-microflow are invoked by the user. The main microflow has Custom without Rollback error handling, and the sub-microflow has Custom with Rollback error handling. In the sub-microflow below, what does the error event achieve?
+  [x]It causes the sub-microflow action in the main microflow to throw an error.
+  ?
+  "Custom without Rollback" does not throw, does it?
+A: must be poor wording
+
+Q: Why at https://gettingstarted.mendixcloud.com/link/module/32/lecture/207/4.3-Knowledge-Check-%E2%80%93-Advanced-Error-Handling-Situations
+  Question 4: What happens if the same microflows are used, but the error handling on the main microflow is Custom with Rollback and the error handling on the sub-microflow is Custom without Rollback?
+  [x]The Order, OrderLine, and Log objects are rolled back while the Customer object is committed to the database
+  ?
+  The accepted answer is the same as for Question 3 although the error from the java action is now handled with "Custom without Rollback" which should create a concurrent transaction for the "Create Log" action.
+  So the Log object should not be rolled back.
+A: The answer is correct and the tutorial is wrong
+
+Q: When is a savepoint created?
+A: It's created before an action with a "Without rollback" error handling.
+
+Q: What does Rollback do?
+A: It rolls back to the most recent savepoint. If there's no savepoint the whole transaction is rolled back and a new transaction is started.
+
+
+Q: What if a sub-microflow saves to DB after error with or without rollback, then re-throws and the calling microflow rolls back?
+  https://gettingstarted.mendixcloud.com/link/module/32/lecture/294/4.1-Advanced-Error-Handling-Situations
+    https://gettingstarted.mendixcloud.com/file?guid=4222124650660791&changedDate=1611130719644
+    What happens to the $NewEmailError object?
+
+A: test shows that the object is not committed
+
+
+Q: What happens to non-persistable objects on transaction rollback?
+A: they aren't rolled back
+
+Q: why at https://gettingstarted.mendixcloud.com/link/module/31/lecture/292/3.5-Knowledge-Check-%E2%80%93-Error-Handling-Basics
+Question 2: What best describes the Custom without Rollback error handling option?
+[x]A new transaction is initiated, the microflow follows the designated error flow, and all the database commits preceding the error action are preserved.
+and not
+[ ]The existing transaction is continued, and all the changes made before and after the error will be committed to the database.
+
+A: must be bad wording
+
+Q: What happens to values of attributes of an object variable in a microflow after rollback? What happens to the cached objects after rollback?
+A: A rolled back object can be passed to the page with a data view and can be saved later.
