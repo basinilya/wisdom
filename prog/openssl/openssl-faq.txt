@@ -1,3 +1,10 @@
+# create a self-signed certificate
+openssl req -newkey rsa:2048 -nodes -keyout cert.key.pem -x509 -days 365 -out cert.pem
+
+# Export cert only to p12
+openssl pkcs12 -in cert.pem -export -nokeys -out cert.pem.p12
+
+
 # convert from openssh public key format to BEGIN RSA PUBLIC KEY
 ssh-keygen -e -m PEM -f ~/.ssh/id_rsa.pub >~/.ssh/id_rsa.pub.pem
 
