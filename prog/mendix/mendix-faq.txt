@@ -36,9 +36,9 @@ A:
 	// END EXTRA CODE
 
 
-
 Q: Redirect the logs to a custom logging framework
 A:
+  In "After startup":
 	@java.lang.Override
 	public java.lang.Void executeAction() throws Exception
 	{
@@ -51,13 +51,23 @@ A:
 		};
 		Core.registerLogSubscriber(subs);
 
+Q: Jave Thread name in log messages to extract message sequences for specific threads.
+A: It's not logged. See what object is passed to com.mendix.logging.impl.LogManager.registerLogSubscriber and maybe reconfigure it or extend its class.
+  Or register your own LogSubscriber that logs the current thread and or current HTTP request.
+
+Q: Integrate Java Actions that use other logging frameworks
+A: In "After startup"
+  register an appender that calls Core.getLogger ... info/error/...
+  Make sure it doesn't recursively call the same logging framework via LogSubscriber
+
+
 Q: Why at https://gettingstarted.mendixcloud.com/link/module/36/lecture/200/3.4-Knowledge-Check
   Question 4: In which of the following microflows would applying entity access NOT be recommended?
   [x]A microflow to display a company overview to anonymous users.
   and not
   [ ]A microflow that generates a report on the productivity of all the app users.
 
-Q: list view classes
+Q: standard list view CSS classes
 A: 
   ,
 
@@ -93,12 +103,13 @@ Q: https://gettingstarted.mendixcloud.com/link/module/37/lecture/3066/4.4-Summar
   > and discussed utilizing the power of the single sign-on
   Where?
 
-Q: How does Retrieve work in case of no read access to _some_ attributes?
+Q: How does Retrieve work in microflows in case of no read access to _some_ attributes (when entity access is enforced)?
 
 Q: Does Entity Access apply to Retrieve in Microflows without that checkbox checked?
 A: looks like it doesn't
 
 Q: Do Log Levels persist between runs in Studio Pro?
+A: yes
 
 Q: Why at https://gettingstarted.mendixcloud.com/link/module/374/lecture/3053/7.8-Knowledge-Check
   Question 1: When localize is set to No, the date displayed in the client is based on the:
@@ -106,38 +117,40 @@ Q: Why at https://gettingstarted.mendixcloud.com/link/module/374/lecture/3053/7.
   and not
   [ ]UTC value
   ?
+A: must be poor wording. Tests show that it's based on the UTC value
 
+Q: Why at https://gettingstarted.mendixcloud.com/link/module/374/lecture/3053/7.8-Knowledge-Check
   Question 3: If both the Project and User time zone are set, the value of the localized DateTime attribute displayed in the client is according to:
   [x]The Client timezone
   and not
   [ ]The User timezone
   ?
-
+A: The answer is correct. The localized time is based on the browser timezone and ignores the user timezone.
 
 Q: In what timezone do date arithmetic functions in microflows work, especially when working with non-localized date attributes?
 A: in the caller timezone. Alternatively, use the xxxUTC() variants of the functions like addDaysUTC()
 
 Q: how to change association direction in domain model?
-
-Q: how to change association owner in domain model?
+A: the button is only available in Mendix Studio (Web)
 
 Q: Do non-persistable objects stay after page refresh?
+A: no
 
 Q: When retrieving in batches with custom Limit/Offset it's very easy to miss some objects or process them twice if the records were deleted/inserted during retrieval
-
-Q: How to filter in Retrieve by ID? How to obtain the ID of an object? How to sort in Retrieve by ID?
-
-Q: Integrate Java Actions that use other logging frameworks
-
-Q: Jave Thread name in log messages to extract message sequences for specific threads.
+A: this is mentioned in the courses: https://gettingstarted.mendixcloud.com/link/module/21/lecture/85/3.3-Using-Batches
+  > The new record set is retrieved, but since you didn’t define a sort order, the retrieve arbitrarily returns the list in no specific order
+  So use sorting and maybe it will help. Sorting by internal id is not supported anyway and we don't know if the internal ID monotonic. So use autonumber attribute.
 
 Q: Why instead of setting a role-based home page for Anonymous I have to make the login page default home page and set the role-based home page for every other role?
+  https://gettingstarted.mendixcloud.com/link/module/183/lecture/1426/3.7.3-Creating-a-Custom-Login-Page
+  > Open the Project Navigation and set the newly created login page as the Default home page.
+A: No good reason. Anonymous-specific home page works fine.
 
 Q: When uploading a logo via Theme Customizer (web) a GUID is appended to the file path in the .scss file. What is it?
 
 Q: Check the state of an object ("Instantiated", "Committed") without using java
 
-Q: ???
+Q: Send %CurrentObject% to a microflow associated with the "New" button in a data grid
 A: data grid button "New" pre-associates the new object when the grid datasource is "By Association". It can't do that for other data sources.
 
 Q:
@@ -150,6 +163,7 @@ Q:
 Q: buttons with pull-right class have inverted order in design mode
 
 Q: New pages not listed in "page access"
+A: Fill "Visible for" in page properties
 
 Q: Before Commit returning false, but without error does not stop a microflow (it prevents "Save changes" on click action though)
 Some autocommitted objects still existed on logout for session 'demo_administrator'.
@@ -159,6 +173,7 @@ Autocommitted objects should explicitly have been committed, please check your m
 
 
 Q: Image Viewer not updated when new image is selected in Image Uploader widget
+A: Image Uploader actually uploads the file only when you click the "Save" button on the same page. It somehow detects the proper button and chains itself to the button's action.
 
 Q: How does the Image Uploader widget subscribe to the form submit and how does it distinguish real submit and the cancel action? How does it make sure the upload precedes the user-configured action?
 
@@ -200,21 +215,46 @@ Q: Non-descriptive field names in generated code:
   	private IMendixObject __Parameter;
   	private usermanager.proxies.Employee Parameter;
       private IMendixObject __Parameter_2;
-    
 
-Q: escaping in XPath and OQL
+Q: get Mendix object ID
+A: CommunityCommons/GetGUID()
+
+Q: get object by ID string
+A: 
+  Mendix 7 had the form: id('ID_123423462342 ID_123423462343 ID_123423462344')
+  https://docs.mendix.com/refguide7/xpath-id
+
+  There's an alternative syntax:
+  https://docs.mendix.com/refguide/xpath-expressions
+  //Sales.Customer[Sales.Customer_Order = 'ID_124123512341']
+  
+  However they both aren't supported by Mendix 8
+
+Q: How to filter in Retrieve by ID? How to obtain the ID of an object? How to sort in Retrieve by ID?
+A: you can't
+
+Q: escaping in XPath
+A: concat() is not supported. Use XML entities. Ex:
+  Larry "Basher" O'Niven
+  [attr = 'Larry "Basher" O&apos;Niven']
+  [attr = "Larry &quot;Basher&quot; O'Niven"]
+  This totally works in Mendix 8 in datasource constraints in data widgets
+
+Q: escaping in OQL
 
 Q: escaping in expressions
-A: partial answer: SQL-like
+A: partial answer: SQL-like double apostrophe
   @GWSAMPLE_BASIC.GWSAMPLE_BASIC + '/' + toString(GWSAMPLE_BASIC.EntitySetNames.ProductSet) + '(''HT-1000'')'
   This produces the GET request https://sapes5.sapdevcenter.com/sap/opu/odata/iwbep/GWSAMPLE_BASIC/ProductSet('HT-1000')
 
 
 Q: Why can I compare '[%CurrentUser%]' with the association Xxx.Xxx_Account and not Xxx.Xxx_Account/System.Account ?
+A: Because the alternative form is: Xxx.Xxx_Account/System.Account/id = '[%CurrentUser%]'
 
 Q: unsaved changes on an in-memory object remain when you cancel editing
 
 Q: how to bookmark an application page?
+A: Use the Deep Link module from App Store
 
 Q: Mobile-specific homepage only displayed in Mendix Mobile app, but not in mobile Chrome
 A:
@@ -229,14 +269,21 @@ A:
       Native phone
 
 Q: My app doesn't have user management pages
+A: Add to navigation the page "Account_Overview" from the "Administration" module.
 
-Q: "Free App" "Mxadmin" unknown user
-A: login as demo_administrator
+Q: "Free App" "MxAdmin" unknown user
+A: login as demo_administrator. A password for MxAdmin can probably be set with an "After Startup" microflow.
 
 Q: two texts in one cell are sometimes positioned in one line
 A: change the Render mode from Text to Paragraph for text widgets so they will show up as separate pieces of text instead of on the same line
 
 Q: validation rule "unique" case sensitive?
+A: 
+  https://docs.mendix.com/refguide/case-sensitive-database-behavior
+  HSQLDB - Case insensitive for sorting, comparing, and string functions.
+  POSTGRESQL - Sorting and comparison are case sensitive. They cannot be configured.
+    String functions are case insensitive as they are implemented using the ILIKE SQL operator.
+  My tests show that sorting is case-insensitive in PostgreSQL
 
 Q: run microflow on change of object attribute without Save changes
 
@@ -245,11 +292,12 @@ Q: all validation messages from a microflow disappear if another microflow calle
 Q: refer "Done" stories in a commit?
 
 Q: add multiple tags to glyphicons and search by tags?
+A: The only tagged icons I know are "cog" and "wrench" and their tag is "settings".
 
 Q: validation messages make page resize and the save button escapes from under the mouse cursor when trying to save
 
 Q: How to move arrows in Domain Model?
-A: Select the arersd and then drag its end along the border of an entity
+A: Select the association and then drag its end along the border of an entity
 
 
 Q:
