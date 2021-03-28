@@ -61,6 +61,20 @@ A: In "After startup"
   Make sure it doesn't recursively call the same logging framework via LogSubscriber
 
 
+Q: Reference Selector vs Reference Set Selector vs Input Reference Set Selector
+A: These widgets allow editing associations. They require the current object to be an association owner. They still require the "Save" button.
+
+Reference Selector only works with "one to x" associations. It can associate one or zero parent objects with the current object. In drop-down mode it displays a chosen attribute of the parent object.
+
+The other two widgets only work with "many to many" associations" and they require a _Select page with a list view of unfiltered parent candidates and a "Save changes" button.
+When this pop-up window is invoked by one of the selector widgets it gains an implicit checkbox widget in each row of the list view and the "Save changes" button associates the checked parents with the current child object without committing it.
+
+Input Reference Set Selector looks like a readonly dropdown in which the chosen attribute of the selected parents is shown in a comma-separated list. It also has an active trigger button that invokes the _Select pop-up. In the pop-up already associated objects have their checkboxes checked.
+
+Reference Set Selector looks like a data grid and displays the attributes of parent objects. By default it has "Search Bar Toggle", "Add", and "Remove" buttons. The "Add" button invokes the _Select pop-up. In the pop-up already associated objects don't have their checkboxes checked and it looks like a bug in Mendix 8.17.0. However, checking them does not cause any error.
+Besides, Reference Set Selector ignores the readonlyness of the current container.
+
+
 Q: Why at https://gettingstarted.mendixcloud.com/link/module/36/lecture/200/3.4-Knowledge-Check
   Question 4: In which of the following microflows would applying entity access NOT be recommended?
   [x]A microflow to display a company overview to anonymous users.
@@ -284,6 +298,9 @@ A:
   POSTGRESQL - Sorting and comparison are case sensitive. They cannot be configured.
     String functions are case insensitive as they are implemented using the ILIKE SQL operator.
   My tests show that sorting is case-insensitive in PostgreSQL
+
+  As for built-in database Mendix generates DDL with the type VARCHAR_IGNORECASE instead of VARCHAR.
+
 
 Q: run microflow on change of object attribute without Save changes
 
