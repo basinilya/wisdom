@@ -1,4 +1,21 @@
 ﻿===== do not remove first line ==========
+Q: 
+  invalidMessage vs invalidMessageList
+A:
+  widgets.<widgetId>.invalidMessage
+    { widgetId: "<widgetId>" }
+  widgets.<widgetId>.invalidMessageList
+    ["<widget-label>: foo", "<widget-label>: bar"]
+
+Q: 
+  [ERROR] Failed to execute goal com.emc.xcp.builder:xcp-generate-sources:1.0.9:run (xcp-generate-sources) on project BooksApplication: Xcp mojo executing command 'generate' for project 'BooksApplication' failed unexpectedly: java.lang.RuntimeException: Error occurred while loading manifest for project: BooksApplication
+  [ERROR] Caused by: java.io.IOException: line too long
+  [ERROR] at java.util.jar.Attributes.read(Attributes.java:379)
+A:
+  Check ApplicationName/META-INF/MANIFEST.MF
+  Most probably it's filled with zero bytes
+  Replace the file with a valid one
+
 Q: xda log
  Failed to obtain session for dynamic handle
  Caused by: java.util.concurrent.ExecutionException: java.lang.NumberFormatException: For input string: "S"
@@ -1106,8 +1123,8 @@ A:
   pageContext is not madatory for application events, in this case xcp.core.PageContextManager.getApplicationPageContext() will be used.
   However, the application context must exist at time of subscription. The call to subscribe() must follow the "appready" event of xcp.Startup
 
-Q:
-A:
+Q: Get value from an xCP event
+A: var appEventData = xcp.event.ApplicationEvent.getEventData(eventName, pageContext);
   xcp.event.ApplicationEvent.getEventData (name, pageContext)
   pageContext is the context in which you're reading event data, not the context when it was fired
   pageContext can be undefined

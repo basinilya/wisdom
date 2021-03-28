@@ -1,5 +1,10 @@
 DRAFT
 
+Pages changed on disk aren't refreshed automatically when opened in designer
+
+Attributes of expanded fragment outout of type "Model" are not sorted alphabetically
+
+
 "Select Package Object" dialog in Process Debugger does not allow searching by r_object_id or full object path. It does not allow typing in the list view to quickly select the needed object.
 
 A stateless process can't return multivalue variables with different number of elements
