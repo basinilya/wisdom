@@ -1,6 +1,12 @@
 Q: exec_sql with select
 A: Since D7: execute exec_select_sql with query = '...';
 
+Q: ???
+A:
+  create TYPE mytype ( s string(50) ) supertype dm_sysobject publish;
+  drop   TYPE mytype ;
+
+
 Q: change sysobject type (convert to another type)
 A:
   CHANGE current_type [(ALL)] OBJECT[S]
@@ -14,6 +20,9 @@ A: select r_aspect_name from dm_sysobject where ...
 
 Q: list default type aspects
 A: select ti.r_object_id, ti.default_aspects, ti.r_type_name from dmi_type_info ti where ti.r_type_name = '...';
+
+Q: create aspect
+A: Only with Composer/xCP
 
 Q: drop aspect
 A:

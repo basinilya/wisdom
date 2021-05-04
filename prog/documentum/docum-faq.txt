@@ -1,5 +1,67 @@
-Q: rename attr
+Q: process variables DQL
+A: 
+select r_object_id, object_name, sd_type_info_id from dmc_wfsd_element where workflow_id='workflow_id' and object_name = 'varname';
+select * from dmc_wfsd_element_integer where r_object_id in( select r_object_id from dmc_wfsd_element where workflow_id in( select r_object_id from dm_workflow where object_name like 'Test%' ) );
+dmc_wfsd_element_string
+dmc_wfsd_element_boolean
+
+Q:
+2021-04-29 17:02:05,314 ERROR [default task-21] [com.documentum.mthdservlet.DoMethod] - Exception invoking com.documentum.bpm.method.XCPAutoTasKMgmt.
+java.lang.NumberFormatException: null
+        at java.lang.Integer.parseInt(Integer.java:542)
+        at java.lang.Integer.parseInt(Integer.java:615)
+        at com.documentum.bpm.Utils.GenericJobMethod.createJobReport(GenericJobMethod.java:84)
 A:
+  GenericJobMethod expects only standard arguments. No other args should be passed to DO_METHOD:
+  -method_trace_level 0
+  -user_name <user>
+  -job_id <job_oid>
+  -docbase_name <docbase.server>
+
+Q:
+2021-04-29 17:54:14,763 ERROR [default task-20] [com.documentum.mthdservlet.DoMethod] - Exception invoking com.documentum.bpm.method.XCPAutoTasKMgmt.
+DfMethodArgumentException:: THREAD: default task-20; MSG: [DFC_METHOD_UNSUPPORTED_ARGUMENT] Argument max_timer_threads is not supported; ERRORCODE: ff; NEXT: null
+        at com.documentum.fc.methodserver.DfMethodArgumentException.unsupportedArgument(DfMethodArgumentException.java:55)
+        at com.documentum.fc.methodserver.DfMethodArgumentManager.checkForUnsupportedArguments(DfMethodArgumentManager.java:221)
+        at com.documentum.bpm.Utils.JobArgs.<init>(JobArgs.java:32)
+        at com.documentum.bpm.Utils.GenericJobMethod.execute(GenericJobMethod.java:41)
+A:
+Wrong -job_id in DO_METHOD
+
+Q:
+2021-04-29 18:03:39,359 ERROR [default task-23] [com.documentum.mthdservlet.DoMethod] - Exception invoking com.documentum.bpm.method.XCPAutoTasKMgmt.
+DfMethodArgumentException:: THREAD: default task-23; MSG: [DFC_METHOD_DUPLICATE_ARGUMENT] Argument window_interval is repeated; ERRORCODE: ff; NEXT: null
+        at com.documentum.fc.methodserver.DfMethodArgumentException.duplicateArgument(DfMethodArgumentException.java:47)
+        at com.documentum.fc.methodserver.DfMethodArgumentManager.getString(DfMethodArgumentManager.java:108)
+        at com.documentum.bpm.Utils.JobArgs.<init>(JobArgs.java:29)
+        at com.documentum.bpm.Utils.GenericJobMethod.execute(GenericJobMethod.java:41)
+        
+A:
+You're trying to call DO_METHOD on a job that gets its arguments from -job_id instead of command line
+
+Q: JMS applications not deploying after server restart
+A:
+  cd $JBOSS_HOME/server/DctmServer_MethodServer/deployments
+  for f in *.undeployed; do mv $f ${f%.*}.dodeploy; done
+
+Q: Workflow Activity Timers don't work although dmi_wf_timer object is created
+A: Just be sure the dm_WfmsTimer job is enabled and set to run more often than your timer.
+
+Q:
+  A workflow task is paused paused with Execution Result: Please check the java method server log for possible errors.
+  However, no errors are printed to the JMS log.
+A:
+  The method is probably timing out. Check ${DM_DBA:?}/log/*base.log
+  Activity: 'sleep'. Method timed out within 60 secs The task will be processed by dm_bpm_XCPAutoTaskMgmt job since it is not completed and is from XCP process.."
+
+Q: rename attr
+A: 
+  - rename old db column to tmp_
+  - create again old db column
+  - drop old attribute
+  - create new attribute
+  - drop new db column
+  - rename tmp_ db column to new name
 
 Q: Create object fails with error from DB:
   ERROR: INSERT has more expressions than target columns
@@ -126,7 +188,7 @@ A:
 
 Q: do_method example
 A:
-EXECUTE do_method WITH method = 'aaa', arguments = 'bbb ccc ddd'; 
+EXECUTE do_method WITH method = 'foo', arguments = 'bbb ccc ddd'; 
 
 Q: do_method output saved
 A: EXECUTE do_method WITH save_results=true, ...
@@ -435,7 +497,7 @@ A: DQL:
     EXECUTE SET_OPTIONS WITH option='nettrace', "value"=true;
     EXECUTE SET_OPTIONS WITH option='sqltrace', "value"=true;
 
-    $ tail -F /u01/*/dba/log/*base.log
+    $ tail -F ${DM_DBA:?}/log/*base.log
     
     EXECUTE SET_OPTIONS WITH option='debug', "value"=false;
     EXECUTE SET_OPTIONS WITH option='nettrace', "value"=false;
@@ -448,6 +510,20 @@ Q:
   [DFC_SESSION_TRANSACTION_LOST] Transaction is invalid because server connection was lost (probably due to timeout or I/O error). Please abort transaction. The task will
   be processed by dm_bpm_XCPAutoTaskMgmt job since it is not completed and is from XCP process.."
 A:
+
+
+Q: workflow stuck due to activity timeout. "Transaction logs" in logs
+A:
+  Check ${DM_DBA:?}/log/*base.log for "Method timed out" messages
+  Edit the process activity, tab "Execution", Timeout (sec). The default is 60.
+  You can enter values within the range of:
+    select timeout_min , timeout_max from dm_method where object_name = 'BPSIntegration';
+  (timeout_default is ignored)
+  
+  A workflow may also get stuck due to session timeout. Check JMS log for "DFC_SESSION_TRANSACTION_UNFINISHED" messages.
+  ${DOCUMENTUM:?}/dba/config/*base/server.ini
+    [SERVER_STARTUP]
+    client_session_timeout=5
 
 Q: 
     Workflows stuck in all tasks are future and in bpm.log:

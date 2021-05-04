@@ -6,6 +6,9 @@ A:
 # find files open for write:
 lsof | grep -e "[[:digit:]]\+w"
 
+service nfslock stop
+
+
 # Hint: lsof does not display some files here
 - samba shares; stop samba
 - loop devices, use `losetup -a` to list

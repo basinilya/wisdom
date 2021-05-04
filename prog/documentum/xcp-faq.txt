@@ -1,4 +1,11 @@
 ﻿===== do not remove first line ==========
+
+Q: deploy failed. runapp.log:
+[INFO] Executing request http://hostname:9080/bpm/servlet/InvalidateCache
+[ERROR] Connection refused (Connection refused)
+A:
+  Wildfly stopped at a late stage of deploy. No need to redeploy.
+
 Q: 
   invalidMessage vs invalidMessageList
 A:
@@ -1078,6 +1085,8 @@ A:
   
   DQL: ... enable (RETURN_range  1 25 'out_segment_title  ASC')
 
+Q: What does Action Flow Object Model do?
+A: It acts as a filter for available Action Flows in Object Selector widget/Properties/General/Allow Selecting Object from Repository
 
 Q: fragment output of type "Model" not expandable
 A: 
@@ -1117,7 +1126,7 @@ A: xcp.event.EventBus.publish('ns_event_artifact_name', { param1: value1, ... },
 
 Q: subscribe to an xCP event from javascript
 A: 
-  var subscription = xcp.event.EventBus.subscribe('ns_event_artifact_name', function(name, paramsObj) { ... }, wizard.getPageContext()|fragment_context|xcp.core.PageContextManager.getApplicationPageContext()|undefined|??? );
+  var subscription = xcp.event.EventBus.subscribe('ns_event_artifact_name', function(name, paramsObj) { ... }, null, null, wizard.getPageContext()|fragment_context|xcp.core.PageContextManager.getApplicationPageContext()|undefined|??? );
   wizard.on('destroy', function() {xcp.event.EventBus.unsubscribe(subscription); });
 
   pageContext is not madatory for application events, in this case xcp.core.PageContextManager.getApplicationPageContext() will be used.

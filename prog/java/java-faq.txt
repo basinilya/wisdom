@@ -233,6 +233,14 @@ javap -v -classpath . ClassFileWithoutExtension | grep "major version"
     Java 6 uses major version 50
     Java 7 uses major version 51
     Java 8 uses major version 52
+    9 	53
+    10 	54
+    11 	55
+    12 	56
+    13 	57
+    14 	58
+    15 	59
+    16 	60
 
 ********************************************************************************
 Q: WARNING: Unable to find required classes (javax.activation.DataHandler and javax.mail.internet.MimeMultipart). Attachment support is disabled.
