@@ -1,3 +1,9 @@
+Q: show vertical ruler
+A: view -> rulers -> vertical ruler
+
+Q: crop image
+A: image properties / 6th tab
+
 Q: jpipe.dll: Can't find dependent libraries
 A: set PATH=...\program\;%PATH%
 

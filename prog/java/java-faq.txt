@@ -158,6 +158,7 @@ A: see pretty-xml.txt
 
 Q: parse html
 A: javax.swing.text.html.HTMLEditorKit.getParser()
+  Warning: unknown HTML tags like <tbody> are skipped.
 
 Q: base64
 A: javax.xml.bind.DatatypeConverter.parseBase64Binary

@@ -1,6 +1,8 @@
 Q: default administrator credentials
 A: username: MxAdmin and password: 1
 
+Q: Check the state of an object ("Instantiated", "Committed", dirty) without using java
+A: somewhat - isNew()
 
 Q: how to debug custom java
 A: locally - when you deploy for Eclipse it creates a launch configuration for that. Remotely, I don't know.
@@ -161,8 +163,6 @@ Q: Why instead of setting a role-based home page for Anonymous I have to make th
 A: No good reason. Anonymous-specific home page works fine.
 
 Q: When uploading a logo via Theme Customizer (web) a GUID is appended to the file path in the .scss file. What is it?
-
-Q: Check the state of an object ("Instantiated", "Committed") without using java
 
 Q: Send %CurrentObject% to a microflow associated with the "New" button in a data grid
 A: data grid button "New" pre-associates the new object when the grid datasource is "By Association". It can't do that for other data sources.
