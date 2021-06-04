@@ -1,3 +1,35 @@
+Q: Get ACS URLs
+A:
+    private static List<String> getAcsURLs(final String objId) throws DfException
+    {
+        final IDfSysObject obj = (IDfSysObject) session.getObject(new DfId(objId));
+        final IDfEnumeration acsRequests =
+            obj.getAcsRequests(null, 0, null, constructPreferences());
+        final List<String> URLs = new ArrayList<String>();
+        while (acsRequests.hasMoreElements()) {
+            final IDfAcsRequest acsRequest = (IDfAcsRequest) acsRequests.nextElement();
+            final String acsUrl = acsRequest.makeURL();
+            URLs.add(acsUrl);
+            System.out.println("ACS URL for object " + objId + " " + acsUrl);
+        }
+        return URLs;
+    }
+    private static IDfAcsTransferPreferences constructPreferences() {
+        final IDfAcsTransferPreferences transferPrefs = CLIENT_X.getAcsTransferPreferences();
+        transferPrefs.preferAcsTransfer(true);
+        transferPrefs.allowBocsTransfer(false);
+        // transferPrefs.setClientNetworkLocationId(networkLocationId);
+        // prefs.setProtocols(supportedProtocols);
+        return transferPrefs;
+    }
+
+
+Q: ACS network locations (useless unless GlobalRegistryAcsCache.getAllLocations() non-empty)
+A:
+  IDfEnumeration dfNetworkLocations = clientX.getAcsClient().getClientNetworkLocations(clientIPAddress, strLocale);
+  IDfNetworkLocationEntry dfNetworkLocation = (IDfNetworkLocationEntry)dfNetworkLocations.nextElement();
+  ...
+
 Q:  get sysobject attribute after calling destroy()
 A:
   destroy() removes itself from the cache and it marks the data as stale so if you still have a reference
@@ -215,16 +247,16 @@ A:
     Use this query type for queries containing SELECT statements that will not make changes to the repository. You can execute non-SELECT statements with a DF_READ_QUERY query, but there are no performance benefits in doing so. Note that if a DF_READ_QUERY query makes changes to the repository during processing, the collection returned by the query closes automatically. When the collection is closed, up to batch_hint_size objects will be modified but no error or exception will be raised. Consequently, if you want a query to make changes to a repository during processing, use a DF_QUERY query
     
     DF_QUERY
-    This is a general-purpose query type and the one most commonly used, notice that it corresponds to the ‘1’ mentioned in the text above.  Use this query type for any DQL statement. However, you must use this query type for queries that make changes to the repository.
+    This is a general-purpose query type and the one most commonly used, notice that it corresponds to the 1 mentioned in the text above.  Use this query type for any DQL statement. However, you must use this query type for queries that make changes to the repository.
     
     DF_CACHE_QUERY
     This query type indicates that a query executes as read-only and stores the results in a query cache file. Cached queries can improve performance for queries whose results are generally static. For example, you might use a DF_CACHE_QUERY query to return the names of users in the repository. To implement cached queries, you need to configure the DFC to store the query results in the client query cache. See the EMC Documentum Content Server Fundamentals guide.
     
     DF_EXEC_QUERY
-    This query type is the same as the DF_QUERY query type but should be used when the query string is longer than 255 characters. At least that’s what the documentation says. EDN users report that query strings longer than 255 characters run fine with DF_QUERY and that this limitation may have only existed in “old” versions of Documentum.
+    This query type is the same as the DF_QUERY query type but should be used when the query string is longer than 255 characters. At least thats what the documentation says. EDN users report that query strings longer than 255 characters run fine with DF_QUERY and that this limitation may have only existed in old versions of Documentum.
     
     DF_EXECREAD_QUERY
-    This query type is the same as the DF_READ_QUERY query type but should be used when the query string is longer than 255 characters. At least that’s what the documentation says. EDN users report that query strings longer than 255 characters run fine with DF_READ_QUERY and that this limitation may have only existed in “old” versions of Documentum.
+    This query type is the same as the DF_READ_QUERY query type but should be used when the query string is longer than 255 characters. At least thats what the documentation says. EDN users report that query strings longer than 255 characters run fine with DF_READ_QUERY and that this limitation may have only existed in old versions of Documentum.
     
     DF_APPLY
     Use this query type for queries that invoke procedures that perform system administration functions or run external procedures. For example, GET_PATH or GET_INBOX.

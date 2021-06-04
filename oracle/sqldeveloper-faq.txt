@@ -10,3 +10,26 @@ A:
   %APPDATA%\SQL Developer\system3.2.20.09.87\o.sqldeveloper.11.2.0.9.87\product-preferences.xml
 
 
+Q: debug stored procedure: ORA-24247: network access denied by access control list (ACL)
+A: 
+Oracle is disallowed to make a TCP connection to client's host
+workaround: use DBMS_DEBUG instead of DBMS_DEBUG_JDWP in debugger settings (supported by SQL Developer 20+)
+fix: 
+
+    BEGIN
+     DBMS_NETWORK_ACL_ADMIN.APPEND_HOST_ACE
+     (
+     host => 'subdomain.acme.com',
+     lower_port => 10000,
+     upper_port => 65535,
+     ace => xs$ace_type(privilege_list => xs$name_list('jdwp'),
+     principal_name => 'myusername',
+     principal_type => xs_acl.ptype_db)
+     );
+    END;
+    /
+  select * FROM dba_network_acls;
+  
+  see also
+  DBMS_NETWORK_ACL_ADMIN.CHECK_PRIVILEGE_ACLID
+  DBMS_NETWORK_ACL_UTILITY.CONTAINS_HOST

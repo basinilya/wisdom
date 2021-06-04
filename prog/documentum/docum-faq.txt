@@ -1,3 +1,6 @@
+Q: Find dm_document having content
+A: Do not use r_content_size!=0. Use r_page_cnt!=0
+
 Q: process variables DQL
 A: 
 select r_object_id, object_name, sd_type_info_id from dmc_wfsd_element where workflow_id='workflow_id' and object_name = 'varname';
@@ -245,7 +248,7 @@ A:
       Set this to True and use the i_chronicle_id for the parent_id when you want every new version of the parent to be related to the child.
   A new dm_relation is automatically created for each new version of the parent
   (see figure 3).
-  This setting is “FALSE” by default.
+  This setting is FALSE by default.
 
   permanent_link can be set on relation instance too
 

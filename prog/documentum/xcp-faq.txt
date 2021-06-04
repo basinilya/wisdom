@@ -1,4 +1,32 @@
 ﻿===== do not remove first line ==========
+Q:
+  Caused by: java.lang.NoSuchFieldError: NULL
+  	at org.springframework.expression.TypedValue.<clinit>(TypedValue.java:32)
+  	at org.springframework.expression.spel.support.StandardEvaluationContext.setRootObject(StandardEvaluationContext.java:88)
+  	at org.springframework.expression.spel.support.StandardEvaluationContext.<init>(StandardEvaluationContext.java:74)
+  	at com.emc.xcp.expressions.runtime.impl.SpelExpressionEngine.<init>(SpelExpressionEngine.java:34)
+  	at com.emc.xcp.expressions.runtime.impl.SpelExpressionEngine.<clinit>(SpelExpressionEngine.java:23)
+  	at com.emc.xcp.expressions.runtime.ExpressionEngineFactory.getExpressionEngine(ExpressionEngineFactory.java:35)
+  	at com.emc.xcp.runtime.util.ExpressionUtil.getExpressionValue(ExpressionUtil.java:32)
+  	at com.emc.xcp.runtime.util.ExpressionUtil.getExpressionValue(ExpressionUtil.java:24)
+  	at com.emc.xcp.runtime.util.CommonUtil.evaluateExpression(CommonUtil.java:81)
+  	at com.emc.xcp.runtime.util.CommonUtil.evaluateEvent(CommonUtil.java:74)
+  	at com.emc.xcp.runtime.engine.tracker.Utils.executeEventActions(Utils.java:56)
+A:
+	
+Q:
+    xCP 2.3 window often becomes blank and irrecoverable.
+    xCPDesigner_win64_2.3\Applications\BooksApplication\.metadata\.log:
+    !ENTRY org.eclipse.ui 4 0 2021-05-19 14:26:38.220
+    !MESSAGE Unhandled event loop exception
+    !STACK 0
+    org.eclipse.swt.SWTError: No more handles
+
+A:
+    Windows Registry Editor Version 5.00
+    
+    [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows]
+    "GDIProcessHandleQuota"=dword:00004e20
 
 Q: deploy failed. runapp.log:
 [INFO] Executing request http://hostname:9080/bpm/servlet/InvalidateCache
@@ -517,6 +545,11 @@ Q:
 A:
   Edit ${JBOSS_HOME:?}/server/DctmServer_MethodServer/deployments/acs.ear/bocs.war/WEB-INF/web.xml
   and set CORSAllowed to true (see xCP Deployment Guide)
+  
+  If error does not go away check server response with tcpdump: HTTP 500 responses don't contain Access-Control-Allow-Origin header.
+
+Q: [DM_CONTENT_E_GDCM_NO_CONTENT_EXISTS]error:  "There is no content for sysobject 0902254c803bda6c, page number 0, page modifier search_xml_info, and format xml"; ERRORCODE: 100; NEXT: DfException:: THREAD: tomcat-http--49; MSG: [DM_XFRM_E_NO_FMT_AVAIL]error:  "Unable to find a rendition for 9780333678077_text.pdf with format xml on page 0"; ERRORCODE: 100; NEXT: null
+A:
 
 Q: Stateless Process errors not displayed when using grid sort/navigate
 A: 
