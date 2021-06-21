@@ -1,3 +1,14 @@
+Q: ACS configuration
+A: dm_acs_config
+
+Q: ACS load balancing
+A:
+In all entries in dm_acs_config set acs_base_url to the load balancer URL (not sure about acs_supported_protocol)
+In the load balancer make the backend choice stick to the &servername= URL parameter mapped to dm_acs_config.object_name unless it's offline, then randomy choose the fallback
+Cookies can be safely dropped
+The ACS backends have the ability to register themselves in the doc broker, check the docs
+
+
 Q: Find dm_document having content
 A: Do not use r_content_size!=0. Use r_page_cnt!=0
 
@@ -129,7 +140,7 @@ A:
 Q: [DM_SYSOBJECT_E_NO_WRITE_ACCESS]error: "No write access for sysobject named
 A: check ACL
 
-Q: get storage path for content
+Q: get storage path for content/get content file path
 A: getpath,c,<dm_document_oid|content_oid>
 
 Q: default file extension to a_content_type mapping

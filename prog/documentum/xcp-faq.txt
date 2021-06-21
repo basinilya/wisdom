@@ -1,4 +1,10 @@
 ﻿===== do not remove first line ==========
+Q: The page you requested was not found. / This page either does not exist, or you do not have permissions to view it.
+A: A /ui/pages/ resource returned 404. The resource URL is constructed out of the current page #hash so check parts of the current URL.
+
+Q: application.properties cannot be opened because it does not exist
+A: it should be in target/classes/com/...
+
 Q:
   Caused by: java.lang.NoSuchFieldError: NULL
   	at org.springframework.expression.TypedValue.<clinit>(TypedValue.java:32)

@@ -1,3 +1,37 @@
+Q: Missing JDK dropdown in "job name" -> Configure
+A: Manage Jenkins -> Global Tool Configuration -> JDK
+  add more than one JDK
+
+Q: Missing JDK dropdown in "job name" -> Configure
+A: Manage Jenkins -> Configure System
+  add more than one JDK
+
+Q: Env inject - expand non-existing variables as empty strings
+A:
+    [v] Inject environment variables to the build process
+    [v] Prepare an environment for the run
+    Groovy Script
+    return [NAME1 : "value1", NAME2 : "value2"]
+    
+    Example:
+    return ["MAVEN_OPTS": getBinding().hasVariable("MAVEN_OPTS") ? MAVEN_OPTS : ""]
+    
+    https://stackoverflow.com/questions/58524750/append-possibly-non-existent-environment-variable-in-jenkins
+
+Q: ???
+A:
+  Groovy script
+    return [BUILD_REVISION: 
+    
+    [
+    "I" : "refs/heads/master"
+    ,"A" : "refs/heads/BR-LASTBUILD-I"
+    ,"P" : "refs/heads/BR-LASTBUILD-A"
+    ].get( EDFLUX_ENV )
+    
+    ]
+
+
 Q: free space background monitor
 A:
   exec 4>&1
@@ -9,6 +43,9 @@ A:
     done
   } >&4
   eval "exec ${TMPMON[0]}<&-"
+
+Q: job configurations location
+A: $JENKINS_HOME/jobs/$JOB_NAME/config.xml
 
 Q: build artifacts location
 A: $JENKINS_HOME/jobs/$JOB_NAME/builds/$OLD_BUILD_NUMBER/archive/

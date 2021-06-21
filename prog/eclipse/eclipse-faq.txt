@@ -1,3 +1,6 @@
+Q: External tool builder not run automatically on source file save
+A: On "Targets" tab select a target for auto builds
+
 Q: .class files visible in "Open Resource"
 A: Open the "Navigator" view, navigate to the project output folder, open folder properties and set the "Derived" checkbox
 

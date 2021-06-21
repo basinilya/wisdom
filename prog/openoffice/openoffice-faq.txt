@@ -1,3 +1,6 @@
+Q: page setup
+A: Format > Page Style > Page
+
 Q: show vertical ruler
 A: view -> rulers -> vertical ruler
 
