@@ -19,7 +19,7 @@ A:
   (?<=sUfFiX)
   Important: lookbehind can't into variable-length matches
 
-Q: read whole file
+Q: read whole file read entire file
 A: 
   my $content;
   {
@@ -80,19 +80,18 @@ set -- perl -e 'my $word = $ARGV[1]; my $exact = qr/\Q$word\E/; $exact = substr(
 
 Q:
 A:
- Проблемы с LWP::Useragent протокола https и ошибка "501 Not Implemented"
-Ну вот и я нарвался на странную работу модуля LWP::Useragent через прокси, а именно по https запросу, проксик выдал "501 Not Implemented"
-но это если объявить работу через прокси
-
+ Р°пў«ж­» нњјн»—P::Useragent рђ±®уЇ«®мћ https жЎ®йўЄнћ№нѕў501 Not Implemented"
+Оі гЇІ жЎї оЎ°гЎ«тЅЎ­нћєн±±у±Ў­оґѕ сЎў®у±Ў¬пҐімЅ LWP::Useragent оЃ›н±ҐеЎЇсЇ«±жЄ нћєн±Ёо¬ рђ¬ https иЎЇсЇІі, рђ±®лІЁиЎўеЎ« "501 Not Implemented"
+о¬ у¬ЎҐт¬¦ пўєг©І сЎў®у±Ў·ж±ҐеЎЇсЇ«±ж‹Љ
 $ua->proxy(['http', 'https'], 'http://xxxxx.xxx.xxx:3128/');
 
-Все начинает работать, только если закоментировать объявление proxy и определить прямо в скрипте переменную среды для прокси:
+Г±гЎ­бёЁоЎҐрЎ± вЇІбіј, уЇ¬јл¬ жІ«жЎ§б«®у©±®гЎІ пўєг¬Ґо©Ґ proxy жЎ®рђ±Ґе¦«йіј рђ±їаЎ±л±ЁрђіҐ рђ¦°ж­Ґо®і т±¦¤ е¬ї рђ±®лІЁ:
 
 $ENV{HTTPS_PROXY} = $proxy;
 $ENV{HTTPS_PROXY_USERNAME} = user;
 $ENV{HTTPS_PROXY_PASSWORD} = pass;
 
-Учитывая, что для работы требуется внешняя библиотека OpenSSL это вполне логично, откуда ей знать о проксиках объявленных в Userageny, но все же это настоящие грабли! 
+Ф·йі»гЎї, о‚Ћнј е¬ї сЎў®у№ЎІс¦ўіжі± г®ҐпЂї в©Ўм©®у¦«  OpenSSL у¬ЎўрђЇ«оЈ мЇЈйё­мЄ піЄн±•нѕ ж§ и® уєЎ® рђ±®лІЁлЎµ пўєг¬Ґо®»уЎ  Userageny, о¬ гІҐ зЈ у¬Ў­бІІрђЂ№йЈ д± в¬Ё! 
 
 
 Q:

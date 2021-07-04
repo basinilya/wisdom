@@ -1,3 +1,16 @@
+Q: job fails with
+  a_current_status                : FAILED:  Could not launch method TestTimeoutJob:  OS error: (No Error), DM error: ().
+  <html><head><title>Error</title></head><body>404 - Not Found</body></html>
+  
+  Direct do_method fails too.
+A:
+  bpm.ear or ServerApps.ear not deployed
+  search $JBOSS_HOME/server/DctmServer_MethodServer/log/server.log
+  for messages like: To trigger deployment create a file called
+
+Q: determine content server version/get server version/get version
+A: select r_server_version from dm_server_config;
+
 Q: ACS configuration
 A: dm_acs_config
 

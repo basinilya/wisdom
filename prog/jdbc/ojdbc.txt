@@ -26,3 +26,6 @@ Typ=13 (DATE ?)
 3)
 date - date = java.math.BigDecimal
 timestamp - timestamp = oracle.sql.INTEVALDS
+
+
+jdbc:oracle:thin:user/pass@host:1521:SID

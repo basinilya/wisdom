@@ -7,10 +7,54 @@ A:
   public class EJBBankBean implements EJBBankService {....}
   
   In your JSP file, use: #{ejbBankBean.yourServiceMethod(parameter1_ifAny,parameter2_ifAny)}
+  (Every time you use ejbBankBean in EL, a lookup is performed. Instead create a ref using
+    <c:set var="ejbBankBeanRef" scope="page" value="${ejbBankBean}"/>
+  )
   
   @Named is CDI Annotation, without @Named EJB Bean will not visible in JSP EL i.e. '$' or Unified EL i.e. '#'
 
   https://stackoverflow.com/a/41050460/447503
+
+Q: set jsp variable
+A: <c:set var="varname" value="${someEL}"/>
+
+Q: set jsp variable to a new object
+A:
+  <jsp:useBean id="varname" class="org.foo.BeanClass" scope="session"/>
+
+  <jsp:setProperty name="varname" property="propname" value="${expression}" />
+  or
+  <c:set target="${varname}"  property="propname" value="${expression}" />
+  or
+  <jsp:setProperty name="beanName" property="propName" param="paramName"/><%-- Request parameter  --%>
+
+  https://docs.oracle.com/cd/E19316-01/819-3669/bnaiu/index.html
+
+Q: set jsp variable in java/jsp scriptlet
+A: 
+  pageContext.setAttribute()
+  request.setAttribute()
+  application.setAttribute() // application is ServletContext
+  session.setAttribute()
+
+Q: get real request URI
+A:
+    /** Helps when just "?a=b" turns into ";jsessionId=blah?a=b" */
+    public static String getOriginalRequestURI(HttpServletRequest request) {
+        String uri = (String) request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH);
+        if (uri == null) {
+            uri = request.getServletPath();
+        }
+        return uri;
+    }
+
+Q: construct a relative URI
+A:
+  <% request.setAttribute("selfPath", getOriginalRequestURI(request)); %>
+
+	<c:url var="url" value="${selfPath}">
+	 <c:param name="x" value="y"/>
+	</c:url>
 
 Q: ${} vs #{}
 A:
@@ -23,10 +67,17 @@ A:
   
       https://stackoverflow.com/questions/4812755/difference-between-jsp-el-jsf-el-and-unified-el
 
+Q: jstl maven dependencies
+A: 
+				<dependency>
+						<groupId>javax.servlet</groupId>
+						<artifactId>jstl</artifactId>
+						<version>1.2</version>
+				</dependency>
 
-
-Q: jstl shapka
+Q: jstl file header
 A:
+  (<jsp:> taglib is implied)
   https://www.tutorialspoint.com/jsp/jsp_standard_tag_library.htm
 
   <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><%--
@@ -40,12 +91,92 @@ A:
   --%><%--
   --%><html>
 
-Q: shapka
+Q: custom jsp EL function
+A:
+  WEB-INF/my.tld
+    <taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+        version="2.0">
+     
+        <tlib-version>2.0</tlib-version>
+        <uri>http://www.your-domain.com/taglib</uri>
+     
+        <function>
+            <name>doMyStuff</name>
+            <function-class>com.mydomain.util.ElFunctions</function-class>
+            <function-signature>java.lang.String doMyStuff( java.util.Collection )</function-signature>
+        </function>
+    </taglib>
+
+  public class ElFunctions
+  {
+      public static String doMyStuff( Collection<SomeType> myparam )
+      {
+          // do stuff here and return the results
+      }
+  }
+  
+  <%@ taglib prefix="my" uri="/WEB-INF/my.tld" %>
+  <spring:message text="${my:doMyStuff(bean.collection)}" />
+ 
+  https://digitaljoel.nerd-herders.com/2011/03/17/how-to-create-a-custom-taglib-containing-an-el-function-for-jsp/
+
+Q: file header
 A:
 
 <%@ page language="java" contentType="text/plain; charset=UTF-8" pageEncoding="UTF-8"%><%--
 --%>
 
+
+Q: i18n
+A:
+  https://docs.oracle.com/cd/E17802_01/j2ee/j2ee/1.4/docs/tutorial-update2/doc/WebI18N.html
+  https://docs.oracle.com/javase/tutorial/i18n/index.html
+
+  <c:if test="${!empty locale}"><fmt:setLocale value="${locale}"/></c:if>
+  <fmt:bundle basename="org.foo.LabelsBundle">
+    <html>
+			<fmt:message key="a">
+				<fmt:param>
+					<b>some description</b>
+				</fmt:param>
+			</fmt:message>
+    </html>
+  </fmt:bundle>
+  
+  org/foo/LabelsBundle.properties:
+    a = error: {0}
+  org/foo/LabelsBundle_es.properties:
+    a = error: {0}
+
+
+Q: expression languate (EL)
+A: https://docs.oracle.com/javaee/6/tutorial/doc/bnahq.html
+
+Q: get current request in EL
+A: ${pageContext.request}
+  see JSP EL Implicit Objects
+
+Q: JSP EL Implicit Objects
+A:
+  see javax.servlet.jsp.el.ImplicitObjectELResolver.ScopeManager
+
+  EL implicit object reference name   Types of                         JSP built-in object name   Description
+  pageContext                         javax.servlet.jsp.PageContext    pageContext                the same
+  pageScope                           java.util.Map<String,Object>     No corresponding           Data stored in the pageContext scope, page scope
+  requestScope                        java.util.Map<String,Object>     No corresponding           Request scope data
+  sessionScope                        java.util.Map<String,Object>     No corresponding           Session scope data
+  applicationScope                    java.util.Map<String,Object>     No corresponding           Application data
+  param                               java.util.Map<String,String>     No corresponding           A request parameter
+  paramValues                         java.util.Map<String,String[]>   No corresponding           Request parameters with duplicate names
+  header                              java.util.Map<String,String>     No corresponding           A request header
+  headerValues                        java.util.Map<String,String[]>   No corresponding           Rename request message header
+  initParam                           java.util.Map<String,String>     No corresponding           Global parameters in web.xml
+  cookie                              java.util.Map<String,Cookie>     No corresponding           key: the name value of the cookie object
+
+  https://www.programmersought.com/article/99387364577/
+  https://www.programmersought.com/article/85326779083/
 
 
 Q: import 
@@ -59,13 +190,22 @@ A: <%-- --%>
 
 Q: escape html
 A: 
+EL:
+  ${fn:escapeXml('some')}
+scriptlet:
 pom.xml:
+    <dependency>
+    	<groupId>org.apache.commons</groupId>
+    	<artifactId>commons-text</artifactId>
+    	<version>1.9</version>
+    </dependency>
     <dependency>
     	<groupId>commons-lang</groupId>
     	<artifactId>commons-lang</artifactId>
     	<version>2.6</version>
     </dependency>
 test.jsp:
+    <%@page import="org.apache.commons.text.StringEscapeUtils"%>
     <%@page import="org.apache.commons.lang.StringEscapeUtils"%>
     <%!
     static String escape(String str) {
