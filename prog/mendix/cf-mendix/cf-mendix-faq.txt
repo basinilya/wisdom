@@ -1,0 +1,147 @@
+
+Q: default command
+A:
+  PYTHONPATH=:buildpack:lib python3 buildpack/start.py
+
+Q: troubleshoot crashed app
+A:
+  https://github.com/mendix/cf-mendix-buildpack
+  Troubleshooting (Rescue Mode)
+  cf set-env myapp-test DEBUG_CONTAINER true
+  cf restart myapp-test
+  cf ssh myapp-test
+  export HOME=$HOME/app # this should not be needed but for now it is
+  cd app
+  export DEBUG_CONTAINER=false # while we are in the container turn it off, we could try to make this optional by detecting other environment variables that are present over ssh but not regular start
+  export PORT=1234 # so that nginx can start correctly
+  export BUILDPACK_XTRACE=true
+  PYTHONPATH=:buildpack:lib python3 buildpack/start.py
+
+Q: where are mendix settings stored?
+A: 
+  When in cloud, on M2EE server, the buildpack python scripts read the env and configure M2EE accordingly using HTTP calls.
+  https://github.com/mendix/m2ee-tools/blob/master/doc/introduction.md
+  > When the JVM process is started, the m2ee tool connects to the Mendix Runtime to configure it
+                                           (2) MxRuntime
+                                        ,------------------.
+                               (4) admin                   |
+     (1) m2ee-tools  ------------>  port - m2ee admin api  |       _______
+                                        |                  |      (       )
+                (3) data/   <---------- |  read/write data |      (   D   )
+                    model/  <---------- |  read model      |      (   B   )
+           ,----->  web/                |                  | <--> (   M   )
+           |                   (5) runtime                 |      (   S   )
+     (6) nginx ------------------->  port - public api     |      (_______)
+           ^                            |  /xas/, /file,   |
+           |                            |  /ws/, etc...    |
+       end user                         `------------------'
+
+
+Q: MXRUNTIME_DatabaseType
+A:
+  https://docs.mendix.com/refguide/custom-settings
+  DB2, HSQLDB, MYSQL, ORACLE, POSTGRESQL, SAPHANA, and SQLSERVER.
+
+Q: persistent storage for System.FileDocument
+A:
+  https://docs.mendix.com/refguide/custom-settings
+  com.mendix.core.StorageService
+  com.mendix.storage.localfilesystem, com.mendix.storage.s3, com.mendix.storage.azure, and com.mendix.storage.swift
+  
+
+Q: Use CF service key, cf-mendix-buildpack way
+A: 
+
+  # !!! remove the binding from services in app Manifest
+  # !!!All!!! MXRUNTIME_DatabaseXxx must be unset!
+  #
+  # https://docs.cloudfoundry.org/devguide/services/service-keys.html
+  # create key
+  cf create-service-key myapp-test-database appkey
+  # print Credentials JSON
+  cf service-key myapp-test-database appkey
+  #
+  # Copy to browser console, copy the value of "uri" (make sure \u0026 was unescaped back to ampersand)
+  # Store the value in vault as "DATABASE_URL"
+  #
+  # set the app environment
+  cf set-env myapp-test DATABASE_URL value-from-vault
+
+
+Q: Use bound service database, cf-mendix-buildpack way
+A:
+  !!! Do not use with Postgres:
+  !!! - Each app deploy gets its own credentials, see "permission denied for table" below
+  !!! - Inline Certificates unsupported for PostgreSQL https://github.com/mendix/cf-mendix-buildpack/issues/452
+  !!!All!!! MXRUNTIME_DatabaseXxx must be unset!
+
+  Manifest.yml:
+    applications:
+    - name: my-app
+    services:
+     - myapp-test-database
+      env:
+        #MXRUNTIME_DatabaseHost: 
+        #MXRUNTIME_DatabaseName: 
+        #MXRUNTIME_DatabaseType: HSQLDB
+        #MXRUNTIME_DatabaseUserName: sa
+        # This is important because the default dadabase directory does not exist 
+        #MXRUNTIME_DatabaseJdbcUrl: jdbc:hsqldb:file:~/app/data/database/default
+
+  https://github.com/mendix/cf-mendix-buildpack/blob/ce60432790e501e4237cbeca62b1a33c4849a77c/buildpack/runtime_components/database.py#L12
+  def get_config():
+      # the following options are validated to get database credentials
+      # 1) existence of custom runtime settings Database.... values
+      # 2) VCAP with database credentials
+      # 3) existence of DATABASE_URL env var
+  
+      # In case we find MXRUNTIME_Database.... values we don't interfere and
+      # return nothing. VCAP or DATABASE_URL return m2ee configuration
+  
+      if any(
+          [x.startswith("MXRUNTIME_Database") for x in list(os.environ.keys())]
+      ):
+          logging.debug(
+              "Detected database configuration using custom runtime settings."
+          )
+          return None
+  
+      factory = DatabaseConfigurationFactory() 
+
+Q: ERROR: Executing start did not succeed: result: 1, message: An error occurred while initializing the Runtime: org.postgresql.util.PSQLException: ERROR: permission denied for table mendixsystem$version, caused by: org.postgresql.util.PSQLException: ERROR: permission denied for table mendixsystem$version
+A: 
+  Do not use service bindings with PostgreSQL. Create a CF service key, store the DATABASE_URL in vault and add it to the env list
+
+https://docs.cloudfoundry.org/services/enable-sharing.html
+You should generate unique credentials for each binding. This ensures that developers can unshare a
+service instance at any time. Unsharing an instance deletes any service bindings and revokes access
+for those credentials. Unsharing an instance prevents unauthorized future access from developers
+and apps that saved the credentials they were previously provided using the service binding.
+
+https://www.postgresql.org/docs/14/sql-altertable.html
+You must own the table to use ALTER TABLE.
+
+https://dba.stackexchange.com/a/137211/63417
+A table is always owned by the user who created it initially there is no way to change that. 
+
+Q: ERROR: Executing start did not succeed: result: 1, message: An error occurred while initializing the Runtime: Database name is not set., caused by: Database name is not set.
+A: Bug in 8.18.7: With PostgreSQL DatabaseName is mandatory regardless of DatabaseJdbcUrl
+
+Q: use a built-in database
+A:
+  Manifest.yml:
+    applications:
+    - name: my-app
+      env:
+        MXRUNTIME_DatabaseHost: 
+        MXRUNTIME_DatabaseName: 
+        MXRUNTIME_DatabaseType: HSQLDB
+        MXRUNTIME_DatabaseUserName: sa
+        # This is important because the default dadabase directory does not exist 
+        MXRUNTIME_DatabaseJdbcUrl: jdbc:hsqldb:file:~/app/data/database/default
+
+Q: org.hsqldb.HsqlException: Database does not exists: /home/vcap/app/data/database/hsqldb/default/default
+A: 
+  cf-mendix-buildpack does not create the parent directory "/home/vcap/app/data/database/hsqldb" for the default database location
+  Use an explicit location with:
+    MXRUNTIME_DatabaseJdbcUrl: jdbc:hsqldb:file:~/app/data/database/default

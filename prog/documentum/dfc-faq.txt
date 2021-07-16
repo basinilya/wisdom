@@ -1,3 +1,40 @@
+Q: ClassNotFoundException after deleting a single jar from documentum cache
+A: also remove the entry from content.xml in documentum cache or clear it completely
+
+Q: Instantiate an xCP module
+A: IDfClient.newModule(docbase, xcp_namespace + "_" + artifactname, sm)
+
+Q: Get an xCP module class
+A: 
+  // !!! If it's a library class and a class with the same name exists in app classloader
+  // then the app class will be loaded
+  new DfClient().getModuleClass(xcp_namespace + "_" + artifactname, session)
+
+Q: Get an instance of ModuleClassLoader
+A:
+    final IModuleMetadata metadata = getModuleMetadata(session, moduleName);
+    final ClassLoader moduleClassLoader = getModuleClassLoader(session, metadata);
+
+    private static ClassLoader getModuleClassLoader(
+            final IDfSession session,
+            final IModuleMetadata metadata) throws DfException {
+        final ClassLoaderFactory loaderFactory = ClassLoaderFactory.getInstance();
+        final ClassLoader parentClassLoader = loaderFactory.getSharedClassLoader();
+        final ClassLoader moduleClassLoader =
+            loaderFactory.getModuleClassLoader(session, parentClassLoader, metadata);
+        return moduleClassLoader;
+    }
+
+    private static IModuleMetadata getModuleMetadata(
+            final IDfSession session,
+            final String moduleName) throws DfException {
+        final IModuleRegistry moduleRegistry = (IModuleRegistry) session.getModuleRegistry();
+        // will throw DFC_BOF_CANNOT_FIND_OBJECT if not found
+        final IModuleMetadata metadata = moduleRegistry.lookup(null, moduleName);
+        return metadata;
+    }
+
+
 Q: Get ACS URLs
 A:
     private static List<String> getAcsURLs(final String objId) throws DfException

@@ -1,3 +1,17 @@
+Q: set user role in micrflow
+A: 
+  retrieve the userrole object by xpath of the form [id='[%UserRole_RoleName%]']
+  Assign as a regular association
+
+Q: empty string
+A: a string can be empty (null) or it can be empty string (''). You need both checks
+
+Q: button next to input field
+A:
+
+Q: "raise an error when the microflow returns false", validation messages and Image Uploader widget don't work together
+A:
+
 Q: default administrator credentials
 A: username: MxAdmin and password: 1
 
@@ -154,7 +168,7 @@ A: no
 
 Q: When retrieving in batches with custom Limit/Offset it's very easy to miss some objects or process them twice if the records were deleted/inserted during retrieval
 A: this is mentioned in the courses: https://gettingstarted.mendixcloud.com/link/module/21/lecture/85/3.3-Using-Batches
-  > The new record set is retrieved, but since you didn’t define a sort order, the retrieve arbitrarily returns the list in no specific order
+  > The new record set is retrieved, but since you didnt define a sort order, the retrieve arbitrarily returns the list in no specific order
   So use sorting and maybe it will help. Sorting by internal id is not supported anyway and we don't know if the internal ID monotonic. So use autonumber attribute.
 
 Q: Why instead of setting a role-based home page for Anonymous I have to make the login page default home page and set the role-based home page for every other role?
@@ -244,6 +258,9 @@ A:
   
   However they both aren't supported by Mendix 8
 
+Q: xpath constraint with unrelated entities
+A: not possible
+
 Q: How to filter in Retrieve by ID? How to obtain the ID of an object? How to sort in Retrieve by ID?
 A: you can't
 
@@ -261,6 +278,7 @@ A: partial answer: SQL-like double apostrophe
   @GWSAMPLE_BASIC.GWSAMPLE_BASIC + '/' + toString(GWSAMPLE_BASIC.EntitySetNames.ProductSet) + '(''HT-1000'')'
   This produces the GET request https://sapes5.sapdevcenter.com/sap/opu/odata/iwbep/GWSAMPLE_BASIC/ProductSet('HT-1000')
 
+  urlDecode('%FF') can also be used
 
 Q: Why can I compare '[%CurrentUser%]' with the association Xxx.Xxx_Account and not Xxx.Xxx_Account/System.Account ?
 A: Because the alternative form is: Xxx.Xxx_Account/System.Account/id = '[%CurrentUser%]'
@@ -318,9 +336,9 @@ A: Select the association and then drag its end along the border of an entity
 
 
 Q:
-  During the development of your app, you can preview it whenever you like. As long as nobody is using the app yet, this is perfectly safe to do. Once the app is in production” (meaning, it is being used by end-users), be careful to only publish the app once a feature is built completely. Otherwise, your end-users could be confronted with incomplete functionalities.
+  During the development of your app, you can preview it whenever you like. As long as nobody is using the app yet, this is perfectly safe to do. Once the app is in production (meaning, it is being used by end-users), be careful to only publish the app once a feature is built completely. Otherwise, your end-users could be confronted with incomplete functionalities.
   
-  Studio Pro will not allow you to preview while there are errors in your app, so you can’t accidentally break an app that’s running in production.
+  Studio Pro will not allow you to preview while there are errors in your app, so you cant accidentally break an app thats running in production.
 
   What?
 

@@ -328,3 +328,7 @@ A:
 jconsole (openjdk) can call certain MBean operations, but not those that accept arrays
 jvisualvm (oracle) can thread dump, heap dump, GC
 java mission control can call operations with arrays passing exactly one array member
+
+Q: read entire file
+A:
+  new Scanner(requireNonNull(resourceAsStream), UTF_8.name()).useDelimiter("\\A").next();

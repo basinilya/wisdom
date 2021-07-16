@@ -1,4 +1,19 @@
 ﻿===== do not remove first line ==========
+Q: save Designer installation path to war
+A:
+	  <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <configuration>
+              <archive>
+                  <manifestEntries>
+                    <X-Designer-Path>${designerPath}</X-Designer-Path>
+                    <X-Mvn-Class-Path>${java.class.path}</X-Mvn-Class-Path>
+                    <X-Classworlds-Conf>${classworlds.conf}</X-Classworlds-Conf>
+                  </manifestEntries>
+              </archive>
+
+
 Q: The page you requested was not found. / This page either does not exist, or you do not have permissions to view it.
 A: A /ui/pages/ resource returned 404. The resource URL is constructed out of the current page #hash so check parts of the current URL.
 

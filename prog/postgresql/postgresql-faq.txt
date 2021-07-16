@@ -1,3 +1,28 @@
+Q: current user
+A: current_user
+
+Q: anonymous block
+A: DO $$ DECLARE BEGIN END $$;
+
+Q: delete all objects
+A:
+DO $$DECLARE r record;
+BEGIN
+    FOR r IN select tablename from pg_tables where schemaname = 'public'
+    LOOP
+        EXECUTE 'drop table ' || quote_ident(r.tablename) ;
+    END LOOP;
+    FOR r IN select sequencename from pg_sequences where schemaname = 'public'
+    LOOP
+        EXECUTE 'drop sequence ' || quote_ident(r.sequencename) ;
+    END LOOP;
+END$$;
+
+
+
+Q: default port
+A: 5432
+
 Q: query timeout
 A: 
   set statement_timeout = 120000;

@@ -1,9 +1,16 @@
-Q: Missing JDK dropdown in "job name" -> Configure
-A: Manage Jenkins -> Global Tool Configuration -> JDK
-  add more than one JDK
+Q: Jenkins prepends ${JAVA_HOME}/bin to PATH every time a script is run 
+A: 
+  Jenkins prepends PATH with the configured env vars with the names starting with "PATH+" before any step.
+  The configured var PATH+JDK= exists because you have a JDK configured in Manage Jenkins -> Global Tool Configuration -> JDK
+
+Q: I inject env var JAVA_HOME and it works until I use another inject env vars step
+A: 
+  Every time you use the  inject env vars Jenkins first resets the vars using the values from
+  Manage Jenkins -> Global Tool Configuration -> JDK
+  Manage Jenkins -> Configure System -> Global Properties
 
 Q: Missing JDK dropdown in "job name" -> Configure
-A: Manage Jenkins -> Configure System
+A: Manage Jenkins -> Global Tool Configuration -> JDK
   add more than one JDK
 
 Q: Env inject - expand non-existing variables as empty strings
