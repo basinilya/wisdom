@@ -12,6 +12,8 @@ A:
 Q: "raise an error when the microflow returns false", validation messages and Image Uploader widget don't work together
 A:
 
+Q: Trace SQL
+A: 
 Q: default administrator credentials
 A: username: MxAdmin and password: 1
 
