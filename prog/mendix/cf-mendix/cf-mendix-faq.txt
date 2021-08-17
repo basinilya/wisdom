@@ -1,3 +1,15 @@
+Q: Admin port
+A:
+  https://docs.mendix.com/refguide/monitoring-mendix-runtime
+
+  curl -H "X-M2EE-Authentication: $(printf %s "$ADMIN_PASSWORD" | base64)" -H "Content-Type: application/json"  --data '{"action" : "get_current_runtime_requests", "params":{} }' http://127.0.0.1:8082; echo
+  {"feedback":{},"result":0}
+
+  curl -H "X-M2EE-Authentication: $(printf %s "$ADMIN_PASSWORD" | base64)" -H "Content-Type: application/json" http://127.0.0.1:8082 --data '{"action" : "check_health", "params":{} }'; echo
+  {"feedback":{"health":"unknown"},"result":0}
+
+  With Studio Pro use Sysinternals Process Explorer to extract the env var M2EE_ADMIN_PASS from java process
+
 
 Q: default command
 A:

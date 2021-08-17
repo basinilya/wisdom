@@ -1,3 +1,6 @@
+Q: Where's the mx javascript API documented? mx.ui.showLogin(), mx.data.action() and such.
+A: https://apidocs.rnd.mendix.com/8/client/mx.ui.html
+
 Q: set user role in micrflow
 A: 
   retrieve the userrole object by xpath of the form [id='[%UserRole_RoleName%]']
@@ -258,13 +261,16 @@ A:
   https://docs.mendix.com/refguide/xpath-expressions
   //Sales.Customer[Sales.Customer_Order = 'ID_124123512341']
   
-  However they both aren't supported by Mendix 8
+  However they both aren't supported by Mendix 8+
 
 Q: xpath constraint with unrelated entities
 A: not possible
 
 Q: How to filter in Retrieve by ID? How to obtain the ID of an object? How to sort in Retrieve by ID?
 A: you can't
+
+Q: current object in client xpath
+A:
 
 Q: escaping in XPath
 A: concat() is not supported. Use XML entities. Ex:

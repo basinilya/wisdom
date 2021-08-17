@@ -10,3 +10,11 @@ ssh-keygen -e -m PEM -f ~/.ssh/id_rsa.pub >~/.ssh/id_rsa.pub.pem
 
 # convert from BEGIN RSA PUBLIC KEY to ssl BEGIN PUBLIC KEY
 openssl rsa -in ~/.ssh/id_rsa.pub.pem -RSAPublicKey_in -pubout > ~/.ssh/ssl.pub.pem
+
+
+
+Q: Dump a certificate
+A: 
+  openssl x509 -in certificate.crt -text -noout
+  openssl rsa -in postgresqlshb3fmrh.key -text -noout
+  openssl pkcs8 -in postgresqlshb3fmrh.pk8 -inform DER -nocrypt | openssl rsa -text -noout

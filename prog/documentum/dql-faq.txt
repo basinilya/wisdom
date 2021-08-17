@@ -68,8 +68,9 @@ A: select DATE('2020-12-31 12:00:00utc', 'yyyy-mm-dd hh:mi:ss') as x from dm_doc
 Q: dual
 A: select 'aaa' as x from dm_docbase_config
 
-Q: Current CLIENT date
+Q: Current SERVER date
 A: select date(now) as x from dm_docbase_config
+  Warning: when setting an attribute value to date(now) the CLIENT date is used
 
 Q: dm_relation has no r_object_type, but relation_name may differ from its actual type
 A:

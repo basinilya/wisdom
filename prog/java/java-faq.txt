@@ -1,11 +1,24 @@
 ﻿********************************************************************************
 Do not remove 1st line
 ********************************************************************************
+Q: endorsed
+A: -Djava.endorsed.dirs=
+  https://docs.oracle.com/javase/8/docs/technotes/guides/standards/
+
+Q: bootstrap classpath
+A:
+  -Xbootclasspath:path to-substitute
+  -Xbootclasspath/a:path to-append
+  -Xbootclasspath/p:path to-prepend
+
 Q: Cannot create a generic array of List<String>
 A: 
   @SuppressWarnings("unchecked")
   ...
   List<T> x = new List[sz];
+
+Q: parent-last classloader
+A: see MyParentLastClassloader.java
 
 
 Q: dump on OOM

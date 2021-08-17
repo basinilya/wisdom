@@ -1,7 +1,10 @@
-Q:
+Q: pip-compile prerequisites
+A: libpq-devel libffi-devel python38-devel
+
+Q: ??? prerequisites
 A: perl-IO-stringy
 
-Q: 
+Q: msgconvert prerequisites
 A: perl-Capture-Tiny, libcrypt-devel, perl-MRO-Compat, perl-Module-Pluggable, perl-Test-Fatal, perl-MIME-Types perl-Try-Tiny perl-Test-Needs perl-Role-Tiny perl-Sub-Quote perl-Sub-Name perl-Class-XSAccessor perl-Sub-Exporter perl-Data-OptList perl-Test-LeakTrace perl-Params-Util perl-Sub-Install perl-Devel-StackTrace perl-Encode-Locale perl-File-Which perl-IPC-System-Simple perl-URI perl-IO-String perl-ExtUtils-Depends libnsl-devel perl_pods
 
 Q: cpan prerequisites
