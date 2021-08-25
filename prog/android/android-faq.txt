@@ -1,0 +1,28 @@
+Q: `adb.exe devices` does not show any device, "Android Composite ADB Interface" is missing, "ADB Interface" is missing, the device is recognized as an MTP device, not a composite device 
+A: go to Android setting, developer and disable "always prompt when connected" for ADB, replug.
+
+Q: Generic USB driver cannot be installed for a Huawei Android device
+A: Generic USB drivers don't work with Huawei. The suitable driver is distributed as part of HiSuite. Launch HiSuite, open Menu > Settings > General and click Install USB driver
+  Alternatively, if HiSuite is not installed, open HiSuite_11.0.0.550_OVE.exe in 7zip and unpack the folder containing DriverSetup.exe and launch this executable
+
+
+Q: test on desktop java
+A: roboletric
+
+Q: resources
+A:
+    https://stackoverflow.com/questions/12203072/where-are-the-layouts-and-styles-defined-for-preferenceactivity
+    
+    https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/core/res/res/values/styles.xml
+        <style name="Preference.CheckBoxPreference">
+            <item name="widgetLayout">@layout/preference_widget_checkbox</item>
+        </style>
+    
+    https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/core/res/res/layout/preference_widget_checkbox.xml
+        <CheckBox xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+android:id/checkbox" 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="false"
+            android:background="@null" />
