@@ -1,3 +1,23 @@
+Q: ntfs partitions won't mount (Device or resource busy) 
+A: 
+  Try to stop degraded array
+  mdadm --stop /dev/md125
+  mdadm --stop /dev/md126
+
+  i actually kept searching around on this problem all night tonight and did find the answer eventually.
+  What happened i guess, is that my drives (for whatever reason) had raid metadata stored in the partition table (not sure why, i haven't used either for a raid setup in the past). i believe running `dmraid -n` will display any raid setups detected. To correct the problem, i just stripped the raid metadata from the disks
+
+    # disable the raid setup
+    dmraid -an
+    dmraid -si
+    
+    # remove the metadata
+    dmraid -E -r
+  
+  this effectively releases the hold on the device node, and allows mount to get a lock on the device node (and subsequently mount it). I would definitely put this into the obscure pile, but who knows maybe someone else will get some use out of this!  
+  after running the above commands i was able to simply run `mount -a` and my ntfs partitions were mounting properly! 
+
+
 Q: prepend program output with timestamp 
 A: ts from moreutils
 
@@ -11,8 +31,10 @@ service nfslock stop
 
 # Hint: lsof does not display some files here
 - samba shares; stop samba
-- loop devices, use `losetup -a` to list
+- loop backing devices, use `losetup -a` to list
 - memory mapped writable files (FD=mem). Ex: journald files in /var/log/journal/
+- dmraid backing devices
+- mounted devices
 
 # If you use systemd then disk writes are stopped by stopping systemd-journald.
 
