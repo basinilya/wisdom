@@ -4,19 +4,22 @@ set -o pipefail
 
 partdev=${1:?}
 
-partdev=$(readlink -f -- "$partdev")  
+partdev=$(readlink -f -- "$partdev")
 echo "Canonical partition: ${partdev}"
 
 if false; then
-  
+
   # TODO: lvm/
   sysdev=$(readlink -- "/sys/class/block/${partdev##*/}")
   sysdev=${sysdev%/*}
   sysdev=${sysdev##*/}
-  
+
   dev=/dev/$sysdev
 else
-  if ! dev=/dev/$(lsblk -no pkname -- "$partdev"); then
+  # keep only the 1st line when a partition has its own children, e.g. is an mdraid member
+  if dev=$(lsblk -ndo pkname -- "$partdev"); then
+    dev=/dev/${dev}
+  else
     dev=${partdev%?}
   fi
 fi
@@ -81,7 +84,7 @@ sfdisk -d "$dev" | tac | {
                   fi
               done
           done
-  
+
           if [ x"$linedev" = x"$partdev" ]; then
             newsize=$((follower_start - start))
             if [ $newsize -eq $size ]; then
@@ -129,4 +132,3 @@ sfdisk -d "$dev" | tac | {
         fi
     done
 }
-
