@@ -1,0 +1,132 @@
+#!/bin/bash
+set -e
+set -o pipefail
+
+partdev=${1:?}
+
+partdev=$(readlink -f -- "$partdev")  
+echo "Canonical partition: ${partdev}"
+
+if false; then
+  
+  # TODO: lvm/
+  sysdev=$(readlink -- "/sys/class/block/${partdev##*/}")
+  sysdev=${sysdev%/*}
+  sysdev=${sysdev##*/}
+  
+  dev=/dev/$sysdev
+else
+  if ! dev=/dev/$(lsblk -no pkname -- "$partdev"); then
+    dev=${partdev%?}
+  fi
+fi
+
+echo "Parent device: $dev"
+echo
+
+LF='
+'
+
+LC_ALL=C
+
+follower_start=`blockdev --getsize "$dev"` || {
+  # image file?
+  follower_start=$(stat -c%s test.img)
+  follower_start=$((follower_start / 512))
+}
+
+exec 3<&0
+
+sfdisk -d "$dev" | tac | {
+
+    newdump=
+    newsize=
+
+    echo "### current table (in reverse order): ###"
+
+    body=x
+
+    while IFS= && read -r line; do
+        printf '%s\n' "$line"
+        if [ -z "$line" ]; then
+          # end of partitions
+          body=
+        fi
+
+        if [ "$body" ]; then
+          IFS=':,'
+          start=unknown
+          size=unknown
+          linedev=
+          for nameval in $line; do
+              if [ -z "$linedev" ]; then
+                IFS=' '
+                for linedev in $nameval; do : ; done
+                continue # for nameval in $line
+              fi
+              IFS=' ='
+              varname=
+              for nameorval in $nameval; do
+                  if [ "$varname" ]; then
+                      eval "$varname=\$nameorval"
+                  else
+                      case $nameorval in
+                      'size'|'start')
+                          varname=$nameorval
+                          ;;
+                      *)
+                          break
+                          ;;
+                      esac
+                  fi
+              done
+          done
+  
+          if [ x"$linedev" = x"$partdev" ]; then
+            newsize=$((follower_start - start))
+            if [ $newsize -eq $size ]; then
+              newsize=
+            else
+              suf=${line#*size=}
+              suf=${suf#*,}
+              pref=${line%size=*}
+              line="${pref}size=${newsize},${suf}"
+            fi
+          fi
+          follower_start=$start
+        fi # body
+
+        newdump=${line}${LF}${newdump}
+    done # read -r line
+
+    echo
+
+    if [ -z "$newsize" ]; then
+      echo "Nothing to do"
+      exit
+    fi
+
+    exec 0<&3
+
+    echo ""
+    echo ""
+    echo "### new table: ###"
+
+    echo "cat <<'EOF' | sfdisk $SFDISK_FLAGS '$dev'"
+    printf '%s' "$newdump"
+    echo EOF
+
+    while read -p "is this ok? [yes,no] " s; do
+        if [ "no" = "$s" ]; then
+            exit
+        fi
+        if [ "yes" = "$s" ]; then
+            printf '%s' "$newdump" | sfdisk $SFDISK_FLAGS "$dev" || {
+              >&2 echo "sfdisk failed. Set SFDISK_FLAGS env. var. and retry this script"
+              exit 1
+            }
+            break
+        fi
+    done
+}
+
