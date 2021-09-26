@@ -1,3 +1,8 @@
+Q: create a filesystem image
+A: partclone
+  ex:
+    partclone.ntfs --clone --source /dev/disk/by-label/WINXP --output /media/partclone-images/il/WINXP.partclone.ntfs.gz --compresscmd gzip
+
 Q: ntfs partitions won't mount (Device or resource busy) 
 A: 
   Try to stop degraded array

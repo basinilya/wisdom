@@ -1,0 +1,28 @@
+The package can be named coturn (epel) or turnserver
+
+You may also want to install coturn-utils (turnserver-utils)
+and coturn-client-libs (turnserver-client-libs)
+The header files are probably not packaged.
+
+Warning: the client part is poorly coded. Better use libnice based software.
+
+
+
+Depending on the packager the server will log to syslog or to a file.
+
+turnutils_stunclient 172.31.1.100
+
+
+-c explicit/config/file
+--no-auth
+--stun-only
+--cert
+--pkey
+--verbose
+--Verbose
+no-stdout-log
+syslog
+
+/usr/share/turnserver/etc/turnserver.conf
+/etc/turnserver/turnserver.conf
+/usr/lib/systemd/system/turnserver.service
