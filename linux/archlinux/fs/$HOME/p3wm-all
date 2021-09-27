@@ -1,0 +1,152 @@
+#!/bin/bash
+exec 4<&0
+sed 's|.*installed as \(.*\.pacnew\)$|\1|;t;d' /var/log/pacman.log | sort -u | xargs --no-run-if-empty -d'\n' ls 2>/dev/null | {
+  a_confs=()
+  a_pacnew=()
+  while read -r pacnew; do
+    conf=${pacnew%.pacnew}
+    if [ -e "$conf" ]; then
+      a_confs+=( "$conf" )
+      a_pacnew+=( "$pacnew" )
+    fi
+  done
+  if [ "${#a_confs[@]}" = 0 ]; then
+    exit
+  fi
+  exec 0<&4
+  . /usr/bin/p3wm
+  set_shopts
+  pacman -Qoq "${a_confs[@]}" | sort -u | while read -r pkg_name; do
+    ver_tuple="$(get_ver_tuple "$pkg_name")"
+    oldver="${ver_tuple% *}"
+    pkg_cached="$(find_cached_pkg "$pkg_name" "$oldver")"
+    arch="$(get_pkg_arch "$pkg_name")"
+
+    if [[ -z "$pkg_cached" ]]; then
+      echo "Unable to find package ‘$pkg_name-$oldver-$arch.pkg.*’ in cache"
+
+      # read and append next character to s unless newline, otherwise clear s
+      fn_read_prompt() {
+        local c
+        read -r -N1 c &&
+          if [ $'\n' = "$c" ]; then
+            printf '\n'
+            s=
+          else
+            printf %c "$c"
+            s=$s$c
+          fi
+      }
+      fn_expect() {
+        while true; do
+          IFS= read -r s || {
+            >&2 echo "not found: 'Available packages' prompt"
+            return 1
+          }
+          printf '%s\n' "$s"
+          case $s in
+            'Available packages'*)
+              break;
+              ;;
+          esac
+        done
+        pkgrel=${oldver##*-}
+        pkgver=${oldver%-*}
+        epoch=${pkgver%:*}
+        if [ ${#epoch} = ${#pkgver} ]; then
+          epoch=
+        else
+          pkgver=${pkgver##*:}
+        fi
+
+        echo "looking for ${pkg_name:?} ${epoch} ${pkgver:?} ${pkgrel:?}"
+        blanks=
+        while true; do
+          IFS= read -r s || {
+            >&2 echo "not found: [0-9])   ${epoch} ${pkg_name:?} ${pkgver:?} ${pkgrel:?}"
+            return 1
+          }
+          printf '%s\n' "$s"
+          case $s in
+            '')
+              if [ "x" = "$blanks" ]; then
+                >&2 echo "not found: [0-9])   ${epoch} ${pkg_name:?} ${pkgver:?} ${pkgrel:?}"
+                return 1
+              fi
+              blanks=x$blanks
+              ;;
+            *[0-9]')'*) # *" ${pkg_name:?} "*" ${pkgver:?} "*)
+              a=($s)
+
+              # a=("_" "${a[@]}")
+              #echo "zzz ${a[*]}"
+
+              i=0
+              [[ "${a[0]}" != [+-] ]] || i=$((i+1))
+
+              x_choice=${a[i++]%')'}
+              x_pkg_name=${a[i++]}
+              x_epoch=
+              [ -z "$epoch" ] || x_epoch=${a[i++]}
+              x_pkgver=${a[i++]}
+              x_pkgrel=${a[i++]}
+
+              echo "x_pkg_name=$x_pkg_name x_epoch=$x_epoch x_pkgver=$x_pkgver x_pkgrel=$x_pkgrel"
+
+              if [[ "${pkg_name:?}" == "${x_pkg_name}" && "${epoch}" == "${x_epoch}" && "${pkgver:?}" == "${x_pkgver}" && "${pkgrel:?}" == "${x_pkgrel}" ]]; then
+                choice=${x_choice}
+                echo "choice=$choice"
+                break;
+              fi
+              ;;
+          esac
+        done
+
+        echo "looking for 'select a package by number'"
+        s=
+        while true; do
+          fn_read_prompt || {
+            >&2 echo "not found: 'select a package by number:' prompt"
+            return 1
+          }
+          case $s in
+            'select a package by number: ')
+              printf '%s\n' "${choice:?}"
+              >&5 printf '%s\n' "${choice:?}"
+              s=
+              break;
+              ;;
+          esac
+        done
+        echo "looking for 'add <pkg_name> to IgnorePkg?'"
+        choice='n'
+        while true; do
+          fn_read_prompt || {
+            >&2 echo "not found: 'add <pkg_name> to IgnorePkg? [y/N]' prompt"
+            return 1
+          }
+          case $s in
+            *' to IgnorePkg? [y/N] ')
+              printf '%s\n' "${choice:?}"
+              >&5 printf '%s\n' "${choice:?}"
+              break;
+              ;;
+          esac
+        done
+        cat
+      }
+      coproc downgrade "$pkg_name" -- -wdd --noconfirm # | pv -q -L10; }
+      pid=${COPROC_PID:?}
+      fn_expect <&${COPROC[0]} 5>&${COPROC[1]}
+      wait $pid
+    fi # not found in cache
+  
+  done
+  for pacnew in "${a_pacnew[@]}"; do
+    >>/var/log/p3wm-all.log printf '%(%F %T)T %s\n' -1 "$pacnew"
+    p3wm "$pacnew"
+  done
+}
+
+  #xargs --max-args=1 --open-tty --no-run-if-empty -d'\n' p3wm
+  #xargs --no-run-if-empty -d'\n' ls -ld
