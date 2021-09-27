@@ -183,7 +183,7 @@ Mount the new root:
 
 If the command above fails with "mount(2) system call failed: File exists." it means that the kernel "thinks" there's another device with the same btrfs uuid.
 Make sure no visible block devices contain other copies of the root filesystem. However, this error may also be caused by the certain bug in older kernels.
-Run `btrfs device --forget` if it supports this flag. Otherwise reboot.
+`btrfs device ... --forget`  will not help. You have to reboot.
 
 After successfully mounting the new root we need to populate the /boot partition.
 

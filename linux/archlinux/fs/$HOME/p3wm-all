@@ -1,4 +1,12 @@
 #!/bin/bash
+
+export LC_ALL=C # to screen scrape messages from `downgrade`
+export P3WM_RESOLVE_TOOL=builtin_resolve_vimdiff
+builtin_resolve_vimdiff() {
+  #vim -f -d -c "4wincmd w | wincmd J" "$LOCAL" "$BASE" "$REMOTE" "$MERGED"
+  vimdiff -c "windo set wrap" -c "syntax off" "$LOCAL" "$REMOTE"
+}
+
 exec 4<&0
 sed 's|.*installed as \(.*\.pacnew\)$|\1|;t;d' /var/log/pacman.log | sort -u | xargs --no-run-if-empty -d'\n' ls 2>/dev/null | {
   a_confs=()
@@ -140,11 +148,12 @@ sed 's|.*installed as \(.*\.pacnew\)$|\1|;t;d' /var/log/pacman.log | sort -u | x
       fn_expect <&${COPROC[0]} 5>&${COPROC[1]}
       wait $pid
     fi # not found in cache
-  
+
   done
   for pacnew in "${a_pacnew[@]}"; do
     >>/var/log/p3wm-all.log printf '%(%F %T)T %s\n' -1 "$pacnew"
-    p3wm "$pacnew"
+    #p3wm "$pacnew"
+    ( main "$pacnew" )
   done
 }
 
