@@ -1,5 +1,0 @@
-#!/bin/sh
-LD_PRELOAD=${LD_PRELOAD+LD_PRELOAD:}/usr/lib/xulrunner-1.9.2/libxul.so \
-  LD_LIBRARY_PATH=/usr/lib/xulrunner-1.9.2${LD_LIBRARY_PATH+:$LD_LIBRARY_PATH} \
-  /.snapshots/persist/tos/TalendOpenStudio-linux-gtk-x86_64
-
