@@ -1,3 +1,10 @@
+Q: decrypt DM_ENCR_TEXT_V2=
+A:
+  $>iapi
+  $>initcrypto,c
+  $>decrypttext,c,DM_ENCR_TEXT_V2=AAAAEF
+
+
 Q: job fails with
   a_current_status                : FAILED:  Could not launch method TestTimeoutJob:  OS error: (No Error), DM error: ().
   <html><head><title>Error</title></head><body>404 - Not Found</body></html>

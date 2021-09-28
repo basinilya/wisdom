@@ -1,5 +1,120 @@
+Q:  filter SQL log
+A:
+  (requires a plain text log file)
+  
+    fn_greplog() {
+      local new_msg_mark=${1:?}
+      local pattern=${2}
+      local neg=${3}
+      local subprogram='/'"${pattern}"'/{p}'
+      if [ ! -z "$neg" ]; then
+        subprogram='/'"${neg}"'/!{'"$subprogram"'}'
+      fi
+      echo "subprogram=$subprogram"
+      shift 3
+      sed -n \
+        -e '/'"${new_msg_mark:?}"'/!{H;b L20}' \
+        -e ':L10' \
+        -e 'x' \
+        -e "$subprogram" \
+        -e ':L20' \
+        -e '${s/..*//;t L10}' \
+        "$@"
+    }
+    
+    tail -F mendix.log | fn_greplog '^....-..-..T..:..:......Z' 'DEBUG..ConnectionBus_Retrieve..SQL:' '"system\$'
+
+
+
+Q: current object of a context
+A: legacy, used in BCo or the [%CurrentObject%] from the client
+  https://forum.mendix.com/link/questions/7036
+
+
+Q:
+  Import Mapping marks existing objects dirty even though no value actually changes
+A:
+  Unlike "Change Object" action Import Mapping does not use 
+  com.mendix.basis.action.user.Changer.setMemberValue
+    (or Changer.isDifferentValue())
+  and instead calls IMendixObject.setValue() directly
+
+Q: Select Page internals (Select All, Deselect All)
+A:
+  notice: pageSelectionTopic, initialSelection, constraint
+  
+  "constraint" is "Selectable Objects"
+    https://docs.mendix.com/refguide/input-reference-set-selector#selectable-objects
+  
+  
+  back:
+      _sharePageSelection: function() {
+          const e = this.getSelected();
+          (this.initialSelection.length !== e.length || this.initialSelection.find((t=>!e.includes(t)))) && o(this.pageSelectionTopic, e)
+      },
+  
+  forward:
+  
+  mx.ui.openForm2 = async ƒ (e,n,r,o,a)
+  e: "JflowImport/FilterVAType_Select_2.page.xml"
+  a: {
+      "name": "JflowImport/FilterVAType_Select_2.page.xml",
+      "location": "modal",
+      "resizable": true,
+      "formParams": {
+          "initialSelection": [
+              "33776997205283421"
+          ],
+          "pageSelectionTopic": "1630746742541-11",
+          "listViewSelectionMode": "multi",
+          "dataSourceMixin": {
+              "extra": {
+                  "constraint": "[JflowImport.FilterVAType_JsonImport = '34058472181989782']",
+                  "offlineConstraints": {
+                      "type": "function",
+                      "name": "=",
+                      "parameters": [
+                          {
+                              "type": "attribute",
+                              "attribute": "JflowImport.FilterVAType_JsonImport",
+                              "attributeType": "ObjectReference"
+                          },
+                          {
+                              "type": "token",
+                              "name": "currentObject"
+                          }
+                      ]
+                  }
+              }
+          }
+      }
+  }
+
+Q: error event
+A: This re-throws an existing error. It's only valid in error handling flow.
+
+Q: No access to microflow X for user role Y
+A:
+
+Q: Removal or rename of attributes in external entity key for entity 'X.Y' is not supported.
+A: 
+
+Q: flow is not accepted by origin or destination
+A: first choose "set error handling" from context menu, then mark the flow as error handler
+
+Q: Internationalize display values in Reference Selector
+A: https://forum.mendix.com/link/questions/5419
+  TL/DR: Use a calculated attribute.
+  For languages, instead of an attribute with a code, associate your entity with System$Language
+
+Q: Dropdown without association
+A:
+  Custom Dropdown https://marketplace.mendix.com/link/component/117326
+  It really is fully customizable, but setting its mandatory properties is a lot of work
+  Also, the English translation is awful so instead of guessing what those properties do better see the doc and the test application here https://github.com/mendixlabs/CustomDropdown/tree/main/tests/testProject
+
 Q: Where's the mx javascript API documented? mx.ui.showLogin(), mx.data.action() and such.
-A: https://apidocs.rnd.mendix.com/8/client/mx.ui.html
+A: https://apidocs.rnd.mendix.com/9/client/mx.ui.html
 
 Q: set user role in micrflow
 A: 
@@ -59,6 +174,8 @@ A:
 
 Q: Redirect the logs to a custom logging framework
 A:
+  Warning! the method processMessage() is called in a dedicated thread. It's pointless to try enrich the log message with Thread.currentThread.getName()
+  
   In "After startup":
 	@java.lang.Override
 	public java.lang.Void executeAction() throws Exception
@@ -87,12 +204,23 @@ A: These widgets allow editing associations. They require the current object to 
 
 Reference Selector only works with "one to x" associations. It can associate one or zero parent objects with the current object. In drop-down mode it displays a chosen attribute of the parent object.
 
-The other two widgets only work with "many to many" associations" and they require a _Select page with a list view of unfiltered parent candidates and a "Save changes" button.
-When this pop-up window is invoked by one of the selector widgets it gains an implicit checkbox widget in each row of the list view and the "Save changes" button associates the checked parents with the current child object without committing it.
+The other two widgets only work with "many to many" associations" and they require a _Select page with a data grid (preferred) or a list view of parent candidates and a "Save changes" button.
+When a pop-up with a data grid is invoked by one of the selector widgets some of its rows are auto-selected and the "Select" button associates the selected parents with the current child object without committing it.
+When a pop-up with a list view is invoked by one of the selector widgets it gains an implicit checkbox widget in each row of the list view and the "Save changes" button associates the checked parents with the current child object without committing it.
+Important: the filtering must be done on the "Selectable Objects" tab of the reference set widget, not in the grid or list view data source.
+In the "Selectable Objects" xpath you can use the '[%CurrentObject%]' token to filter by the child object.
+There is no '[%CurrentObject%]' in Select Page.
 
-Input Reference Set Selector looks like a readonly dropdown in which the chosen attribute of the selected parents is shown in a comma-separated list. It also has an active trigger button that invokes the _Select pop-up. In the pop-up already associated objects have their checkboxes checked.
+Input Reference Set Selector looks like a readonly dropdown in which the chosen attribute of the selected parents is
+shown in a comma-separated list. It also has an active trigger button that invokes the _Select pop-up. In the pop-up
+already associated objects have their checkboxes checked.
+The current entity can be non-persistable, but the associated entity MUST be persistable.
 
-Reference Set Selector looks like a data grid and displays the attributes of parent objects. By default it has "Search Bar Toggle", "Add", and "Remove" buttons. The "Add" button invokes the _Select pop-up. In the pop-up already associated objects don't have their checkboxes checked and it looks like a bug in Mendix 8.17.0. However, checking them does not cause any error.
+Reference Set Selector looks like a data grid and displays the attributes of parent objects. By default it has
+"Search Bar Toggle", "Add", and "Remove" buttons. The "Add" button invokes the _Select pop-up.
+Both the current entity and the associated entity MUST be persistable.
+In the pop-up already associated objects don't have their checkboxes checked and it looks like a bug in Mendix
+8.17.0. However, checking them does not cause any error.
 Besides, Reference Set Selector ignores the readonlyness of the current container.
 
 

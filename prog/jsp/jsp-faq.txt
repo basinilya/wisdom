@@ -39,6 +39,7 @@ A:
 
 Q: get real request URI
 A:
+  <%!
     /** Helps when just "?a=b" turns into ";jsessionId=blah?a=b" */
     public static String getOriginalRequestURI(HttpServletRequest request) {
         String uri = (String) request.getAttribute(RequestDispatcher.FORWARD_SERVLET_PATH);
@@ -47,6 +48,7 @@ A:
         }
         return uri;
     }
+    %>
 
 Q: construct a relative URI
 A:

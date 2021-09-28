@@ -1,3 +1,6 @@
+Q: set a constant
+A: MX_ModuleName_ConstantName: value
+
 Q: Admin port
 A:
   https://docs.mendix.com/refguide/monitoring-mendix-runtime
@@ -9,7 +12,7 @@ A:
   {"feedback":{"health":"unknown"},"result":0}
 
   With Studio Pro use Sysinternals Process Explorer to extract the env var M2EE_ADMIN_PASS from java process
-
+M2EE_PASSWORD
 
 Q: default command
 A:
@@ -20,6 +23,7 @@ A:
   https://github.com/mendix/cf-mendix-buildpack
   Troubleshooting (Rescue Mode)
   cf set-env myapp-test DEBUG_CONTAINER true
+  cf set-health-check myapp-test process
   cf restart myapp-test
   cf ssh myapp-test
   export HOME=$HOME/app # this should not be needed but for now it is
@@ -48,6 +52,9 @@ A:
            |                            |  /ws/, etc...    |
        end user                         `------------------'
 
+   2021-08-20T17:13:59.29+0300 [APP/PROC/WEB/0] ERR Aug 20, 2021 2:13:59 PM java.util.prefs.FileSystemPreferences$6 run
+   2021-08-20T17:13:59.29+0300 [APP/PROC/WEB/0] ERR WARNING: Prefs file removed in background /home/vcap/.java/.userPrefs/com/mendix/core/prefs.xml
+ 
 
 Q: MXRUNTIME_DatabaseType
 A:
@@ -146,7 +153,7 @@ A:
     - name: my-app
       env:
         MXRUNTIME_DatabaseHost: 
-        MXRUNTIME_DatabaseName: 
+        MXRUNTIME_DatabaseName: default
         MXRUNTIME_DatabaseType: HSQLDB
         MXRUNTIME_DatabaseUserName: sa
         # This is important because the default dadabase directory does not exist 

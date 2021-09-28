@@ -1,6 +1,41 @@
 ﻿********************************************************************************
 Do not remove 1st line
 ********************************************************************************
+
+Q: platform-independent newlines in java stack trace
+A:
+            throwable.printStackTrace(new PrintWriter(wr) {
+
+                @Override
+                public void println() {
+                    write('\n');
+                }
+            });
+
+
+
+Q: profiling
+A:
+the easiest is Flight Recorder (feature) + Mission Control (GUI)
+It's part of OpenJDK 11+ and Oracle JDK 7+.
+
+Mission Control is distributed as part of Oracle JDK or can be downloaded from Bellsoft or AdoptOpenJDK sites.
+
+If the default java is too old you need to insert the following to jmc.ini:
+  -vm
+  C:\Program Files\AdoptOpenJDK\jdk-11.0.3.7-hotspot\bin
+
+In Oracle JDK it has to be enabled with:
+  -DXX:+UnlockCommercialFeatures
+  -DXX:+FlightRecorder
+
+OpenJDK does not support these.
+
+The recording start/dump-to-file can be triggered by jcmd, a remote call
+- or from the command line:
+  -XX:StartFlightRecording=disk=true,dumponexit=true,filename=recording.jfr,maxsize=1024m,maxage=1d,settings=profile,path-to-gc-roots=true
+
+
 Q: endorsed
 A: -Djava.endorsed.dirs=
   https://docs.oracle.com/javase/8/docs/technotes/guides/standards/
@@ -313,6 +348,11 @@ A: check endpoint interface @SOAPBinding(style=SOAPBinding.Style.RPC)
 Q: debug VM options
 A: -Xrunjdwp:transport=dt_socket,address=0.0.0.0:8787,server=y,suspend=n
 
+Q: jmx port forward
+A: 
+  ssh -fN -D 7777 user@firewalled-host
+  jconsole -J-DsocksProxyHost=localhost -J-DsocksProxyPort=7777 service:jmx:rmi:///jndi/rmi://localhost:2147/jmxrmi -J-DsocksNonProxyHosts=
+
 
 Q: ???
 A:
@@ -328,13 +368,19 @@ A:
     -Dcom.sun.management.jmxremote.authenticate=false
     -Dcom.sun.management.jmxremote.ssl=false
     
-    В этом случае симптомы те же, но дополнительно в tcpview видно много сокетов 127.0.01 с TIME_WAIT и рандомным портом, по одному на каждое нажатие кнопки Connect
+    В этом случае симптомы те же, но дополнительно в tcpview видно много сокетов 127.0.0.1 с TIME_WAIT и рандомным портом, по одному на каждое нажатие кнопки Connect
     
     10:24
     Похоже, что Cisco так и не починил ipv6 в своем клиенте
     11:25
     Отключение ipv6 в свойствах адаптера не помогает. Пришлось запускать программу с 
     -Djava.net.preferIPv4Stack=true
+    
+    Есть ещё одна проблема: если ip адрес, который был основным в момент старта программы, более не актуален, то программа тем не менее продолжает требовать подключаться к себе именно по этому адресу. То есть, её надо перезапустить.
+    Since Java 8u102 -Dcom.sun.management.jmxremote.host= binds to the selected IP
+    (compare: -Djava.rmi.server.hostname=)
+    
+    In Java 11 
 
 Q: ???
 A:
