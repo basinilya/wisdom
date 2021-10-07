@@ -18,3 +18,8 @@ A:
   openssl x509 -in certificate.crt -text -noout
   openssl rsa -in postgresqlshb3fmrh.key -text -noout
   openssl pkcs8 -in postgresqlshb3fmrh.pk8 -inform DER -nocrypt | openssl rsa -text -noout
+
+Q: Dump a certificate from a server
+A:
+  s_client -showcerts -verify 5 -connect host:443 < /dev/null
+ 

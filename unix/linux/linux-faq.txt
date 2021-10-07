@@ -1,3 +1,20 @@
+Q: Run software on the tty1 console instead of getty login
+A:
+  mkdir /etc/systemd/system/getty@tty1.service.d/
+  vim /etc/systemd/system/getty@tty1.service.d/override.conf
+    [Service]
+    ExecStart=
+    ExecStart=-/usr/bin/htop
+    StandardInput=tty
+    StandardOutput=tty
+  systemctl daemon-reload; systemctl restart getty@tty1.service
+  
+  https://raymii.org/s/tutorials/Run_software_on_tty1_console_instead_of_login_getty.html
+
+Q: console to serial 
+A: boot parameter console=ttyS0,115200 console=tty0 (multiple consoles can be defined, the last one will be /dev/console)
+https://www.kernel.org/doc/html/latest/admin-guide/serial-console.html
+
 Q: create a filesystem image
 A: partclone
   ex:

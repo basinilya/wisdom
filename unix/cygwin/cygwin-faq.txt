@@ -1,3 +1,36 @@
+Q: tftp server
+A:
+  Install packages: tftp tftp-server xinetd
+  
+  xinetd-config
+  
+  tftpd-config
+  
+  # enable the service
+  vim /etc/xinetd.d/tftp
+  
+  cygcheck -l tftp-server
+  
+  # fix xinetd: PID 2280: Service tftp missing attribute user - DISABLING 
+  mkpasswd.exe | sed 's/^[^:]*\(cyg_server\):/\1:/;t;d' >>/etc/passwd
+  
+  # fix tftpd: PID 2844: cannot drop privileges: No error
+  mkpasswd.exe | sed 's/^[^:]*\(tftpd\):/\1:/;t;d' >>/etc/passwd
+  editrights -u tftpd -a SeDenyInteractiveLogonRight
+  editrights -u tftpd -a SeDenyRemoteInteractiveLogonRight
+  net user tftpd /active:YES
+
+  # deny access from all hosts to programs with argv[0]="tftpd"
+  echo "tftpd: ALL" >>/etc/hosts.deny
+
+  # allow access from subnet to programs with argv[0]="tftpd"
+  echo "tftpd: 192.168.56." >>/etc/hosts.allow
+
+  
+  cygrunsrv -S xinetd
+
+  ls /var/lib/tftpboot/
+
 Q: pip-compile prerequisites
 A: libpq-devel libffi-devel python38-devel
 

@@ -1,3 +1,17 @@
+Q: create object ... setfile = ...
+  [DM_SYSOBJECT_E_CANT_ACCESS_FILE]error:  "Cannot access file 'C:\2\Daily Vendor Report.pwt' due to Operating System error."
+A:
+  DQL looks on content server. API looks locally
+  Use API setfile,...
+
+Q:
+  API> save,c,0902253e826cfed4
+  ...
+  [DM_API_E_CANT_UPDATE]error:  "Cannot Save/Check-in object <> because the object is marked invalid.  This is most likely due to an error from a prior operation performed on the object."
+A:
+  API> reset,c,0902253e826cfed4
+
+
 Q: exec_sql with select
 A: Since D7: execute exec_select_sql with query = '...';
 
