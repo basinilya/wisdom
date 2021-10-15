@@ -252,6 +252,7 @@ Finally, install some btrfs backup package.
 Now switching to a snapshot means creating a writable snapshot out of a readonly snapshot created by the backup software (`btrfs sub snapshot` without the '-r' flag).
 
 The .sxbackup subvol created by the software can be moved with the `mv` command: `mv /mnt/volroot/.sxbackup /mnt/`.
+This is needed because nested subvolumes are not shared among the snapshots of the parent subvolume. When a snapshot is created it just contains a placeholder directory in place of the subvolume.
 
 To access .sxbackup when volroot is mounted as root you can add to fstab:
 

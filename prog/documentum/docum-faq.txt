@@ -1,3 +1,17 @@
+Q:
+  2021-10-13 16:38:09,320 ERROR [default task-1] [com.documentum.mthdservlet.DoMethod] - Exception invoking com.documentum.bpm.services.BPSIntegrationMethod.
+  java.lang.NullPointerException
+  	at com.documentum.bpm.rtutil.GenericWorkflowMethod.buildErrorMessage(GenericWorkflowMethod.java:160)
+  	at com.documentum.bpm.rtutil.GenericWorkflowMethod.execute(GenericWorkflowMethod.java:142)
+  	at com.documentum.bpm.rtutil.GenericWorkflowMethod.execute(GenericWorkflowMethod.java:284)
+  	at com.documentum.bpm.rtutil.GenericWorkflowMethod.execute(GenericWorkflowMethod.java:65)
+  	at com.documentum.mthdservlet.DfMethodRunner.runIt(Unknown Source)
+  	at com.documentum.mthdservlet.AMethodRunner.runAndReturnStatus(Unknown Source)
+  	at com.documentum.mthdservlet.DoMethod.invokeMethod(Unknown Source)
+  	at com.documentum.mthdservlet.DoMethod.doPost(Unknown Source)
+A:
+  The Documentum account is inactive
+
 Q: decrypt DM_ENCR_TEXT_V2=
 A:
   $>iapi
