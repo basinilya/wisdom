@@ -1,3 +1,42 @@
+Q: custom javascript
+A: 
+  From Marketplace install HTML Snippet
+  Add the addon widget HTML Snippet to the form
+  In Widget properties switch to Javascript mode
+
+  An empty Div will be created
+
+
+  The js is evaluated in a context of a function without parameters.
+  `this` refers to the current widget (dojo based)
+  this.__proto__.declaredClass === "HTMLSnippet.widget.HTMLSnippet"
+    "mxui.widget._WidgetBase"
+      "uniqName_0"
+        "dijit._WidgetBase"
+          "dijit.Destroyable"
+            "dojo.Stateful"
+
+
+  this.domNode === this.srcNodeRef refers to the widget Div HTMLNode
+
+  this.domNode.parentElement refers to the container HTMLNode
+
+  To find a neighbour widget use:
+  HTMLNode.querySelectorAll(`.mx-someclass`); 
+  
+  See
+  https://github.com/mendix/list-view-controls/blob/e1cfe0bb16678201581210381fa07db1e4cfc1e2/src/TextBoxSearch/components/TextBoxSearchContainer.ts#L89
+
+Q: xpath exists
+A: It's always 'exists'
+
+Q: xpath self reference direction
+A:
+  by default
+    A_B = $x
+  To reverse the direction use 
+    A_B[reversed ()] = $x
+  https://docs.mendix.com/refguide/query-over
 Q:  filter SQL log
 A:
   (requires a plain text log file)
