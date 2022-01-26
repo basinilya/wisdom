@@ -1,6 +1,16 @@
+???/??? -> parent/child  
+  BOTH 	     Both the parent Mendix object and the child object are owner.
+  DEFAULT 	 The parent Mendix object is the owner.
+
 Stateless Process -> Microflow
 Activity -> Action
 Fragment -> Snippet
 Parameters -> "Constants"
-IDfSysObject.saveAsNew() -> CommunityCommons.Clone
 Relation -> Association
+
+IDfSysObject.saveAsNew() -> CommunityCommons.Clone
+
+CHANGE type OBJECTS TO newtype dql -> 
+  Not easily implemented. The object ID must be changed when the type changes.
+  It's cleaner to create another instance of the object with the new type
+  and restore its attributes and associations

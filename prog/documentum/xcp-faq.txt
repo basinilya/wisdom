@@ -720,6 +720,16 @@ A: isNumber(getJavascriptPropertyValue('parseFloat('+<quotedString>+')'))
 Q: clear Number Input
 A: set value: { 0 }[1]
 
+Q: breakpoint on expression evaluation 
+A:
+  xcp.core.expr.ExpressionPropertiesPlugin.prototype.createEventHandler
+    delayedCall
+      var value = xcp.core.expr.ExpressionManager.evaluate(evalScope, exprConfig, namespaceContext,eventData);
+        exprConfig
+          etype === "button_edit_disabled_" // for button_edit / Disable When
+          etype === "button_edit_hidden_" // for button_edit / Hide When
+      
+
 Q: clear Date Input
 A:
   An expression returning null or undefined will be ignored, see

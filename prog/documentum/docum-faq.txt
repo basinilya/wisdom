@@ -280,6 +280,13 @@ Q: add user to role
 A:
   UPDATE dm_group OBJECTS APPEND users_names = 'Dave' WHERE group_name IN ('role_name');
 
+Q: remove user from role
+A:
+  An UPDATE cannot have subqueries in WHERE.
+  for i_position = -999999 remove element 999998
+  UPDATE dm_group OBJECTS REMOVE users_names[999998] WHERE group_name IN ('role_name');
+
+
 Q: Java 1.8.0_201, Java 11 SSLHandshakeException: Received fatal alert: handshake_failure
 A:
   $JAVA_HOME/conf/security/java.security

@@ -1,3 +1,31 @@
+Q: minimal install
+A:
+su - postgres
+psql
+ALTER SYSTEM SET listen_addresses TO '*';
+alter user postgres password 'apassword';
+iptables -I INPUT -p tcp -m state --state NEW -m tcp --dport 5432 -j ACCEPT
+service iptables save
+service postgresql-11 restart
+..
+psql
+create database osm_brandenburg; -- you have created a new database.
+\connect osm_brandenburg
+-- you switched to database osm_brandenburg.
+
+create user prism password 'prism';
+
+Q: current database
+A: \conninfo
+
+Q: psql: error: FATAL:     "192.168.56.3", user "app8", database "app8", SSL off
+A: 
+  add to /var/lib/postgres/data/pg_hba.conf
+    # TYPE DATABASE USER CIDR-ADDRESS  METHOD
+    host  all  all 0.0.0.0/0 md5
+  
+  and restart server
+
 Q: current user
 A: current_user
 
@@ -18,6 +46,20 @@ BEGIN
     END LOOP;
 END$$;
 
+
+Q: move tables to another schema
+A:
+DO $$DECLARE r record;
+BEGIN
+    FOR r IN select tablename from pg_tables where schemaname = 'bpp'
+    LOOP
+        EXECUTE 'alter table bpp.' || quote_ident(r.tablename) || ' set schema public';
+    END LOOP;
+    FOR r IN select sequencename from pg_sequences where schemaname = 'bpp'
+    LOOP
+        EXECUTE 'alter sequence bpp.' || quote_ident(r.sequencename) || ' set schema public';
+    END LOOP;
+END$$;
 
 
 Q: default port

@@ -390,4 +390,5 @@ java mission control can call operations with arrays passing exactly one array m
 
 Q: read entire file
 A:
+  // !! this throws NoSuchElementException on zero length input, use hasNext()
   new Scanner(requireNonNull(resourceAsStream), UTF_8.name()).useDelimiter("\\A").next();

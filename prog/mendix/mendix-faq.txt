@@ -1,3 +1,96 @@
+Q: menus don't work in topbar
+A: 
+  1. Make sure you have:
+  
+    .layout-atlas .region-topbar {
+        z-index: auto;
+    }
+  
+  2. Make sure there's no overflow:hidden in any parents
+
+Q: autocomplete
+A: 
+  https://marketplace.mendix.com/link/component/2695
+  https://github.com/AuraQ/AutoCompleteForMendix
+
+Q: remainder
+A: A mod B
+
+Q: com.mendix.m2ee.api.AdminException: An error occurred while initializing the Runtime: ERROR: relation "mendixsystem$version" does not exist
+A:
+
+Q: Add a trigger button to a regular input widget
+A:
+  wrap the input and the button with a container, set the container class my-input-with-trigger-container
+  add the following to the custom styles:
+
+  div.my-input-with-trigger-container {
+  	position: relative;
+  
+  	&> div {
+  		&> div > input {
+  			margin-right: 50px;
+  		}
+  	}
+  
+  	&> button {
+  		position: absolute;
+  		right: 0;
+  		top: 0;
+  	}
+  }
+
+
+Q: get React Component instance
+A:
+  React widgets are wrapped with dojo mxui.widget.ReactCustomWidgetWrapper
+  It stores no reference to the React component
+  Its domNode.parentNode is null
+  Its _markerNode property is an <!-- HTML Comment --> and is a previous sibling of the actual widget node
+
+  It's easier to skip obtaining ReactCustomWidgetWrapper and find the React Component directly from the widget DOM Node:
+    FindReact(dom) // see below
+  Simplified:
+    dom.__reactFiber$xxx.return.stateNode
+  
+  Alternatively, the React Component can be found via:
+    (obj as ReactCustomWidgetWrapper)._markerNode.__reactContainer$xxx.child.child.stateNode  
+
+  // https://stackoverflow.com/a/39165137/447503
+  function FindReact(dom, traverseUp = 0) {
+      const key = Object.keys(dom).find(key=>{
+          return key.startsWith("__reactFiber$") // react 17+
+              || key.startsWith("__reactInternalInstance$"); // react <17
+      });
+      const domFiber = dom[key];
+      if (domFiber == null) return null;
+  
+      // react <16
+      if (domFiber._currentElement) {
+          let compFiber = domFiber._currentElement._owner;
+          for (let i = 0; i < traverseUp; i++) {
+              compFiber = compFiber._currentElement._owner;
+          }
+          return compFiber._instance;
+      }
+  
+      // react 16+
+      const GetCompFiber = fiber=>{
+          //return fiber._debugOwner; // this also works, but is __DEV__ only
+          let parentFiber = fiber.return;
+          while (typeof parentFiber.type == "string") {
+              parentFiber = parentFiber.return;
+          }
+          return parentFiber;
+      };
+      let compFiber = GetCompFiber(domFiber);
+      for (let i = 0; i < traverseUp; i++) {
+          compFiber = GetCompFiber(compFiber);
+      }
+      return compFiber.stateNode;
+  }
+
+
 Q: custom javascript
 A: 
   From Marketplace install HTML Snippet
@@ -6,10 +99,26 @@ A:
 
   An empty Div will be created
 
+  The js is eval'ed, attempt to return will fail. 
+  Evaluation error is caught and displayed in a nested balloon.
 
-  The js is evaluated in a context of a function without parameters.
+  In case of External File script it's executed synchronously in a tag: <script src="custom.js?cacheid">
+  where custom.js is a file inside theme/web/
+  jquery will not work
+  
+  
+  In case of inline script
+  A non-JQuery snippet is run synchronously
   `this` refers to the current widget (dojo based)
-  this.__proto__.declaredClass === "HTMLSnippet.widget.HTMLSnippet"
+
+  A JQuery snippet is deferred by window.require(["jquery"], function(jQuery) { ... })
+  `this` refers to an object:
+  {
+      jquery: jQuery, // pass JQuery as the context of the immediate function which will wrap the code snippet
+      widget: widget    // pass the HTMLSnippet widget context itself, so the code could use listen/addOnDestroy
+  }
+  
+  widget.__proto__.declaredClass === "HTMLSnippet.widget.HTMLSnippet"
     "mxui.widget._WidgetBase"
       "uniqName_0"
         "dijit._WidgetBase"
@@ -17,14 +126,19 @@ A:
             "dojo.Stateful"
 
 
+  this.contextObj is an optional current instance of an entity
+  
   this.domNode === this.srcNodeRef refers to the widget Div HTMLNode
 
   this.domNode.parentElement refers to the container HTMLNode
+  
+  dijit.getEnclosingWidget(this.domNode.parentNode) returns the parent widget
 
   To find a neighbour widget use:
-  HTMLNode.querySelectorAll(`.mx-someclass`); 
+  HTMLNode.querySelectorAll('.mx-someclass'); 
   
   See
+  https://github.com/mendix/HTMLSnippet
   https://github.com/mendix/list-view-controls/blob/e1cfe0bb16678201581210381fa07db1e4cfc1e2/src/TextBoxSearch/components/TextBoxSearchContainer.ts#L89
 
 Q: xpath exists
@@ -175,7 +289,10 @@ Q: default administrator credentials
 A: username: MxAdmin and password: 1
 
 Q: Check the state of an object ("Instantiated", "Committed", dirty) without using java
-A: somewhat - isNew()
+A: 
+  somewhat - isNew()
+  isChanged() is only available in Java
+  Warning: isSynced() is only meaningful in offline apps in Client Expressions
 
 Q: how to debug custom java
 A: locally - when you deploy for Eclipse it creates a launch configuration for that. Remotely, I don't know.
@@ -445,6 +562,9 @@ A: concat() is not supported. Use XML entities. Ex:
   [attr = 'Larry "Basher" O&apos;Niven']
   [attr = "Larry &quot;Basher&quot; O'Niven"]
   This totally works in Mendix 8 in datasource constraints in data widgets
+
+  Community Commons have the utility function
+    XPath.valueToXPathValue(Object)
 
 Q: escaping in OQL
 

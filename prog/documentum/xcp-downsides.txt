@@ -15,6 +15,8 @@ It's really inconvenient to chain data actions on client (especially with condit
 
 Maximum artifact system name length is too small, especially for UI events and Action Flow Steps
 
+The horizontal scrollbar in page designer does not help with very wide column boxes with horizontal orientation
+
 Hard to find a widget by id when designing a page
 
 Hard to drag Column Boxes with blank title

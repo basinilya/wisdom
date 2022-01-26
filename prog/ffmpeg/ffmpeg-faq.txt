@@ -2,7 +2,9 @@ Q: Screen grab
 A:
   Install UScreenCapture
   Install Virtual Audio Cable (lite) https://vac.muzychenko.net/en/index.htm
-  ffmpeg -hide_banner -y -f dshow -thread_queue_size 1024 -i video="UScreenCapture" -f dshow -channel_layout stereo -thread_queue_size 1024 -i audio="Микрофон (Realtek High Definiti" -f dshow -channel_layout stereo -thread_queue_size 1024 -i audio="Line 1 (Virtual Audio Cable)" -filter_complex amix=inputs=2 -c:a aac -ac 2 -b:a 128k -c:v libx264 -preset ultrafast -tune zerolatency -movflags +faststart output.mp4
+
+  ffmpeg -list_devices true -f dshow -i dummy | iconv -f utf-8 -t cp866
+  ffmpeg -hide_banner -y -f dshow -thread_queue_size 1024 -i video="UScreenCapture" -f dshow -channel_layout stereo -thread_queue_size 1024 -i audio="рпд (Realtek High Definiti" -f dshow -channel_layout stereo -thread_queue_size 1024 -i audio="Line 1 (Virtual Audio Cable)" -filter_complex amix=inputs=2 -c:a aac -ac 2 -b:a 128k -c:v libx264 -preset ultrafast -tune zerolatency -movflags +faststart output.mp4
 
   Problems:
   unlike mkv, mp4 requires graceful shutdown of ffmpeg otherwise you get "moov atom not found" when you try to play an incomplete mp4 file.
