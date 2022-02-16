@@ -1,3 +1,9 @@
+Q: add trusted authority
+A:
+       QUICK HELP 1: To add a certificate in the simple PEM or DER file formats to the list of CAs trusted on the system:
+       •   add it as a new file to directory /etc/pki/ca-trust/source/anchors/
+       •   run update-ca-trust extract
+
 Q: tftp server
 A:
   Install packages: tftp tftp-server xinetd
