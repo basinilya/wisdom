@@ -1,3 +1,55 @@
+Q: entity ID type ID, sequences etc.
+A: 
+  The real sequence objects are only used for autonumber attributes.
+  
+  CREATE MEMORY TABLE PUBLIC."mendixsystem$entityidentifier"(
+  "id" VARCHAR(36) COLLATE INFORMATION_SCHEMA.SQL_TEXT_UCC NOT NULL PRIMARY KEY,
+  "short_id" SMALLINT,
+  "object_sequence" BIGINT
+  )
+  INSERT INTO "mendixsystem$entityidentifier" VALUES('b1103c3a-5b42-4b6a-9458-653525793e0d',141,12901)
+  8d
+  3265
+
+  INSERT INTO "avatarmain$vaitem" VALUES(39687971716214161,NULL,FALSE,11567,0,'KwaZulu-Natal','ZAKZN')
+  008d 0000 0000 2d91
+  
+  short_id is part of the ID
+
+  https://forum.mendix.com/link/questions/4441
+  >
+  The long version is that in Mendix 4 we don't automatically insert objects into
+  the database when creating them, for performance reasons and for making
+  transient objects work. Obviously we still need unique identifiers for objects
+  which is why we reserve batches of identifiers up front.
+  
+  Multiple Mendix Runtime servers with the same application can operate on a
+  single database so this is all done neatly in transactions such that one server
+  can claim a set of identifiers and immediately updates the table keeping these,
+  the next server will never claim the same range.
+  
+  These identifiers are currently reserved in sets of 100 at a time and their
+  current number is kept in a special system table called
+  mendixsystem$entityidentifier with 1 row per entity. These rows are stored by
+  entity id, the entity name can be found in mendixsystem$entity.
+  
+  When identifiers are about to run out, we can do an asynchronous database query
+  claiming some more identifiers. If a runtime server stops then the ids not
+  spent are basically lost, which is not an issue since the identifiers are 48
+  bits.
+  
+  The actual identifiers you will see in the id column are made up of these 48
+  bits (least significant) AND an additional 16 bits (most significant)
+  indicating what entity type they actually are. This is needed for inheritance
+  and this part is fixed for a certain entity in a specific database. This number
+  is the column short_id in the entityidentifier table.
+  
+  I honestly think you'll have too much trouble getting this to work in a
+  guaranteed bug-free way, and any mistakes here could seriously corrupt your
+  database. Additionally, we can change this implementation since this is
+  internal server logic. Is there no other way to do what you want to achieve?
+
+
 Q: menus don't work in topbar
 A: 
   1. Make sure you have:

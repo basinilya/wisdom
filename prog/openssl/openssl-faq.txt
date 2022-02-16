@@ -23,3 +23,46 @@ Q: Dump a certificate from a server
 A:
   s_client -showcerts -verify 5 -connect host:443 < /dev/null
  
+Q:
+A:
+
+  mkdir /tmp/fakesite
+  cd /tmp/fakesite
+
+  # index.txt must pre-exist
+  touch index.txt
+  
+  # create minimal config
+  cat <<'EOFCONF' >tmp.cnf
+  [ ca ]
+  default_ca      = CA_default            # The default ca section
+  [ CA_default ]
+  dir             = .           # Where everything is kept
+  database        = $dir/index.txt        # database index file.
+  serial          = $dir/serial           # The current serial number
+  [ policy_any ]
+  countryName		= optional
+  stateOrProvinceName	= optional
+  localityName		= optional
+  organizationName	= optional
+  organizationalUnitName	= optional
+  commonName		= supplied
+  emailAddress		= optional
+  EOFCONF
+  
+  # create self-signed certificate  
+  openssl req -newkey rsa:2048 -days 3651 -nodes -x509 -subj "/C=US/O=AAATrusted, Inc/CN=AAATrusted CA" -keyout root.key -out root.crt
+  # dump as text
+  openssl x509 -in root.crt -text -noout -text >root.crt.txt
+
+  # create certificate request  
+  openssl req -newkey rsa:2048 -nodes -subj "/C=US/O=AAATrusted, Inc/CN=AAA SQL Client" -keyout postgresql.key -out postgresql.csr
+
+  # sign  
+  yes | openssl ca -days 3650 -cert root.crt -keyfile root.key -in postgresql.csr -out postgresql.crt -outdir . -config ./tmp.cnf -md md5 -policy policy_any -create_serial -notext
+  # dump as text
+  openssl x509 -in postgresql.crt -text -noout -text >postgresql.crt.txt
+
+  # export as p12 (with empty password)
+  openssl pkcs12 -in root.crt -export -nokeys -passout "pass:" -out root.p12
+
