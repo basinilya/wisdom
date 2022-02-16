@@ -54,15 +54,33 @@ EOFCONF
   openssl req -newkey rsa:3072 -sha256 -days 3651 -nodes -x509 -subj "/C=US/O=AAATrusted, Inc/CN=AAATrusted CA" -keyout root.key -out root.crt
   # dump as text
   openssl x509 -in root.crt -text -noout -text >root.crt.txt
-
-  # create certificate request  
-  openssl req -newkey rsa:2048 -sha256 -nodes -subj "/C=US/O=AAATrusted, Inc/CN=AAA SQL Client" -keyout postgresql.key -out postgresql.csr
-
-  # sign  
-  yes | openssl ca -days 3650 -cert root.crt -keyfile root.key -in postgresql.csr -out postgresql.crt -outdir . -config ./tmp.cnf -md sha256 -policy policy_any -create_serial -notext
-  # dump as text
-  openssl x509 -in postgresql.crt -text -noout -text >postgresql.crt.txt
-
   # export as p12 (with empty password)
   openssl pkcs12 -in root.crt -export -nokeys -passout "pass:" -out root.p12
 
+  ########################33
+  
+  # 
+  FILENM="acme.com"
+  # wildcard CN
+  NAME="*.$FILENM"
+
+  # create certificate request  
+  openssl req -newkey rsa:3072 -sha256 -nodes -subj "/C=US/O=AAATrusted, Inc/CN=$NAME" -keyout "$FILENM.key" -out "$FILENM.csr"
+
+# Create a config file for the extensions (Chrome 58+)
+>extensions.ext cat <<-EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = $NAME # Be sure to include the domain name here because Common Name is not so commonly honoured by itself
+EOF
+
+  # sign  
+  yes | openssl ca -days 3650 -cert root.crt -keyfile root.key -in "$FILENM.csr" -out "$FILENM.crt" -outdir . -config ./tmp.cnf -md sha256 -policy policy_any -create_serial -extfile extensions.ext -notext
+  # dump as text
+  openssl x509 -in "$FILENM.crt" -text -noout -text >"$FILENM.crt.txt"
+
+  # create a bundle for STunnel
+  cat "$FILENM.crt" "$FILENM.key" root.crt >"$FILENM-bundle.pem"
