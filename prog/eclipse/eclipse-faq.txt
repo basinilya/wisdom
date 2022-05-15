@@ -42,6 +42,7 @@ A:
 
 Q: source not found
 A: 
+  - If you want to add sources from another project libraries (native eclipse java project) then make sure that project exports all its dependencies 
   - Add seemingly unrelated projects to source path
   - Try "Remote Java Applicatopn". It's more capable than local
   - Decompile and try to compile the class in question. Add missing dependencies to project classpath

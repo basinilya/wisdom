@@ -1,3 +1,8 @@
+Q: @XmlValue unexpected mixed content
+A:
+  "<AaaJaxbXmlValue>\n    some<!-- a --><b/>\n    body<!-- a -->once\n</AaaJaxbXmlValue>"
+  "\n    bodyonce\n"
+
 Q: multiple namespaces
 A:
   If package-info.java annotated with @XmlSchema exists, the annotation must have elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED

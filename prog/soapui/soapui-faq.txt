@@ -1,0 +1,17 @@
+Q: request body missing on Raw tab
+A: File -> Preferences -> UI Settings -> Size of Raw Request Message to Show
+  multiply by 10
+
+Q: Encode Request parameter as JSON
+A: 
+  ${= groovy.json.StringEscapeUtils.escapeJavaScript( testStep.properties["DependenciesJsonString"].value ) }
+
+  Do not use the following:
+  ${= groovy.json.StringEscapeUtils.escapeJavaScript( context.expand('${DependenciesJsonString}' )) }
+  because the template parser will expand it before passing to context.expand()
+
+  Do not use the following:
+  ${= groovy.json.StringEscapeUtils.escapeJavaScript( context.expand('$' + '{DependenciesJsonString}' )) }
+  because the first encountered right curly brace } cuts the rest of the scriptlet
+  You can use "\u007D", but it makes the code unreadable
+ 

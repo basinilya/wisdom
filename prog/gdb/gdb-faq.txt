@@ -1,3 +1,6 @@
+Q: ellipsis ... print full value of a long string
+A: set print elements 0
+
 Q: function return value truncated
 A: 
   7.6+:

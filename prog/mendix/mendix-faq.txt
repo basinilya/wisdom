@@ -1,3 +1,33 @@
+Q: Pop-up menu placed in a layout is not visible
+A: 
+  _custom.scss :
+  .flexcontainer.header--top {
+      overflow: visible;
+  }
+
+Q: module roles in complex expression for widget visibility 
+A:
+
+Q: get module roles in java
+A: 
+
+Q: refresh on client from java code
+A: FeedbackHelper.addRefreshClass
+
+Q: Call a nanoflow in a javascript action
+A:
+  The easiest is to create a parameter of the type 'Nanoflow' in the javascript action.
+  The passed parameter will be of the type 'function' returning a Promise and
+  accepting a single parameter of the type 'JS object' whose properties are the
+  nanoflow's named parameters.
+
+Q: replicate SAML SP certificate to another Environment
+A: 
+  - On the source app go to SP Metadata and download the JKS
+  - On the target app go to SP Metadata and upload the JKS, then click
+    "Download SP Metadata" one time. This will extract the certificate
+    from the JKS and save it in SPMetadata object
+
 Q: entity ID type ID, sequences etc.
 A: 
   The real sequence objects are only used for autonumber attributes.

@@ -1,0 +1,27 @@
+Q: call a Groovy method from java code, e.g. java.net.URL.getText()
+A: 
+  MetaClass mc = InvokerHelper.getMetaClass(obj.getClass());
+  MetaMethod method = mc.getMetaMethod(name, paramTypes);
+  method.invoke(obj, params);
+
+Q: Add implicit import to a script
+A:
+  final CompilerConfiguration cc = new CompilerConfiguration();
+  final ImportCustomizer importCustomizer = new ImportCustomizer();
+  importCustomizer.addImport("Mail2", Mail.class.getName());
+  // import static com.mrhaki.blog.Type.*
+  importCustomizer.addStaticStars("com.mrhaki.blog.Type");
+  // import com.mrhaki.blog.Post as Article
+  importCustomizer.addImport("Article", "com.mrhaki.blog.Post");
+  cc.addCompilationCustomizers(importCustomizer);
+  // can now use cc to instantiate GroovyShell or GroovyClassLoader
+  
+Q: ConfigSlurper with custom CompilerConfiguration
+A: 
+  String scriptText;
+  CompilerConfiguration cc;
+  ConfigSlurper configSlurper;
+  final GroovyClassLoader gl =
+      new GroovyClassLoader(Thread.currentThread().getContextClassLoader(), cc);
+  Script script = (Script) gl.parseClass(scriptText).newInstance();
+  configSlurper.parse(script, locationUrl);
