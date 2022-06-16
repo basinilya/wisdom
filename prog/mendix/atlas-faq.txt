@@ -1,0 +1,2 @@
+Q: horizontal scrollbar in pop-up
+A: A form widget is not enclosed with a layout grid

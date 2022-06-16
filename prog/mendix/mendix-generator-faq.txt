@@ -1,3 +1,59 @@
+Q: npm ERR! gyp ERR! stack Error: spawn C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\15.0\Bin\MSBuild.exe ENOENT
+A: 2019 might be not supported. But you can try:
+         npm config set msbuild_path "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
+
+Q:
+  With 2019:
+  MSBuild.exe` failed with exit code: 1
+A:
+  Install 2017 and switch
+  See https://stackoverflow.com/questions/57795314/are-visual-studio-2017-build-tools-still-available-for-download
+  See https://github.com/nodejs/node-gyp#on-windows
+
+  https://download.visualstudio.microsoft.com/download/pr/3e542575-929e-4297-b6c6-bef34d0ee648/639c868e1219c651793aff537a1d3b77/vs_buildtools.exe
+  md5sum 280760e13ec19fda455ab4f6ec13b285
+  Visual Studio Build Tools 2017 15.9.43
+
+  # if more than one version installed, do:
+  npm config delete msbuild_path
+  npm config set msvs_version 2017
+
+Q: build an .mpk widget package
+A: npm start
+
+node-v16.13.2-x64.msi
+
+
+
+npm config set msvs_version 2017
+
+npm config get msvs_version
+#npm config delete msvs_version
+
+# the following doesn't work:
+#npm config set msvs_version 2019
+#KeyError: '2019'
+
+
+python-2.7.16.amd64.msi
+
+mklink /H C:\Python27\python2.exe C:\Python27\python.exe
+
+# 
+npm install
+npm start
+
+
+
+
+
+
+
+VSCodeUserSetup-x64-1.63.2.exe
+
+
+
+
 ## Install
 > npm install -g yo @mendix/generator-widget
 ...

@@ -1,3 +1,6 @@
+Q: Action activity that has a side effect on the client is not recommended here because the microflow is used as a data source for data view 'dataView1'.
+A: disable "Refresh in client" for the returned object
+
 Q: Pop-up menu placed in a layout is not visible
 A: 
   _custom.scss :
