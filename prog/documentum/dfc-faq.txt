@@ -1,3 +1,10 @@
+Q: What does getRepeatingString throw in case of index out of bounds
+A: DfTypedObjectException:: THREAD: main; MSG: [DM_API_E_BADATTRINDX]error:  "Attribute name 'bic_code' for document/object has incorrect index '1'"; ERRORCODE: 100; NEXT: null
+
+Q: getObjectsByQualification
+A: session.getObjectsByQuery
+  https://web.archive.org/web/20200716201951/https://blog.documentum.pro/2015/03/09/bulk-fetches/
+
 Q: ClassNotFoundException after deleting a single jar from documentum cache
 A: also remove the entry from content.xml in documentum cache or clear it completely
 

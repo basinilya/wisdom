@@ -26,3 +26,23 @@ syslog
 /usr/share/turnserver/etc/turnserver.conf
 /etc/turnserver/turnserver.conf
 /usr/lib/systemd/system/turnserver.service
+
+
+Q: 
+A:
+  [il@reallin ~]$ ~/builds/coturn/bin/turnserver -c ~/builds/turnserver-debug.conf 
+  [il@reallin ~]$ cat ~/builds/turnserver-debug.conf 
+  verbose
+  #no-stdout-log
+  #syslog
+  stun-only
+  pidfile /dev/null
+  log-file -
+
+
+Q: ERROR: main: Cannot configure any meaningful IP listener address
+A:
+/etc/systemd/system/coturn.service.d/custom.conf
+[Service]
+RestrictAddressFamilies=
+#RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
