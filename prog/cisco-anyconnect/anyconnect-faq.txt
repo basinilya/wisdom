@@ -1,0 +1,56 @@
+Q:
+  nested VPN big packet loss
+  connection was reset 
+A:
+  Windows 7-10: 
+    netsh interface ipv4 set subinterface "Ethernet 2" mtu=1300 store=persistent
+  Mac (needed every time):
+    ifconfig utun4 mtu 1300
+
+
+Q: Your device doesn't meet the requirements
+A:
+  - Check that installed version is the same as the working version
+  - check the log files
+    %LOCALAPPDATA%\Cisco\Cisco HostScan\log\libcsd.log
+    %LOCALAPPDATA%\Cisco\Cisco HostScan\log\cscan.log
+
+Q:
+  Posture Assessment Failed: Hostscan CSD prelogin verification failed.
+  
+  %LOCALAPPDATA%\Cisco\Cisco HostScan\log\libcsd.log
+  unable to bind to ipc port.
+
+A:
+  https://quickview.cloudapps.cisco.com/quickview/bug/CSCvy56297
+  > Port 60808 being used by some other application that AnyConnect/CScan
+  
+  $ socat TCP-LISTEN:60808 STDIO
+  2021/07/23 11:45:27 socat[1449] E bind(5, {AF=2 0.0.0.0:60830}, 16): Permission denied
+  
+  :\WINDOWS\system32>netsh int ipv4 show excludedportrange protocol=tcp
+  
+  Протокол tcp Диапазоны исключения портов
+  
+  Начальный порт    Конечный порт
+  ----------    --------
+       50000       50059     *
+       60766       60865
+       60866       60965
+       60966       61065
+       61066       61165
+       
+  C:\WINDOWS\system32>dism /online /get-features | find /i "Microsoft-Hyper-V"
+  Имя функции : Microsoft-Hyper-V-All
+  Имя функции : Microsoft-Hyper-V
+  Имя функции : Microsoft-Hyper-V-Tools-All
+  Имя функции : Microsoft-Hyper-V-Management-PowerShell
+  Имя функции : Microsoft-Hyper-V-Hypervisor
+  Имя функции : Microsoft-Hyper-V-Services
+  Имя функции : Microsoft-Hyper-V-Management-Clients
+  
+  !!! solution !!!
+  net stop winnat & netsh int ipv4 add excludedportrange protocol=tcp startport=60808 numberofports=1 & net start winnat
+  !!! solution !!!
+  
+  https://stackoverflow.com/a/65254516/447503
