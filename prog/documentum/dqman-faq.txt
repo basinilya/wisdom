@@ -1,3 +1,21 @@
+Q:
+  API script
+  API> set,c,last,parent_id
+  
+  0b01e2408001b4cc
+  
+  ...
+  [DFC_OBJECT_BADATTRVALUE] invalid object id string - 0b01e2408001b4cc
+
+A:
+  You must convert the text file to CRLF before pasting. Good output:
+
+  API> set,c,last,parent_id
+  0b01e2408001b4cc
+  ...
+  OK
+
+
 Q: Unsupported Major
 A: Install dfc_7.3_win.zip
 

@@ -19,7 +19,7 @@ A:
   npm config set msvs_version 2017
 
 Q: build an .mpk widget package
-A: npm start
+A: npm run build
 
 node-v16.13.2-x64.msi
 

@@ -328,6 +328,20 @@ A:
       }
   }
 
+Q: pass a parameter to a select page
+A:
+  Some findings
+  When used on a select page a data grid (or a list view) must not be inside a data view,
+  otherwise the pre-selection and the select button won't work.
+  It means that if you somehow pass a parameter you still can't use it in the data source.
+  So it's easier to just add a singleton entity.
+  You can pass an XPath defined on the Selectable Objects tab as a parameter.
+  Example for HTML Snippet:
+    var constraint = this.mxform._params.dataSourceMixin.extra.constraint;
+    this.mxform._params.dataSourceMixin.extra.constraint = "";
+    var renditionMxId = constraint.replace(/.*'(.*)'.*/,"$1");
+    debugger;
+
 Q: error event
 A: This re-throws an existing error. It's only valid in error handling flow.
 

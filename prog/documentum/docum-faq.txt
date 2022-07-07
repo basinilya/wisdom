@@ -1,3 +1,15 @@
+Q: direction_kind
+A: cosmetic
+
+Q: saveasnew copies relations
+A: yes, if permanent_link is TRUE it copies the relations whose parent_id is the object id
+
+Q: iapi quote string parameters
+A: 
+
+Q: iapi last object
+A: get,c,last,r_object_id
+
 Q: [DM_SYSOBJECT_E_INVALID_PAGE_NUM]error:  "Invalid page number = 0 for
 A:
 
@@ -285,7 +297,7 @@ A:
 
 Q: remove user from role
 A:
-  An UPDATE cannot have subqueries in WHERE.
+  An UPDATE cannot have subqueries in WHERE (not to confuse with subquery in SET).
   for i_position = -999999 remove element 999998
   UPDATE dm_group OBJECTS REMOVE users_names[999998] WHERE group_name IN ('role_name');
 
