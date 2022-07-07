@@ -7,7 +7,6 @@ A:
   Mac (needed every time):
     ifconfig utun4 mtu 1300
 
-
 Q: Your device doesn't meet the requirements
 A:
   - Check that installed version is the same as the working version
