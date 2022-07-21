@@ -1,3 +1,6 @@
+Q: ??
+A: aspects
+
 Q: direction_kind
 A: cosmetic
 

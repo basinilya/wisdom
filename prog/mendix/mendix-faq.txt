@@ -1,3 +1,24 @@
+Q: add trigger button to the right of the regular text input
+A:
+padding-right заменил на margin-right, чтобы рамка вокруг инпута тоже сужалась. В остальном, всё, как советовала;
+div.my-input-with-trigger-container {
+	position: relative;
+
+	&> div {
+		&> div > input {
+			margin-right: 50px;
+		}
+	}
+
+	&> button {
+		position: absolute;
+		right: 0;
+		top: 0;
+	}
+}
+
+
+
 Q: Action activity that has a side effect on the client is not recommended here because the microflow is used as a data source for data view 'dataView1'.
 A: disable "Refresh in client" for the returned object
 
@@ -225,6 +246,15 @@ A:
   See
   https://github.com/mendix/HTMLSnippet
   https://github.com/mendix/list-view-controls/blob/e1cfe0bb16678201581210381fa07db1e4cfc1e2/src/TextBoxSearch/components/TextBoxSearchContainer.ts#L89
+
+Q: Find widget neighbours
+A: a = dijit.findWidgets(this.domNode.parentNode);
+
+Q: Find a sibling of a specified type
+A: var aaareportparam = aaasiblings.find(djw => djw.isInstanceOf(reporting.widget.ReportParameter));
+
+Q: set default ReportParameter widget value
+A: aaareportparam.mxcontext.setParam(aaareportparam.parameter, aaathissnippet.contextObj.getGuid());
 
 Q: xpath exists
 A: It's always 'exists'
@@ -666,6 +696,7 @@ A: concat() is not supported. Use XML entities. Ex:
     XPath.valueToXPathValue(Object)
 
 Q: escaping in OQL
+A:
 
 Q: escaping in expressions
 A: partial answer: SQL-like double apostrophe
