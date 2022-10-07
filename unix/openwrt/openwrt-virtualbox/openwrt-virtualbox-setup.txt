@@ -1,0 +1,79 @@
+https://downloads.openwrt.org/releases/
+
+version / targets / x86/64/
+generic-squashfs-combined
+
+https://downloads.openwrt.org/releases/22.03.0/targets/x86/64/
+
+# unpack
+>openwrt.img <openwrt-*-x86-64-generic-squashfs-combined.img.gz gzip -dc
+
+# convert
+VBoxManage convertfromraw openwrt.img openwrt.vdi
+
+Create new VM
+RAM 128Mb
+
+controller: IDE
+
+Important
+
+eth0 LAN (ssh disabled by default)
+internal network
+
+eth1 WAN
+NAT, forward 2022 -> 22, 2080 -> 80
+
+
+# allow access from WAN
+cat <<'EOF' >>/etc/config/firewall
+
+config rule
+        option name 'Custom-Allow-SSH'
+        option src 'wan'
+        option proto 'tcp'
+        option dest_port '22'
+        option target 'ACCEPT'
+
+config rule
+        option name 'Custom-Allow-Luci'
+        list proto 'tcp'
+        option src 'wan'
+        option dest_port '80'
+        option target 'ACCEPT'
+EOF
+
+# restart firewall
+/etc/init.d/firewall restart
+
+
+# make sure no real DNS servers overlap with lan subnet
+uci set network.lan.ipaddr=192.168.2.1
+/etc/init.d/network restart
+uci commit
+
+http://127.0.0.1:2080/
+
+
+
+
+Create VBox NatNetwork 192.168.3.0/24 , no DHCP,
+forward 2023 -> 192.168.3.5 22, 2081 -> 192.168.3.5 80
+
+
+Take VM snapshot, clone
+generate all new MACs, full clone
+eth0 "NatNetwork"
+eth1 internal network, cable disconnected
+
+# give the client br-lan another subnet
+uci set network.lan.ipaddr=192.168.3.5
+uci set system.@system[0].hostname='ClientHost'
+
+/etc/init.d/network restart
+
+uci commit
+
+http://127.0.0.1:2081/
+
+=========================================

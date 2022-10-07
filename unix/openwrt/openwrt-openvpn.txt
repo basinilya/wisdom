@@ -1,0 +1,62 @@
+https://openwrt.org/docs/guide-user/services/vpn/openvpn/extras
+
+
+Install openvpn-openssl and openvpn-luci-app
+
+
+# The following will enable VPN DNS
+
+cat << "EOF" > /etc/hotplug.d/net/00-openvpn-resolv
+if [ "${INTERFACE%%[0-9]*}" = "tun" ]
+then case "${ACTION}" in
+(add) RESOLV_CONF="/tmp/resolv.conf.d/resolv.conf.vpn" ;;
+(remove) RESOLV_CONF="/tmp/resolv.conf.d/resolv.conf.auto" ;;
+esac
+uci set dhcp.@dnsmasq[0].resolvfile="${RESOLV_CONF}"
+/etc/init.d/dnsmasq restart
+fi
+EOF
+cat << "EOF" > /etc/hotplug.d/openvpn/00-resolv
+env | sed -n -e "
+/^foreign_option_.*=dhcp-option.*DNS/s//nameserver/p
+/^foreign_option_.*=dhcp-option.*DOMAIN/s//search/p
+" | sort -u > /tmp/resolv.conf.d/resolv.conf.vpn
+EOF
+cat << "EOF" >> /etc/sysupgrade.conf
+/etc/hotplug.d/net/00-openvpn-resolv
+/etc/hotplug.d/openvpn/00-resolv
+EOF
+
+# The following will enable forwarding
+
+Network > Firewall > General Settings > wan > Edit > Advanced Settings > Covered devices
+add: tun+
+
+
+# in LUCI 
+Network > DHCP and DNS > General settings
+Uncheck "Rebind protection" (to allow private subnet responses)
+
+# in LUCI
+VPN > OpenVPN
+
+upload .ovpn file
+edit
+
+find auth-user-pass
+and replace with:
+auth-user-pass /etc/openvpn/${Profile:?}.auth
+
+comment: dev-node
+
+add:
+pull-filter ignore "route "
+
+In next section fill user and password
+
+go back
+Check the "Enabled" checkbox and click "Start"
+
+
+System > Startup > openvpn
+must be "Enabled"

@@ -1,3 +1,26 @@
+Q: remember dev portal credentials
+A: studiopro.exe --external-browser-signin
+
+Q: Why are one-to-one associations evil?
+A:
+  Updating one-to-one associations only from one side and then trying to save both previously retrieved objects lead to unexpected state of DB
+  This mistake is common in user Microflows and in addon widgets too.
+
+Q: In a tall pop-up have to scroll down to see the Data View footer
+A: Move the data view outside of the enclosing layout grid
+
+Q: All microflow requests fail with 403 after successful login, causing page refresh loop
+A:
+  The outdated .layout.xml containing obsolete "queryId" values was cached by the load balancer.
+  It can happen if a newer Cache Burst value was used to retrieve .layout.xml from the old deployment.
+  If the two instances run in parallel, then index.html can be requested by the load balancer from the
+  new deployment and then .layout.xml is requested from the old deployment and then is cached.
+  Solution: rebuild the app so the Cache Burst is updated again and deploy it.
+
+  Some load balancers allow manual invalidate cache
+  $ curl 'https://your.app/pages/en_US/SysUtils/Some.layout.xml?637945052630427850' -X PURGE
+  { "code":"200", "message":"Purged" }
+
 Q: add trigger button to the right of the regular text input
 A:
 padding-right заменил на margin-right, чтобы рамка вокруг инпута тоже сужалась. В остальном, всё, как советовала;
