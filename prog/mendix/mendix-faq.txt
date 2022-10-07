@@ -1,3 +1,30 @@
+Q: downgrade project or module
+A:
+  open .mpr file with C:\Program Files\Mendix\*\modeler\MprTool.exe, 
+  click Tools > Edit Metadata and set the earlier version
+
+Q: advanced downgrade
+A: 
+sqlite3 project.mpr
+.output dump.sql
+.dump
+.output
+
+update _MetaData  set  _ProductVersion = '9.5.4.47318', _BuildVersion = '9.5.4.47318';
+
+SELECT writefile('dump/' || ContainmentName || '-' || hex(UnitID) || '.bson', Contents)  from Unit;
+.exit
+
+#bsondump --type=json dump/ProjectDocuments-BA2320E029FEC248BA8B016E8302221D.bson >dump/ProjectDocuments-BA2320E029FEC248BA8B016E8302221D.json
+
+java RemoveJarDeploymentSettings
+
+sqlite3 project.mpr
+update Unit set Contents = readfile('dump/' || ContainmentName || '-' || hex(UnitID) || '.bson.1.bson') where hex(UnitID) = 'BA2320E029FEC248BA8B016E8302221D';
+vacuum;
+.exit
+
+
 Q: remember dev portal credentials
 A: studiopro.exe --external-browser-signin
 
@@ -5,6 +32,9 @@ Q: Why are one-to-one associations evil?
 A:
   Updating one-to-one associations only from one side and then trying to save both previously retrieved objects lead to unexpected state of DB
   This mistake is common in user Microflows and in addon widgets too.
+
+Q: Auto-fill and Auto-fit content not available in Layout Grid design properties. Only numeric widths available
+A: Erase the "theme" folder (most probably coming from Atlas 2) and copy this folder from a working Atlas 3 app
 
 Q: In a tall pop-up have to scroll down to see the Data View footer
 A: Move the data view outside of the enclosing layout grid
@@ -766,6 +796,12 @@ A:
   My tests show that sorting is case-insensitive in PostgreSQL
 
   As for built-in database Mendix generates DDL with the type VARCHAR_IGNORECASE instead of VARCHAR.
+
+Q: which objects are saved by the "Save Changes" action?
+A:
+  In <= 9.5.1 all objects in the current form modified by user or microflows/nanoflows are committed
+  In >= 9.12.4 only objects in *Editable* data views/list views in the current form are committed
+  (A "Listen to widget" data view only commits the currently selected object)
 
 
 Q: run microflow on change of object attribute without Save changes
