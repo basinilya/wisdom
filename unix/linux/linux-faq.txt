@@ -152,6 +152,9 @@ Q:  Resolve local hostname
 A:  /etc/nsswitch.conf:
     hosts:      files dns myhostname
 
+Q: command to update DNS record
+A: nsupdate
+
 Q: systemd re-generate cryptsetup units
 A:
     #rm /run/systemd/generator/systemd-cryptsetup@*.service

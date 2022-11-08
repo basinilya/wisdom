@@ -392,3 +392,29 @@ Q: read entire file
 A:
   // !! this throws NoSuchElementException on zero length input, use hasNext()
   new Scanner(requireNonNull(resourceAsStream), UTF_8.name()).useDelimiter("\\A").next();
+
+Q: jdk1.8.0_77
+  javax.net.ssl.SSLHandshakeException: Received fatal alert: handshake_failure
+          at sun.security.ssl.Alerts.getSSLException(Alerts.java:192)
+          at sun.security.ssl.Alerts.getSSLException(Alerts.java:154)
+          at sun.security.ssl.SSLSocketImpl.recvAlert(SSLSocketImpl.java:2023)
+          at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:1125)
+          at sun.security.ssl.SSLSocketImpl.performInitialHandshake(SSLSocketImpl.java:1375)
+          at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1403)
+          at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1387)
+          at sun.net.www.protocol.https.HttpsClient.afterConnect(HttpsClient.java:559)
+          at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:185)
+          at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1513)
+          at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1441)
+          at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:254)
+
+A:
+  re-run with -Djavax.net.debug=all
+  If you see something like:
+    Ignoring unavailable cipher suite: TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+  The cipher ECDHE-RSA-AES256-GCM-SHA384 is disabled due to US export policy.
+  
+  In newer JDK it's enabled by default.
+  To enable it in the current JDK download the unlimited policy package jce_policy-8.zip
+  from https://www.oracle.com/java/technologies/javase-jce8-downloads.html
+  and replace the jar files in the JRE directory.

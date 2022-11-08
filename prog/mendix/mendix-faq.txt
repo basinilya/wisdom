@@ -1,3 +1,12 @@
+Q: Cannot find association 'BookProposal.BookProposal_va_source' on MetaObject '[MetaObject: name=BookPlanningMain.Edition entityId=112]'.
+A: A one-to-one association is used in an deep expression in a microflow
+
+Q:
+  In a java action I wrap org.xml.sax.SAXParseException with com.mendix.systemwideinterfaces.core.UserException
+  but $latestError/ErrorType is still org.xml.sax.SAXParseException
+A:
+  $latestError/ErrorType is the class name of the last Throwable cause in the chain.
+
 Q: downgrade project or module
 A:
   open .mpr file with C:\Program Files\Mendix\*\modeler\MprTool.exe, 
