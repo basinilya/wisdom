@@ -1,4 +1,42 @@
 ﻿===== do not remove first line ==========
+Q: xCP Designer Process Debugger
+A:
+  Full deploy is not needed, but Java actions to run will be loaded from the docbase module.
+  To update just the module jars run the API script.
+  Restarting xCP is required.
+  
+  Java debugging is possible. Add in xcpdesigner.ini under: -vmargs
+    -Xrunjdwp:transport=dt_socket,address=0.0.0.0:7878,server=y,suspend=n
+
+Q: update java activities without deploy
+A:
+  DQL>
+  select r_object_id from dmc_jar where object_name = 'xxx_modules.jar';
+  xxxxxxxxxxxxxxxx
+  
+  API> checkout,c,xxxxxxxxxxxxxxxx
+  API> setfile,c,xxxxxxxxxxxxxxxx,content\Java Libraries\common_lib\xxx_modules.jar
+  API> checkin,c,xxxxxxxxxxxxxxxx
+
+
+Q: call stateless process from java
+A: 
+        final StatelessEngine engine = StatelessEngine.getInstance();
+        if (!engine.isInitialized()) {
+            engine.initialize(null, new String[0], 100);
+        }
+        final String processURN =
+            "urn:spr:com.emc.ide.artifact.process:Artifacts/Processes/get_template_name.process";
+        Map<String, Object> processVars = new HashMap<>();
+        processVars.put("in_edition_oid", sEditionOid);
+        final ProcessData processData = new ProcessData(new HashMap<>(), processVars, null);
+        final ProcessData processDataResult = engine.execute(processURN, dfcSession, processData);
+        processVars = processDataResult.getProcessVarNameToValueMap();
+
+        final Object repeatingValue = processVars.get("out_template_oid");
+        @SuppressWarnings("unchecked")
+        final Iterable<String> suitableTemplateOids = (Iterable<String>) repeatingValue
+
 Q: save Designer installation path to war
 A:
 	  <plugin>
@@ -1083,6 +1121,52 @@ Q: find the "Next>" button inside an Action Flow:
 A:
   var foundCmp = Ext.Component.fromElement(rawElem);
   var nextButton = foundCmp.findParentByType("xcp_wizard").nextButton;
+
+Q:
+  Uncaught SyntaxError: Invalid or unexpected token
+      at constructor.collectExpressions (contents-1.4.42.js?nominify=true&locale=en_US:39445:84)
+      at constructor.replaceChild (contents-1.4.42.js?nominify=true&locale=en_US:8470:41)
+      at constructor.success (contents-1.4.42.js?nominify=true&locale=en_US:9136:64)
+      at Object.callback (ext-all-debug.js:8439:32)
+      at constructor.onComplete (ext-all-debug.js:25157:17)
+      at constructor.callParent (ext-all-debug.js:12115:32)
+      at constructor.onComplete (contents-1.4.42.js?nominify=true&locale=en_US:6362:21)
+      at constructor.onStateChange (ext-all-debug.js:25114:16)
+      at XMLHttpRequest.method (ext-all-debug.js:6662:35)
+
+A:
+  Your xCP is below v16 and you have unescaped line feeds in the string expression.
+  xCP generates a js function for every expression.
+  For some reason a function declaration isn't stored as is, but
+  as an evaluable string that evaluates to another string that
+  evaluates to a function declaration. Consider:
+  function() {}
+  same as: eval("function() {}")
+  same as: eval(eval(`"function() {}"`))
+  
+  Now, when such 2nd level evaluable string contains unescaped
+  line feeds it evaluates to an invalid string constant because
+  "double-quoted" string constants cannot contain line feeds
+  (only `back-quoted` can).
+  
+  In collectExpressions():
+    if(!xcp.expression.Generated[functionName])
+        xcp.expression.Generated.addFunction(functionName,eval(functionBody));
+  
+  bad:
+    functionBody: `"function (context) { return 'aaastyle\r\n\r\nstyle\r\n'; }"`
+    evaluates to:
+      "function (context) { return 'aaastyle
+  
+      style
+      '; }"
+  
+  The solution is to escape line feeds in the expression.
+  good:
+    functionBody `"function (context) { return 'aaastyle\\\\nstyle\\\\n'; }"`
+    evaluates to:
+    "function (context) { return 'aaastyle\\nstyle\\n'; }"
+
 
 Q: Run custom javascript / arbitrary javascript when page loaded
 A:

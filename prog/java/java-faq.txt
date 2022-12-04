@@ -13,6 +13,11 @@ A:
             });
 
 
+Q: JVM argument for timezone
+A: -Duser.timezone=Etc/UTC
+
+Q:
+A: -Duser.language=en -Duser.region=US
 
 Q: profiling
 A:
@@ -209,8 +214,11 @@ A: javax.swing.text.html.HTMLEditorKit.getParser()
   Warning: unknown HTML tags like <tbody> are skipped.
 
 Q: base64
-A: javax.xml.bind.DatatypeConverter.parseBase64Binary
+A: java.util.Base64 
+  javax.xml.bind.DatatypeConverter.parseBase64Binary
     (hidden since java 9)
+    
+  
 
 Q: hex string
 A: javax.xml.bind.DatatypeConverter.printHexBinary

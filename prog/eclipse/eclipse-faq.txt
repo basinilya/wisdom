@@ -1,3 +1,39 @@
+Q: Hot swap + Lombok + ECJ + Ant
+A:
+  Since the release of Java 8 the Eclipse compiler creates byte code that cannot be
+  hot swapped into a loaded class compiled with JDK. The workaround is to initially
+  build the project using Eclipse Compiler for Java (ECJ) aka JDT Compiler.
+  Our Ant scripts already have a property for that and it can be enabled on the
+  command line: -Djavac.compiler=org.eclipse.jdt.core.JDTCompilerAdapter  
+  The problem with ECJ is it cannot load Annotation Processors as easily as javac
+  does and since we added Lombok the ECJ compilation fails with inability to load the
+  Lombok annotations or worse, Lombok annotations being ignored causing unexpected
+  sanity errors.
+  
+  The solution is to run Ant build in a Separate JRE and load the Lombok libraries in
+  accordance to the guide.
+  
+      Download lombok.jar v1.18.24 or higher: (there's a known problem with v1.18.18
+      bundled with Eclipse and there's another problem with lombok-1.18.4.jar we ship
+      ourselves: Ant terminates instantly)
+          https://projectlombok.org/download
+      Download ecj-4.19.jar - the nearest to eclipse-jee-2021-03-R-win32-x86_64 and
+      still runnable in JRE8
+          https://archive.eclipse.org/eclipse/downloads/
+      Add the argument on the tab "Main": 
+         -Djavac.compiler=org.eclipse.jdt.core.JDTCompilerAdapter
+      Add an external Jar on the tab "Classpath": ecj-4.19.jar
+      On the tab "JRE"
+          Switch to "Separate JRE" and choose the previously installed OpenJDK 8
+          In "VM arguments" add:
+            -Xbootclasspath/a:C:\Path\To\lombok.jar
+            -javaagent:C:\Path\To\lombok.jar
+      Deploy the app, attach the remote debugger and try to edit method bodies: the
+      changes should be applied without problems
+
+Q: download latest ECJ
+A: https://archive.eclipse.org/eclipse/downloads/
+
 Q: External tool builder not run automatically on source file save
 A: On "Targets" tab select a target for auto builds
 

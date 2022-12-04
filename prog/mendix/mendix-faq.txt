@@ -1,3 +1,17 @@
+Q: Existing Administration.Account cannot be found on the Account Overview page
+A: bug. between 9.3 and 9.18.2 despite opted to manage
+  all roles the Administrator cannot read users with all
+  roles revoked
+
+Q: secondsBetween
+A: 
+  returns abs(Date1 - Date2)
+  passing empty will cause error
+
+Q: compare empty dates
+A: error .IllegalArgumentException: Left and right hand side of binary expression should not be empty
+
+
 Q: Cannot find association 'BookProposal.BookProposal_va_source' on MetaObject '[MetaObject: name=BookPlanningMain.Edition entityId=112]'.
 A: A one-to-one association is used in an deep expression in a microflow
 
@@ -32,6 +46,54 @@ sqlite3 project.mpr
 update Unit set Contents = readfile('dump/' || ContainmentName || '-' || hex(UnitID) || '.bson.1.bson') where hex(UnitID) = 'BA2320E029FEC248BA8B016E8302221D';
 vacuum;
 .exit
+
+Q: what makes a module appear under marketplace modules?
+A:
+  compare dumps of module unit BSONs: 
+  
+  {
+  	"$ID": {
+  		"$binary": {
+  			"base64": "1a8tRzhgA0+TOhqSH0tqSA==",
+  			"subType": "00"
+  		}
+  	},
+  	"$Type": "Projects$ModuleImpl",
+  	"AppStoreGuid": "1d7b7a3f-84e6-4fc1-baf0-afbd0ee23b13",
+  	"AppStorePackageId": {
+  		"$numberLong": "23513"
+  	},
+  	"AppStoreVersion": "2.0.1",
+  	"AppStoreVersionGuid": "1d7b7a3f-84e6-4fc1-baf0-afbd0ee23b13",
+  	"FromAppStore": true,
+  	"IsThemeModule": false,
+  	"Name": "Administration",
+  	"NewSortIndex": {
+  		"$numberDouble": "-0.5"
+  	}
+  }
+  
+  {
+  	"$ID": {
+  		"$binary": {
+  			"base64": "1a8tRzhgA0+TOhqSH0tqSA==",
+  			"subType": "00"
+  		}
+  	},
+  	"$Type": "Projects$ModuleImpl",
+  	"AppStoreGuid": "",
+  	"AppStorePackageId": {
+  		"$numberInt": "0"
+  	},
+  	"AppStoreVersion": "",
+  	"AppStoreVersionGuid": "",
+  	"FromAppStore": false,
+  	"IsThemeModule": false,
+  	"Name": "Administration",
+  	"NewSortIndex": {
+  		"$numberDouble": "-0.5"
+  	}
+  }
 
 
 Q: remember dev portal credentials

@@ -1,3 +1,15 @@
+Q: getTimeContentAttr() / setTimeContentAttribute()
+A: dmr_content content_attr_name[], content_attr_value[]
+
+Q: Does IDfSysObject.getContentSize() return r_full_content_size or r_content_size ?
+A: From DfSysObject:
+  public long getContentSize()
+    getLong("r_full_content_size");
+  public void setContentSize(long value)
+    int contentSize = value <= 2147483647L ? (int)value : -1;
+    setIntInternal("r_content_size", contentSize);
+    setLongInternal("r_full_content_size", value);
+
 Q: What does getRepeatingString throw in case of index out of bounds
 A: DfTypedObjectException:: THREAD: main; MSG: [DM_API_E_BADATTRINDX]error:  "Attribute name 'bic_code' for document/object has incorrect index '1'"; ERRORCODE: 100; NEXT: null
 

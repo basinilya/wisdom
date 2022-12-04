@@ -1,3 +1,46 @@
+Q: create java method example
+A:
+  CREATE dm_method OBJECT
+  LINK '/System/Methods'
+  , SET object_name = 'AaaTestJob2'
+  , SET method_verb = 'org.foo.methods.jobs.test.AaaTestJob2'
+  , SET subject = 'Method that runs forever'
+  , SET timeout_min = 3500
+  , SET timeout_max = 3700
+  , SET timeout_default = 3600
+  , SET launch_direct = 0
+  , SET launch_async = 0
+  , SET trace_launch = 1
+  , SET a_special_app = ''
+  , SET run_as_server = 1
+  , SET use_method_content = 0
+  , SET method_type = 'java'
+  , SET use_method_server = 1
+  ;
+
+Q: do_method fails with:
+  Caused by: java.lang.NoClassDefFoundError: com/documentum/mthdservlet/IDmMethod
+  Caused by: java.lang.ClassNotFoundException: com.documentum.mthdservlet.IDmMethod from [Module "deployment.bpm.ear:main" from Service Module Loader]
+A:
+  IDmMethod.class is inside mthdservlet.jar, it's normally placed in:
+  - ServerApps.ear/DmMethods.war/WEB-INF/lib/mthdservlet.jar
+  - bpm.ear/bpm.war/WEB-INF/lib/mthdservlet.jar
+  
+  This is the Classloader hierarchy:
+    .ear/lib/
+      .war/WEB-INF/lib/
+         methodlocation-1
+  
+  The common mistake is to place the custom methods jar into .ear/lib/: it won't have mthdservlet.jar in classpath.
+  The other common mistake is to fix the error above by copying mthdservlet.jar to .ear/lib/ .
+  The correct fix is to remove the custom methods jar from .ear/lib/ and place it into methodlocation-1 .
+  
+  methodlocation-1 is defined in web.xml:
+      <init-param>
+              <param-name>methodlocation-1</param-name>
+              <param-value>/u01/flxd/dba/java_methods</param-value>
+      </init-param>
+
 Q: ??
 A: aspects
 
