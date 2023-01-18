@@ -30,11 +30,11 @@ If the default java is too old you need to insert the following to jmc.ini:
   -vm
   C:\Program Files\AdoptOpenJDK\jdk-11.0.3.7-hotspot\bin
 
-In Oracle JDK it has to be enabled with:
-  -DXX:+UnlockCommercialFeatures
-  -DXX:+FlightRecorder
+In Oracle JDK 8 it has to be enabled with:
+  -XX:+UnlockCommercialFeatures
+  -XX:+FlightRecorder
 
-OpenJDK does not support these.
+OpenJDK 8 does not support FlightRecorder, but OpenJDK 11 does and it does not need the JVM options above.
 
 The recording start/dump-to-file can be triggered by jcmd, a remote call
 - or from the command line:

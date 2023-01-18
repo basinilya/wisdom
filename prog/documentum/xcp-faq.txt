@@ -1,4 +1,10 @@
 ﻿===== do not remove first line ==========
+Q: show yellow error from javascript
+A: 
+  xcp.core.FeedbackManager.showServiceErrorResponse(operation.error.response, { operation: operation, feedbackContainer: btn.up("xcp_form"), url: operation.request.getUrl() });
+  or
+  xcp.event.EventBus.publish('xcp_show_error', { error_message: "Failed to serialize search filter" }, btn.getPageContext());
+
 Q: xCP Designer Process Debugger
 A:
   Full deploy is not needed, but Java actions to run will be loaded from the docbase module.
@@ -7,6 +13,27 @@ A:
   
   Java debugging is possible. Add in xcpdesigner.ini under: -vmargs
     -Xrunjdwp:transport=dt_socket,address=0.0.0.0:7878,server=y,suspend=n
+
+  Important: if you try to debug multiple design-time
+  environments BOF classes are downloaded only once and
+  then re-used. So a class from a different docbase could
+  be used with a wrong repository session.
+
+  Important: just to get the service model name xCP will download the
+  entire xcpdar which may be hundreds of megabytes and unlike jar files
+  there's no persistent cache for xcpdar:
+
+      package com.documentum.bpm.engine.utils;
+      class ServiceDefinitionResolverUtils {
+      resolveInvokeJavaServiceDef(IDfSession, ServiceDefinition)
+        String modelName = RuntimeArtifactLocator.getArtifactLocator(session, namespace).getArtifact(javaModuleURN).getName();
+      }
+
+Q: xCP Designer Process Debugger Log4j configuration
+A: The DEBUGGER appender is attached to a hard-coded list of loggers.
+  It's possible to add a log file in xcpdesigner.ini
+  -vmargs
+  -Dlog4j.configuration=file:///C:/...
 
 Q: update java activities without deploy
 A:
@@ -463,7 +490,7 @@ A:
   
   java inputs:
   do not use generics, the process variable mapper is broken.
-  for multivalue use arrays: String[], etc.
+  for multivalue use arrays: String[], etc. (if you use List it will fail in runtime)
   
   java outputs:
   generics work, use List<Date/Integer/Double/String>

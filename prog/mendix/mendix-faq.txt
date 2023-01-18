@@ -1,3 +1,6 @@
+Q: mx.data.action onValidation is not called
+A: onValidation is only called in case of exception
+
 Q: Existing Administration.Account cannot be found on the Account Overview page
 A: bug. between 9.3 and 9.18.2 despite opted to manage
   all roles the Administrator cannot read users with all

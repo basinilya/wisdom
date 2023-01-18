@@ -1,3 +1,6 @@
+Q: extract a page (range) from a stream
+A: skip(), then limit()
+
 Q: void functional interface with no argument
 A: Runnable
 

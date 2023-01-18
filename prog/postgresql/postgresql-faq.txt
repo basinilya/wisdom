@@ -1,3 +1,9 @@
+Q: indexof / instr
+A: position
+
+Q: .pgpass default location on Windows
+A: %APPDATA%\postgresql\pgpass.conf
+
 Q: escape unicode characters
 A: e'Telefon\u00ED kontakty'
 

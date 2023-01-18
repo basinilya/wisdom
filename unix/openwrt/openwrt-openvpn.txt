@@ -1,7 +1,9 @@
 https://openwrt.org/docs/guide-user/services/vpn/openvpn/extras
 
 
-Install openvpn-openssl and openvpn-luci-app
+Install openvpn-wolfssl and openvpn-luci-app
+# opkg list | grep openvpn
+#openvpn-openssl
 
 
 # The following will enable VPN DNS
@@ -51,6 +53,8 @@ comment: dev-node
 
 add:
 pull-filter ignore "route "
+# or
+#route-nopull
 
 In next section fill user and password
 

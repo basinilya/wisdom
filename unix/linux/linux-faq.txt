@@ -15,10 +15,20 @@ Q: console to serial
 A: boot parameter console=ttyS0,115200 console=tty0 (multiple consoles can be defined, the last one will be /dev/console)
 https://www.kernel.org/doc/html/latest/admin-guide/serial-console.html
 
+Q: detect filesystem type
+A: blkid, lsblk -f, file -s -L
+
+Q: restore a filesystem image
+A: partclone --restore
+  Warning: -C, --no_check does not do what you think it does!
+  It won't allow you restore to a smaller disk. It just disables
+  the check and will eventually fail with: no space left on device
+
 Q: create a filesystem image
 A: partclone
   ex:
     partclone.ntfs --clone --source /dev/disk/by-label/WINXP --output /media/partclone-images/il/WINXP.partclone.ntfs.gz --compresscmd gzip
+
 
 Q: ntfs partitions won't mount (Device or resource busy) 
 A: 
@@ -151,9 +161,6 @@ A: tail /var/log/messages on server
 Q:  Resolve local hostname
 A:  /etc/nsswitch.conf:
     hosts:      files dns myhostname
-
-Q: command to update DNS record
-A: nsupdate
 
 Q: systemd re-generate cryptsetup units
 A:

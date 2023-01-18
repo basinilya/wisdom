@@ -1,3 +1,9 @@
+Q: import csv
+A:
+  don't try to import CSV with Oracle SQL Developer 20.x or below:
+  it treats line breaks in values as record separators despite
+  the quoting.
+
 Q: where is configuration?
 A: c:\Users\basin\AppData\Roaming\SQL Developer\
 

@@ -27,7 +27,20 @@ The input parameters in ARQ are dollar-quoted, uppercase: $PARAM$
 Multivalue (repeating) parameters MUST be used in a in() clause: in($PARAM$)
 
 When you press "SyncQuery" the Multivalued checkbox is not preserved (bug).
+
 When you press "Finish", the "Enable Sorting" checkbox is not preserved (bug).
+Workaround: edit and replace
+(<outputs.*label="[^"]{0,200}")>
+with
+$1 sortable="true">
+
+and
+
+(<elements.*label="[^"]{0,200}")>
+with
+$1 sortable="true">
+
+
 
 After closing the "Validate DQL Query" window go to the "Output Columns" section and check the "Enable Sorting" checkboxes, at least, for the lowercase columns.
 

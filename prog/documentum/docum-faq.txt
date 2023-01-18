@@ -1,3 +1,56 @@
+Q: manual work item transition
+A:
+  API> setoutput,session,workitem_id{,output_port_name}
+
+Q: hot change log4j levels in JMS
+A:
+  cd $JBOSS_HOME/server/DctmServer_MethodServer/deployments/ServerApps.ear/DmMethods.war
+  wget -O log4jAdmin.jsp https://gist.githubusercontent.com/iamkristian/943918/raw/043ac51bd80321a0873d93277979c8a9a20a9a48/log4jAdmin.jsp
+
+  # curl -v http://127.0.0.1:9080/DmMethods/log4jAdmin.jsp
+
+
+Q:
+  java 7
+  com.rsa.sslj.x.g: java.security.InvalidKeyException: Illegal key size
+A:
+  need unlimited US export policy
+
+Q:
+  com.rsa.sslj.x.g: java.security.InvalidKeyException: Illegal key size
+  Caused by: java.security.InvalidKeyException: Illegal key size
+  or
+  Caused by: com.rsa.sslj.x.g: Certificate not verified.
+  Caused by: java.security.cert.CertificateException: the certificate chain is not trusted, Parameters must be PKIXParameters or be CertPathWithOCSPParameters containing PKIXParameters
+A:
+  Reorder provider list in java.security. Working example:
+    security.provider.1=sun.security.rsa.SunRsaSign
+    security.provider.2=com.rsa.jsafe.provider.JsafeJCE
+    security.provider.3=sun.security.provider.Sun
+    security.provider.4=sun.security.ec.SunEC
+    security.provider.5=com.sun.net.ssl.internal.ssl.Provider
+    security.provider.6=com.sun.crypto.provider.SunJCE
+    security.provider.7=sun.security.jgss.SunProvider
+    security.provider.8=com.sun.security.sasl.Provider
+    security.provider.9=org.jcp.xml.dsig.internal.dom.XMLDSigRI
+    security.provider.10=sun.security.smartcardio.SunPCSC
+    security.provider.11=com.rsa.jsse.JsseProvider
+
+Q:
+  After transaction lost the automatic workitem is left in acquired state, but is not executed.
+  An attempt to restart the task fails:
+  API> restart,c,4d01e2408000b10b,7
+  ...
+  [DM_WORKFLOW_E_ACTION_NOT_ALLOWED]error:  "This operation is not allowed when the state is 'active' for activity instance 'exportCoverTemplateToMendix'."
+A:
+  Using SQL set a_wq_flag=0, a_wq_name = ' '
+  Then
+  halt,c,workflow_id,act_seq_no
+  resume,c,workflow_id,act_seq_no
+
+Q: inbox Execution Result with stacktrace
+A: dmi_workitem.r_exec_result_id
+
 Q: create java method example
 A:
   CREATE dm_method OBJECT
