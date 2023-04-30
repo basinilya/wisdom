@@ -1,0 +1,183 @@
+<html>
+
+<head>
+</head>
+
+<body>
+
+<div>
+<form action="#" onsubmit="apply_input_vid(); return false">
+<label for="input_vid">Video ID or URL:</label>
+<input id="input_vid" type="text" onfocus="console.log('focus'); this.select()">
+<input type="button" value=">>" onclick="apply_input_vid()">
+</form>
+</div>
+<br>
+
+    <div id="ytplayer"></div>
+    <script>
+        // Load the IFrame Player API code asynchronously.
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/player_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // Replace the 'ytplayer' element with an <iframe> and
+        // YouTube player after the API code downloads.
+        var player;
+        function onYouTubePlayerAPIReady() {
+            console.log("onYouTubePlayerAPIReady");
+            window.aaaplayer = player = new YT.Player('ytplayer', {
+                height: '315',
+                width: '560',
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                }
+
+            });
+
+        }
+
+        var savingTimer;
+
+        function onPlayerStateChange(e) {
+            console.log("onPlayerStateChange", e);
+            if (e?.data === 2) {
+              setTimeout(
+              () => {
+                savePosition();
+              }, 2000
+              );
+            }
+            if (e?.data === 1) {
+              savingTimer = setInterval(() => {
+                savePosition();
+              }, 20000);
+            } else {
+              clearInterval(savingTimer);
+            }
+        }
+        
+        function savePosition() {
+          // createCookie('ply_time', player.getCurrentTime(), 1);
+          const vid = extractVideoId(player.getVideoUrl());
+          const pos = player.getCurrentTime();
+          console.log("savePosition", pos);
+          localStorage.setItem("vid-" + vid, pos);
+        }
+        
+        function getPosition() {
+          // return readCookie('ply_time') - 0;
+          const vid = extractVideoId(player.getVideoUrl());
+          return localStorage.getItem("vid-" + vid) - 0;
+        }
+
+        function onPlayerReady() {
+            console.log("onPlayerReady");
+            //debugger;
+            const vid = window.location.hash?.substring(1);
+            apply_vid(vid);
+        }
+
+        function startSeek(retryDelay) {
+            const dur = player.getDuration();
+            console.log("getDuration", dur);
+            if (dur > 0) {
+              const tstamp = getPosition();
+              console.log("seekTo",tstamp);
+              player.seekTo(tstamp, true);
+            } else {
+              setTimeout(
+              () => {
+                startSeek(retryDelay * 2);
+              }, retryDelay
+              );
+            }
+        }
+
+        document.unload = function() {
+            savePosition();
+        }
+
+        window.onbeforeunload = function() {
+            savePosition();
+        }
+
+        function createCookie(name, value, days) {
+            console.log("createCookie", value);
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                var expires = "; expires=" + date.toGMTString();
+            }
+            else
+                var expires = "";
+            document.cookie = name + "=" + value + expires + "; path=/";
+        }
+
+        function readCookie(name) {
+          const res = _readCookie(name);
+          console.log("readCookie", res);
+          return res;
+        }
+
+        function _readCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ')
+                    c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0)
+                    return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function eraseCookie(name) {
+            createCookie(name, "", -1);
+        }
+
+        const input_vid = document.getElementById("input_vid");
+        
+        function apply_input_vid() {
+          console.log("apply_input_vid");
+          const str = input_vid.value;
+        
+          const vid = extractVideoId(str);
+        
+          window.location.hash = "#" + vid;
+          apply_vid(vid);
+        }
+
+        function extractVideoId(str) {
+          var vid;
+          if (str.indexOf("://") !== -1) {
+            // https://www.youtube.com/watch?v=XXXXXXXXX&
+            const searchParams1 = new URLSearchParams(new URL(str).search);
+            vid = searchParams1.get("v");
+          } else {
+            vid = str;
+          }
+          return vid;
+        }
+        
+        function apply_vid(vid) {
+          console.log("apply_vid");
+          if (vid) {
+            player.loadVideoById(vid);
+            startSeek(100);
+          }
+        }
+        
+
+    </script>
+
+
+<script>
+
+</script>
+
+</body>
+</html>
