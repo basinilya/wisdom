@@ -43,6 +43,7 @@
 
         function onPlayerStateChange(e) {
             console.log("onPlayerStateChange", e);
+            document.title = player.getVideoData()?.title;
             if (e?.data === 2) {
               setTimeout(
               () => {
