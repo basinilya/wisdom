@@ -3,7 +3,7 @@
 <head>
 </head>
 
-<body>
+<body onhashchange="onhashchange()">
 
 <div>
 <form action="#" onsubmit="apply_input_vid(); return false">
@@ -77,6 +77,11 @@
         function onPlayerReady() {
             console.log("onPlayerReady");
             //debugger;
+            onhashchange();
+        }
+
+        function onhashchange() {
+            console.log("onhashchange");
             const vid = window.location.hash?.substring(1);
             apply_vid(vid);
         }
@@ -149,7 +154,6 @@
           const vid = extractVideoId(str);
         
           window.location.hash = "#" + vid;
-          apply_vid(vid);
         }
 
         function extractVideoId(str) {
