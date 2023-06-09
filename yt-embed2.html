@@ -68,13 +68,9 @@
           localStorage.setItem("vid-" + vid, pos);
         }
         
-        function getPosition1() {
+        function getPosition() {
           // return readCookie('ply_time') - 0;
           const vid = extractVideoId(player.getVideoUrl());
-          return localStorage.getItem("vid-" + vid) - 0;
-        }
-        
-        function getPosition0(vid) {
           return localStorage.getItem("vid-" + vid) - 0;
         }
 
@@ -91,8 +87,6 @@
         }
 
         function startSeek(retryDelay) {
-        }
-        function startSeek1(retryDelay) {
             const dur = player.getDuration();
             console.log("getDuration", dur);
             if (dur > 0) {
@@ -177,8 +171,7 @@
         function apply_vid(vid) {
           console.log("apply_vid");
           if (vid) {
-            const pos = getPosition0(vid);
-            player.loadVideoById(vid, pos);
+            player.loadVideoById(vid);
             startSeek(100);
           }
         }
