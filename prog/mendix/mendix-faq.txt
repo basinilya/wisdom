@@ -1,3 +1,102 @@
+Q: add a before commit event handler in runtime
+
+A:
+  When you commit from a microflow or from java
+  a list to commit may contain objects of different types. For such list the objects are
+  grouped by type and a separate com.mendix.basis.action.user.CommitAction is created for
+  each type and the group is assigned to the action's EventObjects list.
+  CommitAction never has an empty EventObjects list.
+  Custom ActionListener can be registered for CommitAction.class. This class instance is
+  needed for registration and can be obtained from
+  Core.getConfiguration().getClass().getClassLoader()
+  A listener has configurable lists of EventActionInfo for "before" and "after" events.
+  A listener also has a "replace" property, but for CommitAction a replacement java action
+  requires a constructor accepting Scala immutable list which is inaccessible.
+  For each object in EventObjects a certain UserAction subclass is instantiated depending
+  on the values in EventActionInfo. If it has a Consumer, then an anonymous UserAction is
+  instantiated that calls the Consumer and returns true unconditionally. Otherwise it
+  treats the action name as the Microflow or a Custom Java Action name prefixed with the
+  module name. The method addBeforeEvent(String,String) will convert the class name to the
+  action name. The action must have a constructor accepting context and a single mendix
+  object.
+  EventActionInfo has a flag to treat negative action result as an error or a
+  cancellation.
+  Returning false from the "before" event cancels the entire commit action including the    
+  objects from other groups. However, the previous object groups in a big list stay
+  committed. Just like when returning false from a BCO_ microflow.
+  The action's EventObjects property is writable, but CommitAction already has one default
+  listener with a "before" action:
+    com.mendix.basis.action.user.DataValidationAction
+  and if you assign an empty list then DataValidationAction will fail with
+  ArrayIndexOutOfBoundsException. So to cancel commit of just the current group you can
+  assign an empty string to the private field CommitAction.entityName.
+  listener's check() method is called twice. First on a listener instance in the registry
+  second after the listener is cloned and the events are about to trigger.
+
+
+Q: default index.html location
+A: C:\Program Files\Mendix\*\modeler\runtemplates\deployment\dojo-web\index.html
+
+Q: JSON structure Date Time detection pattern
+A:
+
+Q:  A REST service operation with a body parameter needs an import mapping (unless it's a file document)	Rest operation parameter 'screeningResult'	Published REST service 'CallbackService'	PlagiarismCheck
+A:  remove this parameter and create an HTTPRequest paramater and use its attribute "Content"
+
+Q: guess microflow parameters in java
+A: TODO
+        final IDataType returnDataType = Core.getReturnType(creationMicroflow);
+        if (!(returnDataType.isMendixObject() && Core
+            .getMetaObject(returnDataType.getObjectType())
+            .isSubClassOf(binaryMeta))) {
+            throw new MendixRuntimeException(
+                "Microflow " + creationMicroflow + " not returning subclass of "
+                    + Binary.entityName);
+        }
+
+        String fileDocumentParameter = null;
+
+        boolean hasUnwantedParams = false;
+
+        for (final Entry<String, IDataType> entry : Core
+            .getInputParameters(creationMicroflow)
+            .entrySet()) {
+            final IDataType dataType = entry.getValue();
+            if (dataType.isMendixObject()) {
+                final IMetaObject metaObject = Core.getMetaObject(dataType.getObjectType());
+                if (metaObject.isSubClassOf(fileDocumentMeta)) {
+                    if (fileDocumentParameter == null) {
+                        fileDocumentParameter = entry.getKey();
+                        continue;
+                    }
+                }
+            }
+            hasUnwantedParams = true;
+        }
+        if (hasUnwantedParams) {
+            throw new MendixRuntimeException(
+                "Microflow " + creationMicroflow + "  not accepting a single subclass of "
+                    + FileDocument.entityName);
+        }
+
+
+Q: No connecting flow found
+A: Decision activity expression returned: empty
+
+Q: Unique Nulls
+A: At least in Postgres and H2 the unique constraint created by Mendix allows duplicate NULLs 
+
+Q: replace an attribute with a new one in the domain model
+A: 
+  If it's a marketplace module, it's more complicated
+  If it's an app, it's easier:
+  You rename an existing attribute to "AttributeOld" and create a new attribute "Attribute"
+  The old db column is actually renamed and a new column is created
+  
+  If it's a marketplace module, when you import a module
+  with a renamed attribute the existing db column is
+  dropped and the data is lost.
+
 Q: mx.data.action onValidation is not called
 A: onValidation is only called in case of exception
 
@@ -12,8 +111,9 @@ A:
   passing empty will cause error
 
 Q: compare empty dates
-A: error .IllegalArgumentException: Left and right hand side of binary expression should not be empty
-
+  error .IllegalArgumentException: Left and right hand side of binary expression should not be empty
+A:
+  (a != empty and b != empty and a < b)
 
 Q: Cannot find association 'BookProposal.BookProposal_va_source' on MetaObject '[MetaObject: name=BookPlanningMain.Edition entityId=112]'.
 A: A one-to-one association is used in an deep expression in a microflow
@@ -30,18 +130,24 @@ A:
   click Tools > Edit Metadata and set the earlier version
 
 Q: advanced downgrade
-A: 
-sqlite3 project.mpr
-.output dump.sql
+A:
+mkdir -p deployment/dump
+
+cat <<'EOF' | sqlite3 *.mpr
+.output deployment/dump/dump.sql
 .dump
 .output
 
-update _MetaData  set  _ProductVersion = '9.5.4.47318', _BuildVersion = '9.5.4.47318';
+--update _MetaData  set  _ProductVersion = '9.5.4.47318', _BuildVersion = '9.5.4.47318';
 
-SELECT writefile('dump/' || ContainmentName || '-' || hex(UnitID) || '.bson', Contents)  from Unit;
+SELECT writefile('deployment/dump/' || ContainmentName || '-' || hex(UnitID) || '.bson', Contents)  from Unit;
 .exit
+EOF
 
-#bsondump --type=json dump/ProjectDocuments-BA2320E029FEC248BA8B016E8302221D.bson >dump/ProjectDocuments-BA2320E029FEC248BA8B016E8302221D.json
+
+for x in deployment/dump/*.bson; do
+  bsondump --type=json "$x" >"$x.json"
+done
 
 java RemoveJarDeploymentSettings
 
@@ -164,6 +270,7 @@ A:
 
 Q: refresh on client from java code
 A: FeedbackHelper.addRefreshClass
+   FeedbackHelper.addRefreshObjectFeedback
 
 Q: Call a nanoflow in a javascript action
 A:
@@ -291,6 +398,7 @@ A:
 
   // https://stackoverflow.com/a/39165137/447503
   function FindReact(dom, traverseUp = 0) {
+debugger;
       const key = Object.keys(dom).find(key=>{
           return key.startsWith("__reactFiber$") // react 17+
               || key.startsWith("__reactInternalInstance$"); // react <17
@@ -337,8 +445,16 @@ A:
 
   In case of External File script it's executed synchronously in a tag: <script src="custom.js?cacheid">
   where custom.js is a file inside theme/web/
-  jquery will not work
-  
+  jquery will not work without hacking.
+  To use JQuery provided by HTMLSnippet in external .js files one could surround the .js file contents:
+
+    const htmlWidget = dijit.getEnclosingWidget(document.currentScript.parentElement);
+    htmlWidget._mycode = function($) {
+    ...
+    };
+    htmlWidget.contents = "this.widget._mycode($);";
+    htmlWidget._evalJQueryCode();
+
   
   In case of inline script
   A non-JQuery snippet is run synchronously
@@ -614,11 +730,15 @@ A: In "After startup"
 Q: Reference Selector vs Reference Set Selector vs Input Reference Set Selector
 A: These widgets allow editing associations. They require the current object to be an association owner. They still require the "Save" button.
 
-Reference Selector only works with "one to x" associations. It can associate one or zero parent objects with the current object. In drop-down mode it displays a chosen attribute of the parent object.
+Reference Selector only works with "one to x" associations. It can associate one or zero parent objects with the current object.
+In drop-down mode it displays a chosen attribute of the parent object.
 
-The other two widgets only work with "many to many" associations" and they require a _Select page with a data grid (preferred) or a list view of parent candidates and a "Save changes" button.
-When a pop-up with a data grid is invoked by one of the selector widgets some of its rows are auto-selected and the "Select" button associates the selected parents with the current child object without committing it.
-When a pop-up with a list view is invoked by one of the selector widgets it gains an implicit checkbox widget in each row of the list view and the "Save changes" button associates the checked parents with the current child object without committing it.
+The other two widgets only work with "many to many" associations" and they require a _Select page with a data grid (preferred) or
+a list view of parent candidates and a "Save changes" button.
+When a pop-up with a data grid is invoked by one of the selector widgets some of its rows are auto-selected and the "Select" button
+associates the selected parents with the current child object without committing it.
+When a pop-up with a list view is invoked by one of the selector widgets it gains an implicit checkbox widget in each row of the list
+view and the "Save changes" button associates the checked parents with the current child object without committing it.
 Important: the filtering must be done on the "Selectable Objects" tab of the reference set widget, not in the grid or list view data source.
 In the "Selectable Objects" xpath you can use the '[%CurrentObject%]' token to filter by the child object.
 There is no '[%CurrentObject%]' in Select Page.
@@ -812,7 +932,7 @@ A: you can't
 Q: current object in client xpath
 A:
 
-Q: escaping in XPath
+Q: escape escaping in XPath
 A: concat() is not supported. Use XML entities. Ex:
   Larry "Basher" O'Niven
   [attr = 'Larry "Basher" O&apos;Niven']

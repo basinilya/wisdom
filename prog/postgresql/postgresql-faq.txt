@@ -1,3 +1,21 @@
+Q: select into table
+A: select ... into ... new_table FROM ...
+   https://www.postgresql.org/docs/current/sql-selectinto.html
+
+Q:
+A: jdbc:postgresql://host/db
+
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.2.23.jre7</version>
+    </dependency>
+
+Q: Grant privileges on future tables in PostgreSQL?
+A: 
+  alter default privileges [for someowner] in schema public grant select on tables to somerole;
+  -- someowner defaults to current user
+
 Q: indexof / instr
 A: position
 

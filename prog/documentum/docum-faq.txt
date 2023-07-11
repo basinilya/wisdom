@@ -1,3 +1,24 @@
+Q: attr_type
+A: 
+  Contains integer values representing
+  the datatype of the properties. Valid
+  values are:
+  0 - Boolean
+  1 - Integer
+  2 - String
+  3 - ID
+  4 - Date and Time
+  5 - Double
+
+    public static final int DF_BOOLEAN = 0;
+    public static final int DF_INTEGER = 1;
+    public static final int DF_STRING = 2;
+    public static final int DF_ID = 3;
+    public static final int DF_TIME = 4;
+    public static final int DF_DOUBLE = 5;
+    public static final int DF_UNDEFINED = 6;
+
+
 Q: manual work item transition
 A:
   API> setoutput,session,workitem_id{,output_port_name}

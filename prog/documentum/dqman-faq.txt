@@ -1,3 +1,6 @@
+Q: escape curly bracket
+A: {{
+
 Q:
   API script
   API> set,c,last,parent_id

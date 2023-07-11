@@ -1,6 +1,14 @@
 ﻿********************************************************************************
 Do not remove 1st line
 ********************************************************************************
+Q: initialize a class in a classloader (like Class.forName() )
+A: Class.forName(className, true, classLoader)
+
+Q: coalesce pojo chain as l-value
+A: https://gist.github.com/basinilya/d257de5b5add484d23c15e7e99ef4f03
+
+Q: Cannot create a generic array of CompletableFuture<HttpResponse<String>>
+A: use raw type and suppress the warning
 
 Q: platform-independent newlines in java stack trace
 A:

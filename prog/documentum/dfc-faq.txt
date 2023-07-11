@@ -1,3 +1,11 @@
+Q: ?
+A:
+  Encryption with salt and well-known key (for passwords in dfc.properties) 
+  com.documentum.fc.impl.util.RegistryPasswordUtils.encrypt / decrypt
+  With machine-specific key
+  com.documentum.fc.client.DfClient.decryptText("DM_ENCR_TEXT_V2=...", null) / encryptText("some", null) / initCrypto("C:\\Documentum\\config\\aek.key")
+  Produces DM_ENCR_TEXT_V2=
+
 Q: getTimeContentAttr() / setTimeContentAttribute()
 A: dmr_content content_attr_name[], content_attr_value[]
 

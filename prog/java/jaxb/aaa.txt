@@ -1,7 +1,23 @@
+
+Q:
+A:
+  https://stackoverflow.com/questions/71095913/what-is-the-difference-between-jaxb-impl-and-jaxb-runtime
+  Allow javax.xml.bind and jakarta.xml.bind to coexist
+  
+  For projects that need both APIs to coexist without migrating the legacy code:
+  
+      For javax.xml.bind use com.sun.xml.bind:jaxb-impl:2.3.6. Ignore the 3.0.0 and later releases. Add an explicit dependency on javax.xml.bind:jaxb-api:2.3.1 so that you have a package providing the javax.xml.bind API
+      For jakarta.xml.bind use the latest org.glassfish.jaxb:jaxb-runtime. Ignore the releases earlier than 3.0.0
+
+
 Q: @XmlValue unexpected mixed content
 A:
   "<AaaJaxbXmlValue>\n    some<!-- a --><b/>\n    body<!-- a -->once\n</AaaJaxbXmlValue>"
   "\n    bodyonce\n"
+
+Q: XML declaration missing
+  <?xml version="1.0" encoding="UTF-8"?>
+A: marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
 
 Q: multiple namespaces
 A:

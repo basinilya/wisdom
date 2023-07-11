@@ -1,3 +1,42 @@
+Q: 
+A: 
+  vi /home/vcap/app/nginx/conf/nginx.conf
+
+                             'aaaaaaaaaaaaaaaaaa1="$http_x_forwarded_proto" '
+                             'aaaaaaaaaaaaaaaaaa2="$upstream_http_set_cookie" '
+
+        set $logme 1;
+
+
+  pkill -x -HUP nginx
+
+Q: nginx redirect to https
+A: https://github.com/mendix/cf-mendix-buildpack/issues/600
+  TODO:
+      server {
+          listen 8080;
+          server_name _;
+          root /home/vcap/app/web/;
+          index index.html index.htm;
+  
+          error_page 403 @403-custom;
+          error_page 404 @404-custom;
+          error_page 503 @503-custom;
+  
+  set $my_insecure_forwarded 1;
+  
+  if ($http_x_forwarded_for = '') {
+      set $my_insecure_forwarded 0;
+  }
+  
+  if ($http_x_forwarded_proto = 'https') {
+      set $my_insecure_forwarded 0;
+  }
+  
+  if ($my_insecure_forwarded) {
+      return 307 https://$host$request_uri;
+  }
+
 Q: set a constant
 A: MX_ModuleName_ConstantName: value
 
