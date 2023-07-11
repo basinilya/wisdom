@@ -43,41 +43,87 @@ A:
 Q:  A REST service operation with a body parameter needs an import mapping (unless it's a file document)	Rest operation parameter 'screeningResult'	Published REST service 'CallbackService'	PlagiarismCheck
 A:  remove this parameter and create an HTTPRequest paramater and use its attribute "Content"
 
-Q: guess microflow parameters in java
-A: TODO
-        final IDataType returnDataType = Core.getReturnType(creationMicroflow);
-        if (!(returnDataType.isMendixObject() && Core
-            .getMetaObject(returnDataType.getObjectType())
-            .isSubClassOf(binaryMeta))) {
-            throw new MendixRuntimeException(
-                "Microflow " + creationMicroflow + " not returning subclass of "
-                    + Binary.entityName);
-        }
+Q: guess microflow parameter names in java
+A:
+    static Map<IDataType, String> mapMicroflowParameters(
+            String microflowName,
+            Collection<IDataType> paramTypes) {
 
-        String fileDocumentParameter = null;
+        Map<IDataType, String> result = new HashMap<>();
 
-        boolean hasUnwantedParams = false;
+        final Map<String, IDataType> inputParameters = Core.getInputParameters(microflowName);
+        Map<?, ?> actualParamsForMsg = inputParameters;
+        Collection<?> expectedParamsForMsg = paramTypes;
+        try {
+            // Throws IllegalStateException when not unique
+            Map<IDataType, IDataType> expectedTypes =
+                paramTypes
+                    .stream()
+                    .collect(Collectors.toMap(Function.identity(), Function.identity()));
+            expectedParamsForMsg = expectedTypes.keySet();
 
-        for (final Entry<String, IDataType> entry : Core
-            .getInputParameters(creationMicroflow)
-            .entrySet()) {
-            final IDataType dataType = entry.getValue();
-            if (dataType.isMendixObject()) {
-                final IMetaObject metaObject = Core.getMetaObject(dataType.getObjectType());
-                if (metaObject.isSubClassOf(fileDocumentMeta)) {
-                    if (fileDocumentParameter == null) {
-                        fileDocumentParameter = entry.getKey();
-                        continue;
+            // Throws IllegalStateException when not unique
+            Map<IDataType, String> actualParams =
+                inputParameters
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Entry::getValue, Entry::getKey));
+            actualParamsForMsg = actualParams;
+
+            for (;;) {
+                boolean needRetry = false;
+                for (var it = expectedTypes.entrySet().iterator(); it.hasNext();) {
+                    var entry = it.next();
+                    final IDataType exp = entry.getValue();
+                    if (exp != null) {
+                        String foundName = actualParams.remove(exp);
+                        if (foundName != null) {
+                            it.remove();
+                            result.put(entry.getKey(), foundName);
+                        } else if (exp.isMendixObject() || exp.isList()) {
+                            // try nearest super for all
+                            needRetry = replaceWithSuper(entry);
+                        } else {
+                            entry.setValue(null);
+                        }
                     }
                 }
+                if (!needRetry) {
+                    break;
+                }
+                // check unique supertypes
+                expectedTypes
+                    .values()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toMap(Function.identity(), Function.identity()));
             }
-            hasUnwantedParams = true;
+        } catch (IllegalStateException /* NOSONAR */ e) {
+            // some types not unique
         }
-        if (hasUnwantedParams) {
-            throw new MendixRuntimeException(
-                "Microflow " + creationMicroflow + "  not accepting a single subclass of "
-                    + FileDocument.entityName);
+        if (!expectedParamsForMsg.isEmpty() || !actualParamsForMsg.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Unable to map these types: " + expectedParamsForMsg + " to the remaining "
+                    + microflowName + " parameters: " + actualParamsForMsg);
         }
+        return result;
+    }
+
+    private static boolean replaceWithSuper(Entry<IDataType, IDataType> entry) {
+        final IDataType expectedTypeOrItsSuper = entry.getValue();
+        boolean isList = expectedTypeOrItsSuper.isList();
+        String superName =
+            Core.getMetaObject(expectedTypeOrItsSuper.getObjectType()).getSuperName();
+        if (superName != null) {
+            String type = isList ? superName : ("[" + superName + "]");
+            IDataType superType = Core.createDataType(type);
+            entry.setValue(superType);
+            return true;
+        }
+        entry.setValue(null);
+        return false;
+    }
+
 
 
 Q: No connecting flow found
