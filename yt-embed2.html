@@ -160,8 +160,15 @@
           var vid;
           if (str.indexOf("://") !== -1) {
             // https://www.youtube.com/watch?v=XXXXXXXXX&
+            // https://www.youtube.com/live/XXXXXXXXX?
             const searchParams1 = new URLSearchParams(new URL(str).search);
             vid = searchParams1.get("v");
+            if (!vid) {
+              const matcharr = str.match(/.*live\/([^?/]*)(?:[?/]|$)/);
+              if (matcharr) {
+                vid = matcharr[1];
+              }
+            }
           } else {
             vid = str;
           }
