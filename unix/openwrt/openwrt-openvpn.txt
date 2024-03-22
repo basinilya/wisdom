@@ -1,7 +1,9 @@
 https://openwrt.org/docs/guide-user/services/vpn/openvpn/extras
 
 
-Install openvpn-wolfssl and openvpn-luci-app
+# 
+opkg update
+opkg install openvpn-wolfssl luci-app-openvpn
 # opkg list | grep openvpn
 #openvpn-openssl
 
@@ -34,10 +36,24 @@ EOF
 Network > Firewall > General Settings > wan > Edit > Advanced Settings > Covered devices
 add: tun+
 
+or in /etc/config/firewall :
+config zone
+        option name 'wan'
+        list network 'wan'
+        list network 'wan6'
+        option input 'REJECT'
+        option output 'ACCEPT'
+        option forward 'REJECT'
+        option masq '1'
+        option mtu_fix '1'
+        list device 'tun+'
+
 
 # in LUCI 
 Network > DHCP and DNS > General settings
 Uncheck "Rebind protection" (to allow private subnet responses)
+
+# TODO: maybe dnsmasq.conf: rebind-domain-ok=/.example.com/
 
 # in LUCI
 VPN > OpenVPN
@@ -64,3 +80,31 @@ Check the "Enabled" checkbox and click "Start"
 
 System > Startup > openvpn
 must be "Enabled"
+
+
+
+# allow ssh from VPN
+Network > Firewall > Traffic Rules > Add
+Name: _allow-tun-ssh
+Protocol: TCP
+Source zone: wan/wan6
+Destination zone: Device (input)
+Destination address: 10.8.0.0/16
+Destination port: 22
+
+or in /etc/config/firewall:
+
+config rule
+        option name '_allow-tun-ssh'
+        list proto 'tcp'
+        option src 'wan'
+        option dest_port '22'
+        option target 'ACCEPT'
+        list dest_ip '10.8.0.0/16'
+
+# TODO: route by source address
+--route-noexec + --route-up
+https://openwrt.org/docs/guide-user/network/routing/examples/pbr_iproute2
+/etc/iproute2/rt_tables
+ip rule
+ip route show table ...

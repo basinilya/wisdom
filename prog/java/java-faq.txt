@@ -1,6 +1,77 @@
 ﻿********************************************************************************
 Do not remove 1st line
 ********************************************************************************
+Q: split empty string into zero-length array using String.split(String)
+A: 
+  not possible
+  > For n == 0, the result is as for n < 0, except trailing empty strings will
+  > not be returned. (Note that the case where the input is itself an empty
+  > string is special, as described above, and the limit parameter does not
+  > apply there.)
+
+Q: add to URLClassLoader
+A:
+        try {
+
+            final URLClassLoader classLoader = (URLClassLoader) IContext.class.getClassLoader();
+            final Field fUCP = URLClassLoader.class.getDeclaredField("ucp");
+            fUCP.setAccessible(true);
+            final Object ucp = fUCP.get(classLoader);
+            final Method mAddURL = ucp.getClass().getMethod("addURL", URL.class);
+            mAddURL.invoke(ucp, userlibLocation);
+
+        } catch (
+            | NoSuchFieldException
+            | IllegalAccessException
+            | NoSuchMethodException
+            | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+
+Q: built-in functional interface that throws
+A: none
+
+Q: non-synchronized replacement for java.util.Stack
+A: java.util.ArrayDeque
+
+Q: find substring in character stream
+A:
+            private int ringbufpos = 0;
+
+            private final char[] ringbuf = new char[10];
+
+            private final char[] pattern = "&#13;\r".toCharArray();
+
+            private void writetoring(final char c) {
+                ringbuf[ringbufpos] = c;
+                ringbufpos = (ringbufpos + 1) % ringbuf.length;
+                if (isMatch()) {
+                        System.out.println("found");
+                }
+            }
+
+            private boolean isMatch() {
+                int i = ringbufpos;
+                int j = pattern.length - 1;
+                for (; j > 0; j--) {
+                    i = (i - 1 + ringbuf.length) % ringbuf.length;
+                    final char exp = pattern[j];
+                    final char act = ringbuf[i];
+                    if (exp != act) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+Q: get own PID
+A:
+    public static String getPid() {
+        String sPid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+        sPid = sPid.substring(0, sPid.indexOf('@'));
+        return sPid;
+    }
+
 Q: initialize a class in a classloader (like Class.forName() )
 A: Class.forName(className, true, classLoader)
 
@@ -189,6 +260,26 @@ Q: xml to DOM
 A:
     final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     final DocumentBuilder builder = factory.newDocumentBuilder();
+
+            // suppress parsing errors to stderr
+            builder.setErrorHandler(new ErrorHandler() {
+
+                @Override
+                public void warning(final SAXParseException e) throws SAXException {
+                    ;
+                }
+
+                @Override
+                public void fatalError(final SAXParseException e) throws SAXException {
+                    throw e;
+                }
+
+                @Override
+                public void error(final SAXParseException e) throws SAXException {
+                    throw e;
+                }
+            });
+
     final Document doc = builder.parse(sUrl);
 
 Q: DOM to xml

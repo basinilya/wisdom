@@ -1,3 +1,6 @@
+    // from com.sun.org.apache.xml.internal.serializer.OutputPropertiesFactory
+    private static final String S_KEY_INDENT_AMOUNT = "{http://xml.apache.org/xalan}indent-amount";
+
         {
             DOMImplementationLS domImplementationLS =
                     (DOMImplementationLS) existingDoc.getImplementation().getFeature("LS","3.0");
@@ -14,8 +17,23 @@
             } else {
                 // fallback
                 Transformer transformer = TransformerFactory.newInstance().newTransformer();
+
+            trySetProp(xmlTransformer, OutputKeys.INDENT, "yes");
+            trySetProp(xmlTransformer, S_KEY_INDENT_AMOUNT, "4");
+
                 StreamResult output = new StreamResult(outputFile);
                 DOMSource input = new DOMSource(existingDoc);
                 transformer.transform(input, output);
             }
         }
+
+    private static void trySetProp(
+            final Transformer xmlTransformer,
+            final String name,
+            final String value) {
+        try {
+            xmlTransformer.setOutputProperty(name, value);
+        } catch (final IllegalArgumentException e) {
+            ignoreThrowable(e);
+        }
+    }

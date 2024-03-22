@@ -1,6 +1,16 @@
+Q: PRAGMA AUTONOMOUS_TRANSACTION;
+A: only with a dblink
+
 Q: select into table
 A: select ... into ... new_table FROM ...
    https://www.postgresql.org/docs/current/sql-selectinto.html
+
+Q: select into table with indexes
+A:
+  (beware of shared sequence)
+  create table x2 ( like x1 INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES );
+  insert into x2 select * from x;
+  
 
 Q:
 A: jdbc:postgresql://host/db
@@ -27,6 +37,10 @@ A: e'Telefon\u00ED kontakty'
 
 Q: minimal install
 A:
+# Archlinux:
+pacman -S postgresql
+
+# generic Linux
 su - postgres
 psql
 ALTER SYSTEM SET listen_addresses TO '*';
@@ -145,10 +159,14 @@ Q: rename column
 A: alter table T rename C to C2;
 
 Q: alter column
-A: alter table T alter column C type ...; 
+A: alter table T alter column C type <type>; 
 
 Q: current pid
 A: SELECT pg_backend_pid()
+
+Q: Clients
+A:
+  select * from pg_stat_activity;
 
 Q: long-running queries
 A:
@@ -156,8 +174,7 @@ A:
     pid,
     now() - pg_stat_activity.query_start AS duration,
     query,
-    state,
-    waiting
+    state
   FROM pg_stat_activity
   WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes';
 
@@ -175,7 +192,7 @@ A:
   When function created with the "proconfig":
     SET search_path TO ...
     or
-    SET search_path TO FROM CURRENT
+    SET search_path FROM CURRENT
   the search path is restored when the function exits.
   However, even when the function has this proconfig,
   if "SET search_path" is called in the body, the search path is not restored
@@ -235,6 +252,27 @@ A:
     select a,b from hlp( myrec ) AS T(a int , b text);
 
    If types unknown, only row_to_json()
+
+Q:
+  key/value pair rows to json
+  select a,b from some;
+  
+   a | b
+  ---+---
+   c | d
+   e | f
+
+A:
+  select json_object_agg(a,b) from some;
+
+  ex:
+  select json_object_agg(a,b)
+  from (
+  select null as a, null as b where 1=2 union all select 'c', 'd' union all select 'e', 'f'
+  ) t;
+
+  { "c": "d", "e": "f" }
+
 
 Q: excel to 
 A: save as CSV, utf-8, field sep - comma, string sep:"

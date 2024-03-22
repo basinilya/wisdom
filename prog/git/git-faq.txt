@@ -1,3 +1,6 @@
+Q: git log visualize merges
+A: git log --graph
+
 Q: ???
 A: git cherry-pick -Xignore-cr-at-eol ...
 

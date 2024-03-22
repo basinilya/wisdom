@@ -12,6 +12,9 @@ ssh-keygen -e -m PEM -f ~/.ssh/id_rsa.pub >~/.ssh/id_rsa.pub.pem
 openssl rsa -in ~/.ssh/id_rsa.pub.pem -RSAPublicKey_in -pubout > ~/.ssh/ssl.pub.pem
 
 
+Q: decrypt key
+A: openssl rsa -in encrypted.key [-out <decrypted_private.key>]
+
 Q: Certificate, Version=3
 A: -inform DER
 

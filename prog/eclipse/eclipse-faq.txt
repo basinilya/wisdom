@@ -1,3 +1,8 @@
+Q: ???
+A:
+lifecycle-mapping-metadata.xml
+
+
 Q: Hot swap + Lombok + ECJ + Ant
 A:
   Since the release of Java 8 the Eclipse compiler creates byte code that cannot be

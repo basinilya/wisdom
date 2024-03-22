@@ -1,3 +1,316 @@
+Q: Will this fail? :
+    '' + (if true then empty else 'dummy')
+A: no, concatenating null results in concatinating the word 'null'
+  confirmed in 9.24.2
+
+Q: Will this fail? :
+    isMatch('some', if true then empty else 'dummy')
+    contains('some', if true then empty else 'dummy')
+A: yes, isMatch(..., empty) fails with: Incorrect arguments for function isMatch: 'some', null
+  confirmed in 9.24.2
+
+Q: Will this fail? :
+    isMatch(if true then empty else 'dummy', 'some')
+    contains(if true then empty else 'dummy', 'some')
+A: no, but the second parameter must not be null. isMatch(empty, ...) just returns false 
+  confirmed in 9.24.2
+
+Q: Will this fail? :
+    replaceAll('some', if true then empty else 'dummy', 'some')
+A: yes, replaceAll(..., empty) fails with: Incorrect arguments for function replaceAll: 'some', null, 'some'
+  confirmed in 9.24.2
+
+Q: Will this fail? :
+    replaceAll(if true then empty else 'dummy', 'some','some')
+A: no, but the other parameters must not be null. replaceAll(empty, ...) just returns a zero-length string: ''
+  confirmed in 9.24.2
+
+Q: Will this fail? :
+    toLowerCase(if true then empty else 'dummy')
+    toUpperCase(if true then empty else 'dummy')
+    trim(if true then empty else 'dummy')
+    urlEncode(if true then empty else 'dummy')
+    urlDecode(if true then empty else 'dummy')
+A: no, these functions just return a zero-length string: ''
+  confirmed in 9.24.2
+
+Q: Will this fail? :
+    find(if true then empty else 'dummy','non-null')
+A: no, but the second parameter must not be null. find(empty, 'non-null') just returns -1
+  confirmed in 9.24.2
+
+Q: Will this fail? :
+    find('some',if true then empty else 'dummy')
+A: yes, find(..., empty) fails with: Incorrect arguments for function find: 'some', null
+  confirmed in 9.24.2
+
+Q: Will this fail? :
+    substring(if true then empty else 'dummy',0,0)
+A: no, null is treated here as a zero-length string. Non-zero start or length will cause StringIndexOutOfBoundsException
+  confirmed in 9.24.2
+
+Q: display List View in two columns
+A: lv-col-xs-6
+
+Q: slow query warning
+A: ConnectionBus_Queries: Query executed in
+
+Q: Scheduled Events on Premises
+A: 
+  ScheduledEventExecution and MyScheduledEvents together.
+  https://forum.mendix.com/link/space/app-development/questions/1194
+  https://docs.mendix.com/refguide/custom-settings/
+
+  ScheduledEventExecution: Choices are ALL, NONE, or SPECIFIED. In the case of SPECIFIED, enumerate the scheduled events using the MyScheduledEvents configuration option described below. 
+  MyScheduledEvents: A comma-separated string with the names of the events. Please don’t forget the name of the module (a name can be, for example, CRM.UpdateCustomerStatistics).
+
+Q: retrieve XPath from dev tools
+A: 
+
+mx.data.get({
+    xpath: "//System.User[true()]",
+    filter: {
+        sort: [["Name", "asc"]],
+        offset: 0,
+        amount: 10
+    },
+    error: function(e) {
+        console.error(e);
+    },
+    callback: function(objs) {
+        console.info("Received " + objs.length + " MxObjects");
+    }
+});
+
+
+Q:
+  java.lang.NullPointerException: null
+  	at com.mendix.modules.microflowengine.actions.list.ListOperationAction.$anonfun$execute$5(ListOperationAction.scala:50)
+A:
+  a list for List Operation contains null element
+  In 9.24.2 it's possible to add null elements to list if "add" expression is a reference and the reference itself is not empty, but the referenced object does not exist.
+  The referenced object could be missing if it's a deleted remote object or an object deleted with SQL without deleting the reference.
+
+  The issue can be reproduced by deleting an object row with SQL.
+  A broken list can also be created with java
+
+Q: IContext.getContextObjects() is empty
+A:
+  https://community.mendix.com/link/space/app-development/questions/7036
+  Alexander Willemsen
+  I think (not sure) that the IContext.getCurrentIdentifier() method is now just legacy. Bit of history:
+  
+  Before Mendix had microflows, every action had to be a Java action. But because there were no microflows, there also wasn't a "call Java action" activity where you could pass parameters to the action. This meant that Java actions did no have any parameters, but had to "find" this information in the context.
+  
+  I think there were 4 ways to call a Java action:
+  
+      From an event handler on the entity (e.g. before commit), in which case the current object would be the object on which the event triggered.
+      From a button on a data grid, in which case the current object would be the selected object.
+      From a button/event on a data view, in which case the current object would be the same as "[%CurrentObject%]".
+      From a scheduled event, in which case there wouldn't be a current object.
+  
+  Then there was also the IContext.getContextObjects() method, which would return all objects in the context (including the current object). In those older Mendix versions the context mechanism was basically always enabled with no way to turn it off (now it's the apply context setting on forms which is off by default). The contents of this context (which could contain anything, depending on the way the user navigated the application up until that point) was returned by this method, which you then had search for yourself (usually you'd search for a certain object type).
+  
+  As Michel mentioned and the Mendix documentation recommends, there are now far better ways to achieve this (like parametrised microflow calls, including the options to pass any object), so I wouldn't use these old methods.
+
+Q: get the most recent System.QueuedTask
+A:
+  As with any other entity, the committed object IDs are stored in the current Savepoint object and can be obtained by calling: Seq<Long> committedIds()
+  JavaConverters.asJava(JavaConverters.asJava(ContextImpl.requestScope().savepointQueue()).iterator().next().committedIds())
+  See GetLastQueuedTask.java
+
+Q: get last java.lang.Throwable in a microflow
+A:
+  MicroflowImpl.scope().getLatestError().get()
+  see RethrowWithCause.java
+
+Q: .scss files not compiled in Mendix 8x
+A:
+  Requires additional tool: Calypso or Gulp  
+  https://docs.mendix.com/howto8/front-end/calypso/
+
+
+Q: get savepoints information
+A:
+  JavaConverters.asJava(ContextImpl.requestScope().savepointQueue()).iterator().next().id()
+  see LogTransactionId.java
+
+Q: do something right before DB transaction ends
+A:
+  a)
+  With ByteBuddy instrument:
+  com.mendix.connectionbus.connections.jdbc.TransactionConnectionManager.commitTransaction(UUID)
+
+  b)
+  call 
+  public void com.mendix.basis.action.ContextImpl.registerTransactionListener(final com.mendix.basis.action.TransactionListener listener)
+      this.requestScope().registerTransactionListener(listener);
+  }  
+
+Q: ?
+A:
+  for empty enum getKey(empty) and getCaption(empty) return zero-length string '', not empty
+
+Q: 
+  3m, 6m, 12m, 24m, 48m, 1h36m, 3h12m, 6h24m, 12h48m, 1d.
+A:
+  Exponential delay,
+  Retries: 10
+  Initial interval: 180
+  Maximum interval: 86400
+
+Q:
+  Data Grid editable Date column 
+  Value '11-Jan-2024' is not valid for field SnSaml.AdUser/MissingInAdSince.
+A:
+  Mendix 9.24.2 bug:
+  if current locale specifies month name in date format, e.g. MMM
+  then a valid date string will never match the regexp expecting numeric month in early validation:
+
+                switch (t.getAttributeType(n)) {
+                ...
+                  case 'Date':
+                  case 'DateTime':
+                    return null != r.match(/^\d+([\/\-.])\d+\1\d+$/) &&
+                    void 0 !== m(r, {
+                      type: 'date'
+                    });
+
+Q: Extract single parameter from URL query string
+A:
+  This deletes every character
+    .
+  not preceded by the desired Key=
+    (?<!(?:&|^[?]?)'+$Key+'=)
+  then deletes '&' and the characters after it.
+  Groups are non-capturing
+    (?:
+  DOTALL is enabled
+    (?s)
+  Finally, urlDecode
+
+  Full expression:
+
+    if $QueryString != empty and $Key != empty
+    then
+    urlDecode(
+    replaceFirst(
+    replaceFirst($QueryString,'(?s)(?:(?<!(?:&|^[?]?)'+$Key+'=).)*','')
+    ,'(?s)&.*',''
+    )
+    )
+    else empty
+
+Q: ?
+  I need to truncate a string value in Mendix, like left($Object/Attribute, 1000), but there's no function "left".
+  And substring() throws if the input string is shorter. One ugly workaround with regex: replaceFirst($Object/Attribute, '(?s)(?<=(?:.{1000})).*', '')
+A:
+  In that case, I would use substring($Object/Attribute, 0, min(1000, length($Object/Attribute))). I think that's easier to understand than the regex.
+
+Q: XPath join by multiple attributes
+A: not supported
+
+Q: java.lang.NoSuchMethodError: 'com.google.common.collect.ImmutableMap com.google.common.collect.ImmutableMap$Builder.buildOrThrow()'
+A: 
+  eviction does not work when version has suffix like in guava-30.1.1-jre.jar
+  Workaround:
+  create a jar with two version suffixes, e.g:
+  guava-30.1.1-jre-9999.9.9.jar
+  
+  real world affected libraries:
+    guava-30.1.1-jre.jar
+    slf4j-simple-2.0.0-alpha1.jar
+    listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar
+
+Q: stdout when launch in Studio
+A: deployment\log\m2ee_log.txt
+
+Q: resources aren't copied from javasource/ into deployment/run/bin/
+A: https://forum.mendix.com/link/space/app-development/questions/2656
+
+  Put the resources in userlib/
+  The userlib/ folder structure is copied into deployment/model/lib/userlib/ by
+  Studio during packaging or local deployment. That folder is in classpath.
+  Unlike Eclipse, Studio does not copy non-java files from javasource/.
+
+Q: transactions and savepoints
+A: 
+  The rule of thumb:
+  When calling a microflow, you probably want "Custom with rollback": no new tx/savepoint, changes before the call are rolled back, and a new tx/savepoint is created on error
+  When calling any other action you probably want "Custom without rollback": no new tx/savepoint (because not microflow), no changes are rolled back, and no new tx/savepoint on error
+
+  With microflows only use "Custom without rollback" if you know what you're doing
+
+  Transactions are not implicit. Normally Mendix starts a transaction before calling your microflow,
+  but if you end it, a new transaction won't start automatically even if you save objects to DB.
+  If you eneded a transaction you probably want to start another one with Context.startTransaction()
+  
+  HSQLDB and PostgreSQL both support Savepoints. If a transaction is active calling
+  Context.startTransaction() again will create a savepoint. Calling Context.rollbackTransaction()
+  will rollback to the beginning of the savepoint, regardless of what Javadoc says.
+
+  Not calling MicroflowCallBuilder.inTransaction(false) will create a transaction or if a
+  transaction is already active then a savepoint. inTransaction is true by default.
+  There's no active transaction when you construct a new system
+  context or construct a context from ISession.
+
+  Calling a SUB-microflow with error handling "Custom without Rollback" also creates a savepoint.
+  All other error handling modes don't create it.  
+
+Q:
+  com.mendix.webui.WebUIException: Exception while executing runtime operation
+  	at com.mendix.webui.actions.client.RuntimeOperationAction.$anonfun$apply$1(RuntimeOperationAction.scala:60)
+  
+  Caused by: com.mendix.webui.WebUIException: Applying change for 'Attribute' of object with id '14636698789069566' (BookPlanningMain.ManuscriptSubmission) failed for security reasons. No change hash found for read only member.
+  	at com.mendix.webui.requesthandling.HashUtilImpl$.verifyHash(HashUtilImpl.scala:50)
+A:
+  For changes to members not writable by current user the server expects a so called "change hash" which it previously sent.
+  The reason why the change was not sent may be a buggy customization or a bug in Mendix itself.
+  Change hash is sent unless Mendix thinks that the user has Unconditional Write Access to the member, i.e. access not constrained by XPath.
+  So Mendix does not bother checking the current object for write access to a certain member if it's marked writable in the global Meta Model of a type.
+  It works because normally write is not denied for members that have Unconditional Write Access.
+  If there's a customization that denies this access it may lead to the error above.
+  One workround is to constrain all access rules with this no-op XPath: [true()]
+  The other workaround is to instrument hasUnconditionalWriteAccess$1() with an extra check of the current writability of the member.
+
+    Responses:
+    good:
+                "changes" : {
+                  "14636698789069566" : {
+                    "Attribute" : {
+                      "hash" : "g1r5nnqPt9rG/MdQf2A6R01yIYQwf003oERY00mMClc=",
+                      "value" : "nullx"
+                    }
+                  }
+                },
+    
+    bad:
+                "changes" : {
+                  "14636698789069566" : {
+                    "Attribute" : {
+                      "value" : "nullx"
+                    }
+                  }
+                },
+
+    see com.mendix.webui.requesthandling.helpers.StateHandling
+
+Q: NULL Boolean
+A: Boolean can't be NULL, when a new DB column is added, Mendix does extra UPDATE SET true or false 
+
+Q: XPath constraint [Attribute = empty] or [Attribute = $Nullable]
+A: safe, the resulting SQL will have either "is NULL" or "= ?" depending on actual parameter value
+
+Q: troubleshoot unique validation
+A:
+  the cause is not logged. You can place a java breakpoint in the constructors of UniqueConstraintViolationException
+
+  Failure(com.mendix.datastorage.exception.UniqueConstraintViolationException: Duplicate column value violates its unique constraint: ERROR: duplicate key value violates unique constraint "uniq_snsaml$aduser_samaccountname"
+    Detail: Key (samaccountname)=(Nugent) already exists. (SQL State: 23505, Error Code: 0) Detail Message: org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint "uniq_snsaml$aduser_samaccountname"
+    Detail: Key (samaccountname)=(Nugent) already exists., org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint "uniq_snsaml$aduser_samaccountname"
+    Detail: Key (samaccountname)=(Nugent) already exists.)
+
+
 Q: add a before commit event handler in runtime
 
 A:
@@ -16,7 +329,7 @@ A:
   on the values in EventActionInfo. If it has a Consumer, then an anonymous UserAction is
   instantiated that calls the Consumer and returns true unconditionally. Otherwise it
   treats the action name as the Microflow or a Custom Java Action name prefixed with the
-  module name. The method addBeforeEvent(String,String) will convert the class name to the
+  module name. The method addBeforeEvent(String,boolean) will convert the class name to the
   action name. The action must have a constructor accepting context and a single mendix
   object.
   EventActionInfo has a flag to treat negative action result as an error or a
@@ -277,26 +590,6 @@ A:
   $ curl 'https://your.app/pages/en_US/SysUtils/Some.layout.xml?637945052630427850' -X PURGE
   { "code":"200", "message":"Purged" }
 
-Q: add trigger button to the right of the regular text input
-A:
-padding-right заменил на margin-right, чтобы рамка вокруг инпута тоже сужалась. В остальном, всё, как советовала;
-div.my-input-with-trigger-container {
-	position: relative;
-
-	&> div {
-		&> div > input {
-			margin-right: 50px;
-		}
-	}
-
-	&> button {
-		position: absolute;
-		right: 0;
-		top: 0;
-	}
-}
-
-
 
 Q: Action activity that has a side effect on the client is not recommended here because the microflow is used as a data source for data view 'dataView1'.
 A: disable "Refresh in client" for the returned object
@@ -315,8 +608,12 @@ Q: get module roles in java
 A: 
 
 Q: refresh on client from java code
-A: FeedbackHelper.addRefreshClass
-   FeedbackHelper.addRefreshObjectFeedback
+A: 
+  !!! always call both addRefreshClass and addRefreshObjectFeedback
+  !!! addRefreshObjectFeedback alone works only for data view but not for grids
+
+    FeedbackHelper.addRefreshClass
+    FeedbackHelper.addRefreshObjectFeedback
 
 Q: Call a nanoflow in a javascript action
 A:
@@ -335,6 +632,8 @@ A:
 Q: entity ID type ID, sequences etc.
 A: 
   The real sequence objects are only used for autonumber attributes.
+
+  See com.mendix.connectionbus.IdentifierPoolImpl.IdentifierData.newObjectId(int)
   
   CREATE MEMORY TABLE PUBLIC."mendixsystem$entityidentifier"(
   "id" VARCHAR(36) COLLATE INFORMATION_SCHEMA.SQL_TEXT_UCC NOT NULL PRIMARY KEY,
@@ -349,6 +648,12 @@ A:
   008d 0000 0000 2d91
   
   short_id is part of the ID
+
+  # Mendix Object GUID structure:
+  #      +----------------+-----------------------------------------+-------+
+  #      |    short_id    |              object_sequence            | random|
+  #      +----------------+-----------------------------------------+-------+
+  # of bits:    16                             41                       7
 
   https://forum.mendix.com/link/questions/4441
   >
@@ -394,7 +699,15 @@ A:
   
   2. Make sure there's no overflow:hidden in any parents
 
-Q: autocomplete
+Q: Prevent browser save password for a text input with "Show as password": Yes
+A:
+  Add an HTMLSnippet widget above the fields:
+
+    <!-- The text and password here are to prevent FF from auto filling my login credentials because it ignores autocomplete="off"-->
+    <input type="text" style="display:none">
+    <input type="password" style="display:none">
+
+Q: autocomplete widget (dropdown-like)
 A: 
   https://marketplace.mendix.com/link/component/2695
   https://github.com/AuraQ/AutoCompleteForMendix
@@ -405,27 +718,26 @@ A: A mod B
 Q: com.mendix.m2ee.api.AdminException: An error occurred while initializing the Runtime: ERROR: relation "mendixsystem$version" does not exist
 A:
 
-Q: Add a trigger button to a regular input widget
+Q: add trigger button to the right of the regular text input
 A:
-  wrap the input and the button with a container, set the container class my-input-with-trigger-container
+  wrap the input and the button with a container, set the container class custom-input-with-trigger-container
   add the following to the custom styles:
 
-  div.my-input-with-trigger-container {
+  div.custom-input-with-trigger-container {
   	position: relative;
-  
+    
   	&> div {
   		&> div > input {
-  			margin-right: 50px;
+  			margin-right: 50px; /* margin-right also makes the border around input behave nice */
   		}
   	}
-  
+    
   	&> button {
   		position: absolute;
   		right: 0;
   		top: 0;
   	}
   }
-
 
 Q: get React Component instance
 A:
@@ -819,6 +1131,13 @@ Q: What kind of tokens does the at-sign (@) precede in expressions? Ex:
   @EPM_REF_APPS_PROD_MAN_SRV.EPM_REF_APPS_PROD_MAN_SRV + '/' + toString (EPM_REF_APPS_PROD_MAN_SRV.EntitySetNames.Products) + '?$filter=substringof(SubCategoryName,''' + urlEncode($SearchCriteria/Term) + ''')'
 A: Constants
 
+Q: constants overridden with java resolve to old values in microflows and consumed OData services
+A:
+  New values take effect only after a hot re-run which drops the cached constant values in microflows and consumed OData services.
+  Workaround: create a java action that evaluates the constant itself. 
+  Surprisingly, when used as a header value in a REST Call activity it does not use a cached value.
+  see also com.mendix.basis.impl.MxRuntimeImpl.reloadModel()
+
 Q: How to implement a custom microflow activity that runs other activities placed in it just like the Loop activity does?
 
 Q: Custom functions in expressions (client or runtime or both)?
@@ -910,6 +1229,11 @@ Autocommitted objects are newly created objects which were not yet committed, bu
 Autocommitted objects should explicitly have been committed, please check your model and apply the necessary changes. The autocommitted objects have been deleted from the database to prevent database corruption.Number of autocommitted objects per type which still existed for this session:
 - Expenses.TeamMember: 1 object(s).
 
+Q:
+A:
+  When an object is auto-committed it will not trigger the commit object events nor
+  domain model validation rules, this has always been the behavior since the concept
+  of auto-commit was introduced.
 
 Q: Image Viewer not updated when new image is selected in Image Uploader widget
 A: Image Uploader actually uploads the file only when you click the "Save" button on the same page. It somehow detects the proper button and chains itself to the button's action.
@@ -1046,7 +1370,7 @@ A:
 
 Q: run microflow on change of object attribute without Save changes
 
-Q: all validation messages from a microflow disappear if another microflow called "Change Object" with "Refresh on client"
+Q: all validation messages from a microflow disappear if another microflow called "Change Object" with "Refresh in client"
 
 Q: refer "Done" stories in a commit?
 
