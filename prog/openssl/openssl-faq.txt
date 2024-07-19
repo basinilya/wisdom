@@ -28,11 +28,14 @@ Q: Dump a certificate from a server
 A:
   s_client -showcerts -verify 5 -connect host:443 < /dev/null
  
-Q:
+Q: Create a custom Certification Authority (CA) to trust on local host and issue web site certificates 
 A:
+  
+  # prevent treating forward slash as start of an msys path
+  export MSYS2_ARG_CONV_EXCL="*"
 
-  mkdir /tmp/fakesite
-  cd /tmp/fakesite
+  mkdir ~/fakesite
+  cd ~/fakesite
 
   # index.txt must pre-exist
   touch index.txt
@@ -54,7 +57,7 @@ organizationalUnitName	= optional
 commonName		= supplied
 emailAddress		= optional
 EOFCONF
-  
+
   # create self-signed certificate  
   openssl req -newkey rsa:3072 -sha256 -days 3651 -nodes -x509 -subj "/C=US/O=AAATrusted, Inc/CN=AAATrusted CA" -keyout root.key -out root.crt
   # dump as text
@@ -62,8 +65,15 @@ EOFCONF
   # export as p12 (with empty password)
   openssl pkcs12 -in root.crt -export -nokeys -passout "pass:" -out root.p12
 
-  ########################33
+
+Q: Issue a wildcard web site certificate as a custom CA
+A:
   
+  # prevent treating forward slash as start of an msys path
+  export MSYS2_ARG_CONV_EXCL="*"
+
+  cd ~/fakesite
+
   # 
   FILENM="acme.com"
   # wildcard CN

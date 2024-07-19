@@ -1,6 +1,34 @@
 ﻿********************************************************************************
 Do not remove 1st line
 ********************************************************************************
+Q: log java.net.HttpURLConnection
+A:
+  
+  HttpURLConnection can log the HTTP headers using JUL with level=FINE and logger=sun.net.www.protocol.http.HttpURLConnection
+  To enable this log launch JRE with:
+    -Djava.util.logging.config.file=/path/to/logging.properties
+  and logging.properties contents:
+    handlers=java.util.logging.ConsoleHandler
+    java.util.logging.ConsoleHandler.level=FINEST
+    sun.net.www.protocol.http.HttpURLConnection.level=ALL
+  
+  HttpURLConnection itself can't log the request bodies, but in case of HTTPS protocol SSLLogger can be enabled to do that.
+  
+  SSLLogger configuration:
+
+  -Djavax.net.debug=all|ssl|sslctx|data|packet|plaintext
+    will log to System.err regardless of JUL config
+  
+  -Djavax.net.debug=
+    A zero-length value will log to JUL with logger=javax.net.ssl
+  
+  (no system property)
+    will disable logging regardless of JUL config
+
+  bash script to parse SSLLogger Plaintext dumps:
+  
+    sed -E 's/^ *[^ ]+ (([^ ][^ ] *){1,16}).*/\1/' | xxd -r -p | xxd -g 1
+
 Q: split empty string into zero-length array using String.split(String)
 A: 
   not possible
@@ -304,6 +332,31 @@ A:
         DOMSource input = new DOMSource(existingDoc);
         transformer.transform(input, output);
     }
+
+
+Q: Xerces DOMParserImpl example
+A:
+  do not use.
+  
+            final XMLInputSource xmlInputSource = new SAXInputSource(inputSource);
+
+            fConfiguration
+                .setEntityResolver(AllowingXIncludeAwareParserConfiguration1.COMBINED_XML_HANDLER);
+            fConfiguration
+                .setErrorHandler(AllowingXIncludeAwareParserConfiguration1.COMBINED_XML_HANDLER);
+
+            final DOMParserImpl domParserImpl = new DOMParserImpl(fConfiguration);
+
+            JobSheetXmlPreprocess.DOMHelper
+                .setSecurityFeatures(LambdaUtil.rethrowBiConsumer2(domParserImpl::setParameter));
+
+            final Object nsFeature =
+                domParserImpl.getParameter(org.apache.xerces.impl.Constants.DOM_NAMESPACES);
+            if (!Boolean.TRUE.equals(nsFeature)) {
+                throw new RuntimeException("Expected namespaces on by default");
+            }
+            domParserImpl.parse(xmlInputSource);
+            return domParserImpl.getDocument();
 
 Q: java pretty format xml
 A: see pretty-xml.txt

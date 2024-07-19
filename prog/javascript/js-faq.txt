@@ -1,3 +1,13 @@
+Q: rethrowing errors
+A: just "throw e;"
+
+Q: breakpoint at navigating away from page, beforeunload or something
+A:
+  window.addEventListener("beforeunload", function() { debugger; }, false)
+
+Q: spoof timezone
+A: chrome dev tools other tools sensors
+
 Q: add getter and setter
 A: Object.defineProperty
 
@@ -47,26 +57,26 @@ A:
 Q: comparison
 A: 
 
-    == 	equal to 	x == 8 	false 	Try it »	
-    x == 5 	true 	Try it »	
-    x == "5" 	true 	Try it »	
+    == 	equal to 	x == 8 	false 	Try it 	
+    x == 5 	true 	Try it 	
+    x == "5" 	true 	Try it 	
     
-    === 	equal value and equal type 	x === 5 	true 	Try it »
-    x === "5" 	false 	Try it »
+    === 	equal value and equal type 	x === 5 	true 	Try it 
+    x === "5" 	false 	Try it 
     
-    != 	not equal 	x != 8 	true 	Try it »
+    != 	not equal 	x != 8 	true 	Try it 
     
-    !== 	not equal value or not equal type 	x !== 5 	false 	Try it »
-    x !== "5" 	true 	Try it »
-    x !== 8 	true 	Try it »
+    !== 	not equal value or not equal type 	x !== 5 	false 	Try it 
+    x !== "5" 	true 	Try it 
+    x !== 8 	true 	Try it 
     
-    > 	greater than 	x > 8 	false 	Try it »
+    > 	greater than 	x > 8 	false 	Try it 
     
-    < 	less than 	x < 8 	true 	Try it »
+    < 	less than 	x < 8 	true 	Try it 
     
-    >= 	greater than or equal to 	x >= 8 	false 	Try it »
+    >= 	greater than or equal to 	x >= 8 	false 	Try it 
     
-    <= 	less than or equal to 	x <= 8 	true 	Try it »
+    <= 	less than or equal to 	x <= 8 	true 	Try it 
 
 Q: remove search parameters from url
 A:

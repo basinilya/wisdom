@@ -1,3 +1,28 @@
+Q: format date time
+A: TO_CHAR(now(),'yyyy-mm-dd HH24:MI:SS')
+
+Q: rownum
+A: row_number() OVER ()
+
+Q: truncate date
+A: date_trunc('day', now())
+
+Q: pg_hint_plan
+A: see pg_hint_plan.txt
+
+Q: print debug message
+A: RAISE NOTICE 'I got here:% is the new value', NEW.col;
+
+Q: alternative .pgpass file location
+A: 
+  env var PGPASSFILE
+  .bat file:
+  @rem pgpass default location: %APPDATA%\postgresql\pgpass.conf
+  set "PGPASSFILE=%~dp0pgpass"
+
+Q: run a script file from a psql prompt
+A: \i C:/windows/path/with/forward/slashes
+
 Q: PRAGMA AUTONOMOUS_TRANSACTION;
 A: only with a dblink
 
@@ -137,6 +162,13 @@ A: ... limit 10;
 Q: estimate number of rows in a table
 A: SELECT relname, reltuples::BIGINT AS estimate FROM pg_class WHERE relname like '<table_name>';
 
+Q: create index
+A: create index [concurrently] [if not exists]
+
+
+Q: rename index
+A: alter index XXX rename to YYY
+
 Q:
 A:
 CREATE EXTENSION pg_trgm with schema pg_catalog;
@@ -159,7 +191,13 @@ Q: rename column
 A: alter table T rename C to C2;
 
 Q: alter column
-A: alter table T alter column C type <type>; 
+A: 
+  alter table T alter column C type <type>; 
+  alter table T alter column C set [not] null;
+  alter table T alter column C set default <default>; 
+
+Q: remove column
+A: alter table T drop column C;
 
 Q: current pid
 A: SELECT pg_backend_pid()
@@ -183,6 +221,23 @@ A:
 
 -- dangerous: kill it
 -- SELECT pg_terminate_backend(__pid__);
+
+See also
+
+CREATE EXTENSION pg_stat_statements;
+SELECT 
+        pss.userid,
+        pss.dbid,
+        pd.datname as db_name,
+        round(pss.total_time::numeric, 2) as total_time, 
+        pss.calls, 
+        round(pss.mean_time::numeric, 2) as mean, 
+        round((100 * pss.total_time / sum(pss.total_time::numeric) OVER ())::numeric, 2) as cpu_portion_pctg,
+        pss.query as query
+FROM pg_stat_statements pss, pg_database pd
+WHERE pd.oid=pss.dbid
+ORDER BY pss.total_time 
+DESC LIMIT 30;
 
 Q: show server version
 A: select version();

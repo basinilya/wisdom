@@ -45,6 +45,9 @@ A: On "Targets" tab select a target for auto builds
 Q: .class files visible in "Open Resource"
 A: Open the "Navigator" view, navigate to the project output folder, open folder properties and set the "Derived" checkbox
 
+Q: JDK internal class not visible in "Open Type"
+A: Window > Preferences > Java > Appearance > Type Filters
+
 Q: console buffer size
 A: workspace\.metadata\.plugins\org.eclipse.core.runtime\.settings\org.eclipse.debug.ui.prefs
   Console.highWaterMark=8008029
@@ -102,6 +105,12 @@ A:
 
 Q: error(s)_during_the_evaluation for watch expression
 A: possibly incomplete classpath. Put a conditional breakpoint and see the error
+
+Q: There's no attempt to evaluate a watch expression: blank value column and no error message 
+A:
+
+Q: "Source not found" during debug despite source found during development 
+A: 
 
 Q: Alter $PATH at .launch
 A: ${system_property:path.separator}${env_var:PATH}

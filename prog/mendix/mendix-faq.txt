@@ -1,3 +1,309 @@
+﻿==== do not remove first line ================================
+Q: refresh in client
+A:
+  adds two instructions to XHR result: refresh class and refresh object list
+  not necessary when object attributes are alredy displayed on a form
+  not necessary when object attributes are used as data source parameters on a form, e.g. for a reference selector
+  necessary when the entire object is used as a microflow parameter
+  necessary to refresh a grid
+ 
+
+Q: OQL LEFT OUTER JOIN by entity_path and with extra on clause returns extra results
+A:
+  SQL generated is:
+    left join assiciation_table
+    left join entity
+  not
+    left join assiciation_table join entity
+
+  so assiciation_table is joined successfully and creates the extra results
+
+Q: urlEncode differences between 8.18.7 and 9.24.2
+A:
+  java 11: URLEncoder.encode("'f_.g!h-i(j)k/l-mmmm n*o~p"): %27f_.g%21h-i%28j%29k%2Fl-mmmm+n*o%7Ep
+  8.18.7:         urlEncode('''f_.g!h-i(j)k/l-mmmm n*o~p'): %27f_.g%21h-i%28j%29k%2Fl-mmmm+n*o%7Ep
+  9.24.2:         urlEncode('''f_.g!h-i(j)k/l-mmmm n*o~p'): %27f_.g%21h-i%28j%29k%2Fl-mmmm%20n%2Ao~p
+
+  ## 9.0 Betas {#betas}
+  * We now encode spaces as `%20` instead of `+` in the `urlEncode()` function.
+
+Q: token auth at teamserver SVN
+A:
+  use https://svn.home.mendix.com instead of https://teamserver.sprintr.com
+  Ex: https://svn.home.mendix.com/11111111-1111-1111-1111-111111111111/trunk
+  
+  To generate a token visit
+    https://user-settings.mendix.com/link/developersettings
+    Personal Access Tokens
+  
+  scope: mx:modelrepository:write
+  (the first one, inside "Model Repository")
+  
+  SVN readonly access is not supported, mx:modelrepository:repo:read only works with Git.
+  
+  See also https://docs.mendix.com/developerportal/general/team-server/
+
+Q: troubleshoot/log garbage collection on client
+A: 
+  You can also enable a special setting to see which objects are removed when garbage collections occur.
+
+  dojoConfig = {
+    data: {
+      "logCleanupStatistics": true
+    },
+    ...
+  }
+  
+  enable debug logs in browser console.
+  
+  Example:
+    [Client] Garbage collecting 7 of 7
+    System.HttpHeader: 6473924464401166, 6473924464401171, 6473924464401170, 6473924464401169, 6473924464401168, 6473924464401167
+    System.HttpMessage: 8444249301321588
+  
+  https://www.mendix.com/blog/the-art-of-state-part-2-garbage-collection/
+
+Q: Value of auto-number attribute 'SomeId' not available
+A:
+  After a new AutoNumber value was allocated for a new uncommitted object and
+  the object was sent to the client the value was lost because the Access Rules
+  forbid reading the value.
+
+Q: what if java action throws InterruptedException
+A: 
+  MicroflowCallBuilder.execute() will throw:
+    MendixRuntimeException: java.lang.InterruptedException
+  
+  If InterruptedException was thrown conventionally, the current thread interrupted state will be false 
+
+  P.S.
+  attempts to use ILogNode while thread is interrupted will throw:
+    com.mendix.modules.microflowengine.MicroflowException: com.mendix.systemwideinterfaces.MendixRuntimeException: java.lang.RuntimeException: Failed to put log message into the queue
+  and will clear the interrupted state
+
+Q: user lacks privilege or object not found: com.mendix.connectionbus.connections.jdbc.implementations.hsqldb.DateTimeLocalizationConverter
+A:
+        System
+            .setProperty(
+                HsqlDatabaseProperties.hsqldb_method_class_names,
+                "com.mendix.connectionbus.connections.jdbc.implementations.hsqldb.DateTimeLocalizationConverter.convertToLocalDateTime");
+        
+Q: Disallow concurrent execution
+A:
+  'Disallow concurrent execution' status on microflows is NOT shared between
+  server instances.(!!) So you'd better not rely on using this feature to e.g.
+  generate unique id's yourself when allowing more server instances to connect
+  to the same backend database.
+
+Q: how originURI works
+A: 
+  If /xas/ request fails with most errors the framework will call the function showLogin(httpStatus)
+  showLogin() will try to find the cookie "originURI".
+  If found, the cookie is immediately erased, but its original value is used in
+  window.mx.redirect()
+  If not found, customLoginFn(httpStatus) is called.
+  If customLoginFn() is unconfigured, the default login dialog is shown
+
+  C:\Program Files\Mendix\*\modeler\runtemplates\deployment\dojo-web\index.html
+    sets "originURI=/login.html" + ... if not exists
+  C:\Program Files\Mendix\*\modeler\runtemplates\deployment\dojo-web\js\login.js
+    sets "originURI=" + location.pathname, usually it's also "/login.html".
+  SAML20 sets "originURI=SSO/login", but with Path=/SSO and it's ineffective
+
+  Without originURI=/login.html the login page will never be shown and the login
+  dialog will be shown instead.
+
+Q: test SSO locally for the web site https://acme-test.acme.com
+A:
+* You need a key/certificate pair for the desired web site. The key file is
+  mandatory.
+* Issue a certificate for "*.acme.com". It should be issued by a custom CA
+  (preferred) or be a self-signed certificate, see ../openssl/openssl-faq.txt
+* Make it trusted in the browser or OS, e.g. in "certmgr.msc" 
+* Install Stunnel: https://www.stunnel.org/downloads.html
+* Copy the site key/certificate PEM bundle "acme.com-bundle.pem" into
+  C:\Program Files (x86)\stunnel\config\
+* Edit C:\Program Files (x86)\stunnel\config\stunnel.conf
+
+    ; config section for https://acme-test.acme.com
+    [acme-test]
+    ; Use 127.* values other than 127.0.0.1 as the port 443 is busy
+    accept = 127.0.0.2:443
+    ; The address of the local web app
+    connect = 127.0.0.1:8080
+    ; file name relative to the config dir
+    cert = acme.com-bundle.pem
+
+* restart the Stunnel windows service
+* Launch from command line:
+
+    chrome.exe --host-resolver-rules="MAP acme-test.acme.com 127.0.0.2"
+
+* Duplicate an existing Mendix app configuration and change
+  "Application root URL" to "https://acme-test.acme.com" (no port)
+
+* Start the app and open the web page https://acme-test.acme.com/login.html
+* Configure/Refresh SP Metadata
+* Setup and activate an IdP Configuration
+* Logout and open https://acme-test.acme.com/SSO/
+
+Q: date picker for Localize=N attribute and having letter Z in custom format still shows client timezone 
+A: 
+  Я думал, что Localize влияет на то, как виджеты форматируют и парсят дату. Я думал, что если Localize=Yes, то виджеты будут форматировать и парсить, используя таймзону браузера, а если Localize=No, то используя UTC.
+  
+  Но всё не так! Localize влияет только на преобразование даты при передаче между сервером и клиентом!
+  Если Localize=Yes, то преобразования НЕ ПРОИСХОДИТ. JS Date будет содержать то же значение, что java.util.Date. Именно поэтому для таких атрибутов виджеты отображают корректное время в таймзоне браузера, а другую таймзону они использовать не умеют.
+  
+  Если Localize=No то при передаче дата преобразуется так, что условно результат formatDateTimeUTC на сервере равен результату formatDateTime на клиенте. Если на сервере java.util.Date содержит полночь UTC, то на клиенте JS Date содержит полночь по браузеру. Это преобразование прозрачно до тех пор, пока вы не пытаетесь использовать значение атрибута в клиентстких выражениях или в Nanoflow. Тогда могут быть неожиданные результаты.
+
+Q: custom date format in nanoflows
+A: some letters are unsupported. From mxui.js:
+
+            function i(e) {
+                return o(e, [{
+                    existing: "GGGG",
+                    replacement: "GGG"
+                }, {
+                    existing: "GGGGG",
+                    replacement: "GGG"
+                }, {
+                    existing: "GGGGGG",
+                    replacement: "GGG"
+                }, {
+                    existing: "MMMMM",
+                    replacement: "MMMM"
+                }, {
+                    existing: "E",
+                    replacement: "EEE"
+                }, {
+                    existing: "EE",
+                    replacement: "EEE"
+                }, {
+                    existing: "EEEEE",
+                    replacement: "EEEE"
+                }, {
+                    existing: "EEEEEE",
+                    replacement: "EEEE"
+                }, {
+                    existing: "S",
+                    replacement: "SSS"
+                }, {
+                    existing: "SS",
+                    replacement: "SSS"
+                }, {
+                    existing: "SSSS",
+                    replacement: "'0'SSS"
+                }, {
+                    existing: "SSSSS",
+                    replacement: "'00'SSS"
+                }, {
+                    existing: "SSSSSS",
+                    replacement: "'000'SSS"
+                }, {
+                    existing: "W",
+                    replacement: "'W'"
+                }, {
+                    existing: "WW",
+                    replacement: "'WW'"
+                }, {
+                    existing: "WWW",
+                    replacement: "'WWW'"
+                }, {
+                    existing: "WWWW",
+                    replacement: "'WWWW'"
+                }, {
+                    existing: "WWWWW",
+                    replacement: "'WWWWW'"
+                }, {
+                    existing: "WWWWWW",
+                    replacement: "'WWWWWW'"
+                }, {
+                    existing: "F",
+                    replacement: "'F'"
+                }, {
+                    existing: "FF",
+                    replacement: "'FF'"
+                }, {
+                    existing: "FFF",
+                    replacement: "'FFF'"
+                }, {
+                    existing: "FFFF",
+                    replacement: "'FFFF'"
+                }, {
+                    existing: "FFFFF",
+                    replacement: "'FFFFF'"
+                }, {
+                    existing: "FFFFFF",
+                    replacement: "'FFFFFF'"
+                }, {
+                    existing: "Z",
+                    replacement: "'Z'"
+                }, {
+                    existing: "ZZ",
+                    replacement: "'ZZ'"
+                }, {
+                    existing: "ZZZ",
+                    replacement: "'ZZZ'"
+                }, {
+                    existing: "ZZZZ",
+                    replacement: "'ZZZZ'"
+                }, {
+                    existing: "ZZZZZ",
+                    replacement: "'ZZZZZ'"
+                }, {
+                    existing: "ZZZZZZ",
+                    replacement: "'ZZZZZZ'"
+                }, {
+                    existing: "z",
+                    replacement: "'z'"
+                }, {
+                    existing: "zz",
+                    replacement: "'zz'"
+                }, {
+                    existing: "zzz",
+                    replacement: "'zzz'"
+                }, {
+                    existing: "zzzz",
+                    replacement: "'zzzz'"
+                }, {
+                    existing: "zzzzz",
+                    replacement: "'zzzzz'"
+                }, {
+                    existing: "zzzzzz",
+                    replacement: "'zzzzzz'"
+                }, {
+                    existing: "X",
+                    replacement: "'X'"
+                }, {
+                    existing: "XX",
+                    replacement: "'XX'"
+                }, {
+                    existing: "XXX",
+                    replacement: "'XXX'"
+                }, {
+                    existing: "XXXX",
+                    replacement: "'XXXX'"
+                }, {
+                    existing: "XXXXX",
+                    replacement: "'XXXXX'"
+                }, {
+                    existing: "XXXXXX",
+                    replacement: "'XXXXXX'"
+                }])
+            }
+
+
+
+Q: date literals in client XPath
+A:
+  send as epoch millis.
+  '2024-04-15 13:37:59.000+03:00'
+  ->
+  //MyFirstModule.Entity[(changedDate>=1713177479000 and changedDate<1713263879000)]
+
+Q: App is in maintenance mode. To turn off unset DEBUG_CONTAINER variable
+A: The python server is serving this page if the container was started with debug enabled. You can't stop it without stopping the container. Forward another port to connect to NGinx on port 1234
+
 Q: Will this fail? :
     '' + (if true then empty else 'dummy')
 A: no, concatenating null results in concatinating the word 'null'
@@ -135,17 +441,26 @@ A:
   JavaConverters.asJava(ContextImpl.requestScope().savepointQueue()).iterator().next().id()
   see LogTransactionId.java
 
-Q: do something right before DB transaction ends
+Q: do something right after DB transaction ends
 A:
-  a)
-  With ByteBuddy instrument:
-  com.mendix.connectionbus.connections.jdbc.TransactionConnectionManager.commitTransaction(UUID)
-
-  b)
   call 
   public void com.mendix.basis.action.ContextImpl.registerTransactionListener(final com.mendix.basis.action.TransactionListener listener)
       this.requestScope().registerTransactionListener(listener);
   }  
+
+Q: do something right before DB transaction ends
+A:
+  TransactionListener does not have "before" methods!
+
+  With ByteBuddy instrument:
+  a)
+  com.mendix.connectionbus.connections.jdbc.TransactionConnectionManager.commitTransaction(UUID)
+  caveat: at this point there's no IContext or RequestScope, you can't use
+  public API and you don't have access to committed IDs.
+
+  b)
+	com.mendix.basis.action.ContextImpl.endTransaction()
+  caveat: you will have to check if it's a top-level transaction
 
 Q: ?
 A:
@@ -256,6 +571,12 @@ A:
 
   Calling a SUB-microflow with error handling "Custom without Rollback" also creates a savepoint.
   All other error handling modes don't create it.  
+
+Q: passing "empty" to a List parameter of a microflow
+A: There's no error, but attempt to add to this list will silently fail, at least in 9.18 
+
+Q: Deleting ... object failed for security reasons
+A: Check access rules of Cascade Deleted Objects
 
 Q:
   com.mendix.webui.WebUIException: Exception while executing runtime operation
@@ -437,7 +758,13 @@ A:
         return false;
     }
 
-
+Q: fetch only some attributes with XPath in java
+A: 
+    IRetrievalSchema.addAllMetaPrimitiveNames() was removed from public API in Mendix 7.
+    The internal implementation class in Mendix 9x still has this method and the client method mx.data.get with parameter filter.attributes uses it.
+    
+    https://apidocs.rnd.mendix.com/6/runtime/com/mendix/systemwideinterfaces/connectionbus/requests/IRetrievalSchema.html#addAllMetaPrimitiveNames-java.util.List-
+    https://apidocs.rnd.mendix.com/10/client-react/mx.data.html#.get
 
 Q: No connecting flow found
 A: Decision activity expression returned: empty
@@ -723,7 +1050,8 @@ A:
   wrap the input and the button with a container, set the container class custom-input-with-trigger-container
   add the following to the custom styles:
 
-  div.custom-input-with-trigger-container {
+  /* in 10x container is an <aside> and in 9x it's a <div> */
+  .custom-input-with-trigger-container {
   	position: relative;
     
   	&> div {
@@ -998,6 +1326,38 @@ A:
 
 Q: Where's the mx javascript API documented? mx.ui.showLogin(), mx.data.action() and such.
 A: https://apidocs.rnd.mendix.com/9/client/mx.ui.html
+
+Q: call microflow with multiple parameters from JS
+A: 
+
+  mx.data.action allows for at most 1 non-list object of each entity type
+  plust one list. This limitation comes from the JSON format of the
+  "executeaction" action: all the non-list parameters are passed in the
+  "context" array of guids and the parameter names are just unsupported.
+  If you pass more than one GUID of the same entity type then on the server side
+  one of them will be mapped to all parameters of this type and the others will
+  be discarded.
+
+  The more advanced "runtimeOperation" action used by buttons and nanoflows
+  allows passing the parameter names and values, but the JS API to call it is
+  inaccessible from user scripts: the "runtimeOperation" action JSON is created
+  by the inaccessible class OnlineData. The common function used for both
+  "runtimeOperation" and "executeaction" is also inaccessible.
+
+  The public property mx.onlineData was removed somewhere in 2020.
+
+  Finally, there's no way to directly call "runtimeOperation" using
+  window.fetch() because the value of X-Csrf-Token received during login is also
+  inaccessible. 
+
+  Resolution: you probably can wrap window.fetch() and convert "executeaction"
+  JSON into "runtimeOperation" JSON when necessary. The JSON format of
+  "runtimeOperation" can be guessed by playing with the inaccessible
+  OnlineData.executeMicroflow(). Currently, an istance of OnlineData can only be
+  obtained by using the debugger.
+
+  The other parts of the JSON like "objects" and "changes" can be copied from
+  "executeaction": mx.data.action does a good job filling them for you.
 
 Q: set user role in micrflow
 A: 

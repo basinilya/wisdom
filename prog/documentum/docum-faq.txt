@@ -1,3 +1,6 @@
+Q: Oracle dual
+A: dm_docbase_config
+
 Q: attr_type
 A: 
   Contains integer values representing
