@@ -102,9 +102,301 @@ config rule
         option target 'ACCEPT'
         list dest_ip '10.8.0.0/16'
 
-# TODO: route by source address
---route-noexec + --route-up
+
+### route by source address
 https://openwrt.org/docs/guide-user/network/routing/examples/pbr_iproute2
-/etc/iproute2/rt_tables
-ip rule
-ip route show table ...
+
+
+## Create a dedicated routing table for vpn
+
+printf '10\tvpn\n' >> /etc/iproute2/rt_tables
+
+# there's no "show" command to list the tables
+root@OpenWrt:~# grep -v '^ *#' /etc/iproute2/rt_tables
+128     prelocal
+255     local
+254     main
+253     default
+0       unspec
+10      vpn
+
+
+
+## Configure OpenVPN with source-based routing
+
+# The OpenVPN "route" argument doesn't support iproute2 "table"
+# We'll have to use shell scripts
+
+# Do not try to configure static routes with UCI: they won't apply before VPN is
+# connected and will revert when VPN is disconnected
+
+
+# alternatively, use --route-noexec + --route-up
+
+# TODO: configure routing with hotplug instead
+
+# The following doesn't seem to be needed 
+# ip route flush cache
+
+cat >>/etc/openvpn/basinsrvtplink.ovpn <<'EOF'
+script-security 1
+# always exit with 0 despite /sbin/ip failure
+# args appended to the shell command, ignore them
+up "/sbin/ip route add default via $route_vpn_gateway table vpn; exit 0 # args unused:"
+EOF
+
+# test it works
+
+# Terminal 1
+logread -f
+
+# Terminal 2
+/etc/init.d/openvpn stop
+/etc/init.d/openvpn start
+
+root@OpenWrt:~# ip route list table vpn
+default via 10.8.0.5 dev tun0
+
+
+
+## Create a static ipv4 DHCP lease (TODO: for now ipv6 won't be routed via vpn)
+
+cat /var/dhcp.leases
+
+uci add dhcp host
+#uci set dhcp.@host[-1]=host
+uci set dhcp.@host[-1].mac="${CLIENTDEVMAC:?}"
+uci set dhcp.@host[-1].ip='192.168.43.123'
+
+#uci revert dhcp
+
+uci commit dhcp
+
+tail /etc/config/dhcp
+
+config host
+        option mac 'xx:xx:xx:xx:xx:xx'
+        option ip '192.168.43.123'
+
+
+## Create a routing rule for the client ipv4 address (TODO: for now ipv6 won't be routed via vpn)
+
+# test that it works
+
+ip rule add from 192.168.43.123 table vpn
+
+root@OpenWrt:~# ip rule list
+0:      from all lookup local
+1:      from 192.168.43.123 lookup vpn
+32766:  from all lookup main
+32767:  from all lookup default
+
+# open on client device:
+# https://www.yougetsignal.com/what-is-my-ip-address/
+
+ip rule del from 192.168.43.123 table vpn
+
+# create a permanent config
+
+uci add network rule
+#uci set network.@rule[-1]=rule
+uci set network.@rule[-1].src='192.168.43.123/32'
+uci set network.@rule[-1].lookup='vpn'
+
+#uci revert network
+
+uci commit network
+
+root@OpenWrt:~# tail -5 /etc/config/network
+
+config rule
+        option src '192.168.43.123/32'
+        option lookup 'vpn'
+
+root@OpenWrt:~# ip rule list
+0:      from all lookup local
+1:      from 192.168.43.123 lookup vpn
+32766:  from all lookup main
+32767:  from all lookup default
+
+
+
+
+
+## Setup a second dnsmasq instance that won't be using ISP upstream dns
+
+cat << "EOF" >> /etc/sysupgrade.conf
+/etc/dnsmasq-8888.conf
+EOF
+
+
+cat >/etc/dnsmasq-8888.conf <<'EOF'
+# copy of /var/etc/dnsmasq.conf.cfg01411c
+# withoud dhcp and without ISP upstream DNS
+#
+# Usage: /usr/sbin/dnsmasq -C /etc/dnsmasq-8888.conf -x /tmp/dnsmasq-8888.pid
+
+# 53 + 1
+port=54
+
+# handled by upstream
+no-resolv
+
+# default upstream (no bind to @tun0 to make it work when vpn is down).
+# Routing via tun0 will be handled with ip rule/route
+server=8.8.8.8
+
+# upstream for unqualified domains, .lan, and reverse lan lookups
+# "domain-needed" must be disabled to forward unqualified requests
+# "bogus-priv" must be disabled to allow forwarding reverse lookups
+# TODO: add reverse ipv6 lookups
+server=//lan/43.168.192.in-addr.arpa/127.0.0.1
+
+# stop-dns-rebind must be disabled because "rebind-domain-ok" doesn't support
+# empty domains (segfaults when requested one)
+
+bind-dynamic
+local-service
+edns-packet-max=1232
+user=dnsmasq
+group=dnsmasq
+EOF
+
+
+# Terminal 1: start it for testing in forground:
+/usr/sbin/dnsmasq -d -q -C /etc/dnsmasq-8888.conf
+
+
+# Terminal 2: resolve a few hosts
+
+# expected upstream DNS: 8.8.8.8
+nslookup yougetsignal.com 127.0.0.1:54
+
+# expected upstream DNS: default dnsmasq on 127.0.0.1:53
+nslookup mylaptop.lan 127.0.0.1:54
+nslookup mylaptop 127.0.0.1:54
+nslookup 192.168.43.101 127.0.0.1:54
+
+
+# Terminal 1: 
+# stop and start as daemon
+^C
+/usr/sbin/dnsmasq -C /etc/dnsmasq-8888.conf -x /tmp/dnsmasq-8888.pid
+
+
+# schedule on boot
+echo '/usr/sbin/dnsmasq -C /etc/dnsmasq-8888.conf -x /tmp/dnsmasq-8888.pid' >> /etc/rc.local
+
+
+## Configure a rule to route locally-originated DNS lookups to 8.8.8.8 via vpn
+
+# busybox nslookup, traceroute, ping, and dnsmasq behave differently. nslookup
+# and traceroute bind a socket to one of the interfaces before sending a packet
+# and dnsmasq and ping don't bind it and let the os bind it automatically.
+# When the route rules are checked the dnsmasq connection to upstream has source
+# address 0.0.0.0.
+# For some reason "iif eth0.2" and "iif loopback" don't match even when the
+# socket is bound by a program. The following doesn't work:
+# ip rule add iif eth0.2 to 8.8.8.8 table vpn
+# ip rule add iif loopback to 8.8.8.8 table vpn
+
+# Finally, UCI does't support negating individual part of a rule with "NOT" so
+# we can't use a rule like:
+# ip rule add NOT from 192.168.43.0/24 to 8.8.8.8 table vpn
+
+
+# UCI doesn't let you create a rule for 0.0.0.0/32 so we will
+# use net mask 31, not 32.
+
+# test that it works
+
+ip rule add from 0.0.0.0/31 table vpn
+
+root@OpenWrt:~# ip rule list
+0:      from all lookup local
+1:      from 192.168.43.123 lookup vpn
+2:      from 0.0.0.0/31 to 8.8.8.8 lookup vpn
+32766:  from all lookup main
+32767:  from all lookup default
+
+
+root@OpenWrt:~# traceroute -m 1 -n 8.8.8.8
+traceroute to 8.8.8.8 (8.8.8.8), 1 hops max, 46 byte packets
+ 1  10.82.206.5  3.610 ms  3.569 ms  3.675 ms
+
+root@OpenWrt:~# traceroute -m 1 -s 0.0.0.0 -n 8.8.8.8
+traceroute to 8.8.8.8 (8.8.8.8) from 0.0.0.0, 1 hops max, 46 byte packets
+ 1  10.8.0.1  47.928 ms  48.591 ms  48.665 ms
+
+
+ip rule del from 0.0.0.0/31 table vpn
+
+
+# create a permanent config
+
+uci add network rule
+#uci set network.@rule[-1]=rule
+uci set network.@rule[-1].src='0.0.0.0/31'
+uci set network.@rule[-1].lookup='vpn'
+
+#uci revert network
+
+uci commit network
+
+root@OpenWrt:~# tail -6 /etc/config/network
+
+config rule
+        option dest '8.8.8.8/32'
+        option lookup 'vpn'
+        option src '0.0.0.0/31'
+
+
+root@OpenWrt:~# ip rule list
+0:      from all lookup local
+1:      from 192.168.43.123 lookup vpn
+2:      from 0.0.0.0/31 to 8.8.8.8 lookup vpn
+32766:  from all lookup main
+32767:  from all lookup default
+
+
+
+## Redirect the client DNS lookups to the second dnsmasq
+
+# Android TV prefers ipv6 dns even if ipv4 dns is configured manually
+# so it's easier to just filter by MAC address instead of ip addresses.
+
+# UCI has a strange behavior when address family is "unspecified" and only MAC
+# address is used in the rule it still sets the rule family to ipv4 so we will
+# have to create another rule for ipv6.
+
+
+uci add firewall redirect
+uci set firewall.@redirect[-1].target='DNAT'
+uci set firewall.@redirect[-1].name='to-second-dnsmasq'
+uci set firewall.@redirect[-1].src='lan'
+uci set firewall.@redirect[-1].src_dport='53'
+uci set firewall.@redirect[-1].dest_port='54'
+uci set firewall.@redirect[-1].proto='udp'
+uci set firewall.@redirect[-1].src_mac="${CLIENTDEVMAC:?}"
+uci set firewall.@redirect[-1].family='ipv6'
+
+uci add firewall redirect
+uci set firewall.@redirect[-1].target='DNAT'
+uci set firewall.@redirect[-1].name='to-second-dnsmasq-ipv4'
+uci set firewall.@redirect[-1].family='ipv4'
+uci set firewall.@redirect[-1].proto='udp'
+uci set firewall.@redirect[-1].src='lan'
+uci set firewall.@redirect[-1].src_mac="${CLIENTDEVMAC:?}"
+uci set firewall.@redirect[-1].src_dport='53'
+uci set firewall.@redirect[-1].dest_port='54'
+
+
+# uci revert firewall
+
+uci commit firewall
+/etc/init.d/firewall restart
+
+root@OpenWrt:~# nft list ruleset | grep to-second-dnsmasq
+                meta nfproto ipv6 udp dport 53 ether saddr xx:xx:xx:xx:xx:xx counter packets 1414 bytes 118626 redirect to :54 comment "!fw4: to-second-dnsmasq"
+                meta nfproto ipv4 udp dport 53 ether saddr xx:xx:xx:xx:xx:xx counter packets 15 bytes 976 redirect to :54 comment "!fw4: to-second-dnsmasq-ipv4"
+

@@ -1,3 +1,10 @@
+Q: Pagination by compound key / Pagination by composite key
+A: SELECT * FROM table WHERE (Id, SeqNo) > (1, 4) AND Valid = 'Y' ORDER BY Id, SeqNo LIMIT 3;
+
+
+Q: estimate number of rows in a table
+A: SELECT reltuples AS estimate FROM pg_class where relname = '...';
+
 Q: format date time
 A: TO_CHAR(now(),'yyyy-mm-dd HH24:MI:SS')
 
@@ -186,6 +193,14 @@ A: SELECT last_value FROM foo_seq;
 
 Q: next value from sequence
 A: SELECT nextval('foo_seq');
+
+Q: ?
+A: ALTER SEQUENCE payments_id_seq RESTART WITH 22;
+  or
+  SELECT setval('public."bookproposalmain$intellectualunit_intellectualunitid_mxseq"', 633744, true);
+
+Q: alter table add column
+A: alter table add <colname1> <type1>, add <colname2> <type2>...
 
 Q: rename column
 A: alter table T rename C to C2;

@@ -1,3 +1,6 @@
+Q: change author of the most recent commit
+A: git commit --amend --no-edit --reset-author
+
 Q: git log visualize merges
 A: git log --graph
 

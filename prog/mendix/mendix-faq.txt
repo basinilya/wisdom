@@ -1,4 +1,62 @@
 ﻿==== do not remove first line ================================
+Q:
+  git push --force origin main
+  ! [remote rejected] main -> main (non-fast-forward)
+
+A:
+  https://docs.mendix.com/refguide/troubleshoot-repository-size/
+  > When prompted, enable force pushing
+
+  https://artifacts.rnd.mendix.com/git-fixer/git-fixer-essentials.zip?_gl=1*11tv19l*_gcl_au*MTIyNjU1NTQwNi4xNzI4NjIzMTMz
+    git_fixer_core/main_git_pusher.py
+      api_url = config_system.GP__ENABLE_MX_PUSH_API_URL + f"{app_id}/enable-force-push"
+
+  curl -v "https://repository.api.mendix.com/v1/repositories/${appid:?}/enable-force-push" --header "Authorization: MxToken ${MENDIX_TOKEN:?}" --data ''
+
+Q: Unwanted hours added when updating a datetime attribute with JDBC inside Core.dataStorage().executeWithConnection()
+A:
+    utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
+    now = new Timestamp(System.currentTimeMillis());
+    stmt.setTimestamp(1, now, utcCalendar);
+
+Q:
+A:
+  .gitattributes (not sure about location)
+  *.mpr merge=studiopro
+  
+  config
+  [merge "studiopro"]
+  	name = custom merge driver for studio pro files
+  	driver = /C/Program Files/Mendix/10.12.3.43016/modeler/mx.exe merge %O %A %B
+
+Q: what's the nulls behavior in List operation (sort) activity in Mendix? 
+A:
+  9.24.2: always "NULLS LAST", for both ASC and DESC
+
+Q: is committing empty object ok?
+A: yes, no error is thrown
+
+Q:
+  Get rid of AuditTrail.ReferenceLogLine in mx.data.commit server response.
+A:
+
+Q:
+  Uncaught (in promise) Error: inconsistent response: committed object is missing from response and cache
+A:
+  An entity event committed a large number of objects as a side effect and they
+  displaced the main committed object from the cache.
+  Workaround: call mx.data.subscribe for the main object before the commit and unsubscribe afterwards.
+
+  P.S.
+  This error can't be caught because mxui.js 9.24.2 has improper error handling in mx.data.commit():
+  This method calls Promise.prototype.then with two parameters: onFulfilled and onRejected.
+  onFulfilled validates the object cache and then calls the user success callback asynchronously.
+  onRejected is a wrapper for the user error callback.
+  However, onFulfilled calls handleUncachedObjects() which may throw an Error and the Promise (as
+  expected) does not pass this Error to the error callback, but makes it uncaught.
+  A good implementation would append another "then" and move onRejected to it like this:
+  then(null, onRejected).
+
 Q: refresh in client
 A:
   adds two instructions to XHR result: refresh class and refresh object list
@@ -94,6 +152,9 @@ A:
   server instances.(!!) So you'd better not rely on using this feature to e.g.
   generate unique id's yourself when allowing more server instances to connect
   to the same backend database.
+
+Q: xasid to cluster node
+A:
 
 Q: how originURI works
 A: 
@@ -300,6 +361,8 @@ A:
   '2024-04-15 13:37:59.000+03:00'
   ->
   //MyFirstModule.Entity[(changedDate>=1713177479000 and changedDate<1713263879000)]
+  or in ISO format (time part is optional)
+  [changedDate > '2024-09-30T13:45:00.000-0100']
 
 Q: App is in maintenance mode. To turn off unset DEBUG_CONTAINER variable
 A: The python server is serving this page if the container was started with debug enabled. You can't stop it without stopping the container. Forward another port to connect to NGinx on port 1234
@@ -1054,17 +1117,43 @@ A:
   .custom-input-with-trigger-container {
   	position: relative;
     
-  	&> div {
+  	&> div:first-child {
   		&> div > input {
   			margin-right: 50px; /* margin-right also makes the border around input behave nice */
   		}
   	}
     
-  	&> button {
+  	&> :nth-child(2) {
   		position: absolute;
   		right: 0;
   		top: 0;
   	}
+  }
+
+Q: calculate UTF-8 string length in bytes
+A:
+  length(replaceAll($currentObject/OriginalTitle,'[\u0000-\u07ff]',''))+length(replaceAll($currentObject/OriginalTitle,'[\u0000-\u007f]',''))+length($currentObject/OriginalTitle)
+
+  or in js action:
+
+  // returns the byte length of a utf8 string
+  export async function GetUtf8Length(str) {
+  	// BEGIN USER CODE
+      var utf8Length = 0;
+      for (var n = 0; n < str.length; n++) {
+              var c = str.charCodeAt(n);
+              if (c < 128) {
+                  utf8Length++;
+              }
+              else if(c < 2048) {
+                  utf8Length = utf8Length+2;
+              }
+              else {
+                  utf8Length = utf8Length+3;
+              }
+      }
+      return utf8Length;
+  	// END USER CODE
   }
 
 Q: get React Component instance
@@ -1117,6 +1206,9 @@ debugger;
       return compFiber.stateNode;
   }
 
+Q: close all dialog messages
+A:
+  dijit.registry.toArray().filter(x => x instanceof mxui.widget.DialogMessage).forEach(x => x.onClose());
 
 Q: custom javascript
 A: 
@@ -1167,7 +1259,7 @@ A:
 
   this.domNode.parentElement refers to the container HTMLNode
   
-  dijit.getEnclosingWidget(this.domNode.parentNode) returns the parent widget
+  dijit.getEnclosingWidget(this.domNode.parentNode) returns the parent Dojo widget (In Mendix 9.24 Container is not a Dojo widget)
 
   To find a neighbour widget use:
   HTMLNode.querySelectorAll('.mx-someclass'); 
@@ -1308,7 +1400,7 @@ Q: No access to microflow X for user role Y
 A:
 
 Q: Removal or rename of attributes in external entity key for entity 'X.Y' is not supported.
-A: 
+A: delete and re-add the entire entity from the Data Hub palette
 
 Q: flow is not accepted by origin or destination
 A: first choose "set error handling" from context menu, then mark the flow as error handler

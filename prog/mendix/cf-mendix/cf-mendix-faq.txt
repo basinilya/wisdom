@@ -1,3 +1,20 @@
+Q:
+A:
+see https://docs.developer.swisscom.com/buildpacks/understand-buildpacks.html
+CF runs bin/detect, bin/supply (no-op), bin/finalize (staging), bin/release (run)
+These scriprs process the files: dependencies-stage.yml and dependencies.yml and install the dependencies: python, mono, java, etc.
+Sometimes they have to call the respective python scripts like buildpack/stage.py
+
+cflinuxfs4 where `apt-get -y remove python3; apt-get -y autoremove` was run are more stable because then buildpack installs the right version of Python.
+
+The buildpack can build a Mendix app from sources if the build dir contains an .mpr file
+or it can work on an already built app if the build dir contains an extracted .mda file.
+It expects that CF extracts the package and calls the buildpack scripts with proper arguments.
+
+In 2024 the buildpack 5.0.0 only supports building with `mono mxbuild.exe` although mxbuild.exe was removed from the latest MxBuild packages and replaced with a native Linux binary "mxbuild".
+It also doesn't support extra arguments to mxbuild like model version.
+As a workaround, build the .mda file explicitly.
+
 Q: 
 A: 
   vi /home/vcap/app/nginx/conf/nginx.conf

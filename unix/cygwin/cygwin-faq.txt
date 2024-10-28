@@ -1,3 +1,8 @@
+Q: stat system call on Google Drive causes ReadFile call
+A: 
+  mkdir /cygnotexec
+  mount -obind,notexec "/cygdrive/c/ClusterStorage/gdrive/basinilya@gmail.com" "/cygnotexec/basinilya@gmail.com"
+
 Q: add trusted authority
 A:
        QUICK HELP 1: To add a certificate in the simple PEM or DER file formats to the list of CAs trusted on the system:

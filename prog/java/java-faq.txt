@@ -37,6 +37,10 @@ A:
   > string is special, as described above, and the limit parameter does not
   > apply there.)
 
+Q: thread dump
+A: Or if on unix then kill -3 pid or on windows Ctrl+Break 
+  or jstack -l pid >test4.txt
+
 Q: add to URLClassLoader
 A:
         try {
