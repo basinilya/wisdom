@@ -14,14 +14,13 @@ def sanitize_filename(name):
     return re.sub(f'[{re.escape(INVALID_FILENAME_CHARS)}]', '_', name)
 
 
-def extract_curl_details(curl_cmd):
-    """Extracts the URL and cookies from a curl command copied from browser dev tools."""
-    curl_parts = curl_cmd.split()
+def extract_curl_details(curl_parts):
+    """Extracts the URL and cookies from a curl command split into parts."""
     url = None
     cookies = {}
     headers = {}
     for i, part in enumerate(curl_parts):
-        if part.startswith("'http") or part.startswith('"http'):
+        if part.startswith("http"):
             url = part.strip("'")
         elif part in ('-H', '--header') and i + 1 < len(curl_parts):
             header = curl_parts[i + 1].strip("'")
@@ -72,12 +71,12 @@ def crawl_and_download(base_url, page_id, page_title, cookies, headers):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python script.py '<CURL_COMMAND>'")
+    if len(sys.argv) < 3:
+        print("Usage: python script.py curl <CURL_ARGUMENTS>")
         sys.exit(1)
 
-    curl_cmd = sys.argv[1]
-    base_url, cookies, headers = extract_curl_details(curl_cmd)
+    curl_parts = sys.argv[2:]
+    base_url, cookies, headers = extract_curl_details(curl_parts)
     if not base_url:
         print("Failed to extract base URL from curl command.")
         sys.exit(1)
