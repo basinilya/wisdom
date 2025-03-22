@@ -2,7 +2,7 @@ import os
 import re
 import sys
 import requests
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 INVALID_FILENAME_CHARS = r'<>:"/\\|?*'
 
@@ -24,7 +24,7 @@ def extract_curl_details(curl_parts):
     return url, cookies, headers
 
 def get_child_pages(base_url, cookies, headers, parent_id):
-    api_url = urljoin(base_url, f"rest/api/content/{parent_id}/child/page?expand=title")
+    api_url = urljoin(base_url, f"/rest/api/content/{parent_id}/child/page?expand=title")
     response = requests.get(api_url, cookies=cookies, headers=headers)
     if response.ok:
         return [(p['id'], p['title']) for p in response.json().get('results', [])]
@@ -37,12 +37,17 @@ def download_export(url, cookies, headers, output_path):
             for chunk in response.iter_content(1024):
                 f.write(chunk)
         print(f"Downloaded: {output_path}")
+    else:
+        print(f"Failed to download: {url} (Status: {response.status_code}, Response: {response.text})")
+        sys.exit(1)
 
 def crawl_and_download(base_url, page_id, page_title, cookies, headers):
     safe_title = sanitize_filename(page_title)
     os.makedirs(safe_title, exist_ok=True)
-    pdf_url = urljoin(base_url, f"spaces/flyingpdf/pdfpageexport.action?pageId={page_id}")
-    doc_url = urljoin(base_url, f"exportword?pageId={page_id}")
+    parsed_url = urlparse(base_url)
+    site_root = f"{parsed_url.scheme}://{parsed_url.netloc}"
+    pdf_url = urljoin(site_root, f"/spaces/flyingpdf/pdfpageexport.action?pageId={page_id}")
+    doc_url = urljoin(site_root, f"/exportword?pageId={page_id}")
     
     download_export(pdf_url, cookies, headers, os.path.join(safe_title, f"{safe_title}.pdf"))
     download_export(doc_url, cookies, headers, os.path.join(safe_title, f"{safe_title}.doc"))
