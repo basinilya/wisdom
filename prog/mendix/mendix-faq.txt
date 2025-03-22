@@ -1,4 +1,52 @@
 ﻿==== do not remove first line ================================
+Q: run a microflow or a nanoflow on attribute change in web UI after it's edited in a 3rd-party snippet
+A: see SubscribeToAttribute.js
+
+Q: Set max amount of objects retrieved with XPath to 0
+A:
+  Tested in 8.18.7 .. 10.12.11
+  Attempt to set zero or negative amount would be ignored by XPath engine, if you want to get zero rows append [1=2] or don't run XPath at all
+
+Q: list modifications inside a javascript action are lost
+A:
+  Unlike with Java Actions, you can't implement a JavaScript Action that mutates
+  its parameters of type "List" if you need to get more than one list out of it.
+  Mendix maps Lists to native JS Arrays and those have mutating push() and
+  splice() methods or can have their elements replaced, but after JS Action
+  returns the List parameters stay as they were before the call. I haven't found
+  a good workaround for that.
+
+Q: Git info for Mendix Support
+A:
+  (echo 'git version'  & git version & echo 'git status'  &  git status  & echo 'git config --list --show-origin' & git config --list --show-origin  & echo '.gitattributes '  & more .git\.gitattributes & echo '.git\config'  & more .git\config  & echo 'git log -n 20 '  & git log -20 & echo 'git log -20 --notes=refs/notes/mx_metadata '  & git log -20 --notes=refs/notes/mx_metadata  & echo 'graph log 100' & git log --graph -n 100  ) >  supportgit.log 2> nul
+
+Q: ???
+A: studiopro.exe --log-level=debug
+
+Q: get dependency tree
+A:
+    ~/.gradle/init.gradle
+
+    rootProject {
+    
+        apply(['plugin': 'project-report'])
+    
+        def allDependencies = task([type: DependencyReportTask],"allDependencies")
+        allDependencies.doFirst {
+                System.err.println 'allDependencies is executing'
+            }
+        allDependencies.setOutputFile new File("C:\\14\\last.report")
+    
+        tasks.matching({it.name == 'copyDependencies'}).configureEach {
+            it.dependsOn allDependencies
+    
+            it.doFirst {
+                System.err.println 'copyDependencies is executing'
+                throw new Exception("failing intentionally")
+            }
+      }
+    }
+
 Q:
   git push --force origin main
   ! [remote rejected] main -> main (non-fast-forward)
@@ -33,7 +81,7 @@ Q: what's the nulls behavior in List operation (sort) activity in Mendix?
 A:
   9.24.2: always "NULLS LAST", for both ASC and DESC
 
-Q: is committing empty object ok?
+Q: is committing empty object ok? commit empty object
 A: yes, no error is thrown
 
 Q:
@@ -368,6 +416,10 @@ Q: App is in maintenance mode. To turn off unset DEBUG_CONTAINER variable
 A: The python server is serving this page if the container was started with debug enabled. You can't stop it without stopping the container. Forward another port to connect to NGinx on port 1234
 
 Q: Will this fail? :
+    min(empty,1), max(empty,1)
+A: yes, max(empty, ...) fails with: All input values should be non empty for function max
+
+Q: Will this fail? :
     '' + (if true then empty else 'dummy')
 A: no, concatenating null results in concatinating the word 'null'
   confirmed in 9.24.2
@@ -525,6 +577,9 @@ A:
 	com.mendix.basis.action.ContextImpl.endTransaction()
   caveat: you will have to check if it's a top-level transaction
 
+Q: get enumeration by string
+A: You need to duplicate CommunityCommons.EnumerationFromString for every Enum you want to use
+
 Q: ?
 A:
   for empty enum getKey(empty) and getCaption(empty) return zero-length string '', not empty
@@ -640,6 +695,9 @@ A: There's no error, but attempt to add to this list will silently fail, at leas
 
 Q: Deleting ... object failed for security reasons
 A: Check access rules of Cascade Deleted Objects
+
+Q: ???
+A: When a new object is created, or when a new object is sent to the runtime server as part of a request, all XPath constraints are assumed to evaluate as true.
 
 Q:
   com.mendix.webui.WebUIException: Exception while executing runtime operation
@@ -833,7 +891,7 @@ Q: No connecting flow found
 A: Decision activity expression returned: empty
 
 Q: Unique Nulls
-A: At least in Postgres and H2 the unique constraint created by Mendix allows duplicate NULLs 
+A: At least in Postgres and HSQLDB the unique constraint created by Mendix allows duplicate NULLs 
 
 Q: replace an attribute with a new one in the domain model
 A: 
@@ -1419,7 +1477,7 @@ A:
 Q: Where's the mx javascript API documented? mx.ui.showLogin(), mx.data.action() and such.
 A: https://apidocs.rnd.mendix.com/9/client/mx.ui.html
 
-Q: call microflow with multiple parameters from JS
+Q: call microflow with multiple parameters from javascript
 A: 
 
   mx.data.action allows for at most 1 non-list object of each entity type

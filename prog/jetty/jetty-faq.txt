@@ -1,6 +1,9 @@
 Q: stop/undeploy webapp without killing process
 A: connect with JConsole, Mbeans, org.eclipse...servlethandler/0/.../stop()
 
+Q: mvn jetty:run with debug
+A: mvnDebug jetty:run
+
 Q: mvn jetty:run +JMX 
 A: 
   Download jetty distribution of the same version as jetty plugin

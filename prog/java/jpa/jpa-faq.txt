@@ -1,0 +1,18 @@
+Q: JPQL where in list
+A: just put a parameter of java.util.Collection to the parameter map and use in(?1)
+
+Q: batch select related entities
+A:
+  Eclipselink: @BatchFetch
+  Hibernate: @BatchSize
+
+Q: invalidate cache
+A: 
+    em.getEntityManagerFactory().getCache().evictAll();
+    https://khartig.wordpress.com/2011/10/23/clearing-cache-in-jpa-2-0/
+
+Q: select complex types
+A: 
+  - JOIN FETCH
+  - eager
+  - result mapping

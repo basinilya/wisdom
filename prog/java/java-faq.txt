@@ -1,6 +1,12 @@
 ﻿********************************************************************************
 Do not remove 1st line
 ********************************************************************************
+Q: array of parameterized type
+A:
+
+Q: OutOfMemoryError: Metaspace
+A: 
+
 Q: log java.net.HttpURLConnection
 A:
   
@@ -36,6 +42,8 @@ A:
   > not be returned. (Note that the case where the input is itself an empty
   > string is special, as described above, and the limit parameter does not
   > apply there.)
+
+workaround:
 
 Q: thread dump
 A: Or if on unix then kill -3 pid or on windows Ctrl+Break 
@@ -379,6 +387,7 @@ A: java.util.Base64
 Q: hex string
 A: javax.xml.bind.DatatypeConverter.printHexBinary
     (hidden since java 9)
+  org.apache.commons.codec.binary.Hex.encodeHexString()
 
 Q: md5
 A:
@@ -582,3 +591,20 @@ A:
   To enable it in the current JDK download the unlimited policy package jce_policy-8.zip
   from https://www.oracle.com/java/technologies/javase-jce8-downloads.html
   and replace the jar files in the JRE directory.
+
+Q: ???
+A:
+    private static URI uriFromPath(final String path) {
+        try {
+            if (path != null && path.indexOf(':') != -1) {
+                // prefixing the path so the part preceding the colon does not become the scheme
+                final String tmp = new URI(null, null, "/x" + path, null).toString().substring(2);
+                // the colon is not escaped by default
+                return new URI(tmp.replace(":", "%3A"));
+            } else {
+                return new URI(null, null, path, null);
+            }
+        } catch (final URISyntaxException x) {
+            throw new RuntimeException("Can't happen: " + x, x);
+        }
+    }

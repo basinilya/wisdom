@@ -1,0 +1,40 @@
+2.6.3:
+=========================================
+quoted identifiers setting broken
+=========================================
+@JoinColumns(..., foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+applied to whole table. No constraints created at all
+
+=========================================
+@BatchFetch(size=20)
+java.lang.NullPointerException: Name is null
+	at java.lang.Enum.valueOf(Enum.java:236)
+	at org.eclipse.persistence.annotations.BatchFetchType.valueOf(BatchFetchType.java:1)
+
+Workaround:
+@BatchFetch(size=20, value=BatchFetchType.XXX)
+
+https://www.eclipse.org/forums/index.php/t/1091566/
+
+=========================================
+"size" ignored in @BatchFetch with BatchFetchType.IN
+
+From "size" javadoc:
+
+    This is only used for IN type batch reading and defines the number of keys used in each IN clause.
+
+Form used: @BatchFetch(size=3, value=BatchFetchType.IN)
+
+Expected:
+
+    SELECT IDSG, NAME, NUMBER FROM gnss_handsets WHERE (IDSG IN (?,?,?))
+      bind => [+ 49 00000 0 00 01, + 49 00000 0 00 02, + 49 00000 0 00 03]
+    SELECT IDSG, NAME, NUMBER FROM gnss_handsets WHERE (IDSG IN (?,?,?))
+      bind => [+ 49 00000 0 00 04, + 49 00000 0 00 05, + 49 00000 0 00 05]
+    ...
+
+Actual:
+
+    [190209 10:57:04.101] FINE: "SELECT IDSG, NAME, NUMBER FROM gnss_handsets WHERE (IDSG IN (?,?,?,?,?,?,?,?,?,?,?...
+      bind => [+ 49 00000 0 00 01, + 49 00000 0 00 02, + 49 00000 0 00 03, + 49 00000 0 00 04, + 49 00000 0 00 05,...
+=========================================

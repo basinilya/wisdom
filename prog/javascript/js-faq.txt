@@ -1,3 +1,18 @@
+aaaobserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    console.log(mutation.type, mutation.target.id, mutation.attributeName);
+    debugger;
+    if (mutation.type === "childList" && mutation.target.id === "target") {
+    }
+  });
+})
+
+
+aaaobserver.observe(temp1, {
+  attributes: true
+})
+
+
 Q: rethrowing errors
 A: just "throw e;"
 

@@ -1,3 +1,22 @@
+Q: postgresql show max connections
+A: show max_connections
+
+Q: parameters / prepared statement
+A:
+PREPARE fooplan (int, text, bool, numeric) AS
+    INSERT INTO foo VALUES($1, $2, $3, $4);
+EXECUTE fooplan(1, 'Hunter Valley', 't', 200.00);
+
+PREPARE usrrptplan (int) AS
+    SELECT * FROM users u, logs l WHERE u.usrid=$1 AND u.usrid=l.usrid
+    AND l.date = $2;
+EXECUTE usrrptplan(1, current_date);
+
+Q: ???
+A:
+native: -csearch_path=some 
+java: currentSchema=some
+
 Q: Pagination by compound key / Pagination by composite key
 A: SELECT * FROM table WHERE (Id, SeqNo) > (1, 4) AND Valid = 'Y' ORDER BY Id, SeqNo LIMIT 3;
 
@@ -240,19 +259,21 @@ A:
 See also
 
 CREATE EXTENSION pg_stat_statements;
+
 SELECT 
         pss.userid,
         pss.dbid,
         pd.datname as db_name,
-        round(pss.total_time::numeric, 2) as total_time, 
+        round(pss.total_exec_time::numeric, 2) as total_time, 
         pss.calls, 
-        round(pss.mean_time::numeric, 2) as mean, 
-        round((100 * pss.total_time / sum(pss.total_time::numeric) OVER ())::numeric, 2) as cpu_portion_pctg,
+        round(pss.mean_exec_time::numeric, 2) as mean, 
+        round((100 * pss.total_exec_time / sum(pss.total_exec_time::numeric) OVER ())::numeric, 2) as cpu_portion_pctg,
         pss.query as query
 FROM pg_stat_statements pss, pg_database pd
 WHERE pd.oid=pss.dbid
-ORDER BY pss.total_time 
+ORDER BY pss.total_exec_time 
 DESC LIMIT 30;
+
 
 Q: show server version
 A: select version();

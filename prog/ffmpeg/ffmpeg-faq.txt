@@ -1,3 +1,13 @@
+Q: cut part from video file from start position to end position
+A:
+  -ss starttime
+  -t duration
+  -to endtime
+
+Q: concat
+A:
+  https://trac.ffmpeg.org/wiki/Concatenate
+
 Q: Screen grab
 A:
   Install UScreenCapture
