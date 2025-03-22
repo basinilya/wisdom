@@ -50,6 +50,10 @@ def crawl_and_download(base_url, page_id, page_title, cookies, headers):
     for child_id, child_title in get_child_pages(base_url, cookies, headers, page_id):
         crawl_and_download(base_url, child_id, child_title, cookies, headers)
 
+def extract_page_id(html):
+    match = re.search(r'<meta name="ajs-page-id" content="(\d+)">', html)
+    return match.group(1) if match else None
+
 def main():
     if len(sys.argv) < 3:
         print("Usage: python script.py curl <CURL_ARGUMENTS>")
@@ -62,15 +66,17 @@ def main():
         sys.exit(1)
 
     match = re.search(r'pageId=(\d+)', base_url)
-    if not match:
-        print("Failed to extract page ID from URL.")
-        sys.exit(1)
-
-    page_id = match.group(1)
+    page_id = match.group(1) if match else None
     response = requests.get(base_url, cookies=cookies, headers=headers)
     if not response.ok:
         print(f"Failed to access page: {base_url} (Status: {response.status_code})")
         sys.exit(1)
+
+    if not page_id:
+        page_id = extract_page_id(response.text)
+        if not page_id:
+            print("Failed to extract page ID from URL or page source.")
+            sys.exit(1)
 
     page_title_match = re.search(r'<title>(.*?)</title>', response.text, re.IGNORECASE)
     if not page_title_match:
