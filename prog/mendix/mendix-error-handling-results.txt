@@ -36,7 +36,7 @@ Q: When is a savepoint created?
 A: It's created before an action with a "Without rollback" error handling.
 
 Q: What does Rollback do?
-A: It rolls back to the most recent savepoint. If there's no savepoint the whole transaction is rolled back and a new transaction is started.
+A: It rolls back to the most recent savepoint. If there's no savepoint the whole transaction is rolled back.
 
 
 Q: What if a sub-microflow saves to DB after error with or without rollback, then re-throws and the calling microflow rolls back?
@@ -58,5 +58,10 @@ and not
 
 A: must be bad wording
 
-Q: What happens to values of attributes of an object variable in a microflow after rollback? What happens to the cached objects after rollback?
+Q: What happens to values of attributes of an object variable in a microflow after "Rollback Object" activity? What happens to the cached objects after "Rollback Object" activity?
 A: A rolled back object can be passed to the page with a data view and can be saved later.
+
+Q: What happens to values of attributes of an object variable in a microflow after Rollback of a Transaction or a Savepoint?
+A: 
+  The values and the isNew() state aren't reverted automatically. In fact, even manual revert isn't possible if an object was saved inside a savepoint that was later aborted.
+  One exception is a save of a list: the changes made in a BCO_ are reverted if the whole list fails to save.

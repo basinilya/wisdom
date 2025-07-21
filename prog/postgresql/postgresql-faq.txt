@@ -1,3 +1,11 @@
+Q: create schema
+A:
+
+Q: User query might have needed to see row versions that must be removed
+A: 
+  In readonly replica transactions should not last for more than a few dozens of seconds, or else you get this error.
+  Consider not using TX at all
+
 Q: postgresql show max connections
 A: show max_connections
 
@@ -64,7 +72,7 @@ A:
   
 
 Q:
-A: jdbc:postgresql://host/db
+A: jdbc:postgresql://host/db?currentSchema=myschema
 
     <dependency>
       <groupId>org.postgresql</groupId>

@@ -1,3 +1,18 @@
+Q:
+    org.gradle.tooling.BuildActionFailureException: The supplied phased action failed with an exception.
+    ...
+    	at org.eclipse.buildship.core.internal.workspace.EclipseModelUtils.runPhasedModelQuery(EclipseModelUtils.java:111)
+    ...
+    Caused by: BUG! exception in phase 'semantic analysis' in source unit '_BuildScript_' Unsupported class file major version ***
+    	at org.gradle.groovy.scripts.internal.DefaultScriptCompilationHandler.compileScript(DefaultScriptCompilationHandler.java:160)
+    ...
+    Caused by: java.lang.IllegalArgumentException: Unsupported class file major ***
+    	at groovyjarjarasm.asm.ClassReader.<init>(ClassReader.java:199)
+A:
+  Your fixed version of Gradle is too old
+  Go to Window > Preferences > Gradle > Gradle distribution
+  and change from "Local installation directory" to "Gradle wrapper"
+
 Q: ???
 A:
 lifecycle-mapping-metadata.xml

@@ -41,19 +41,20 @@ def download_export(url, cookies, headers, output_path):
         print(f"Failed to download: {url} (Status: {response.status_code}, Response: {response.text})")
         sys.exit(1)
 
-def crawl_and_download(base_url, page_id, page_title, cookies, headers):
+def crawl_and_download(base_url, page_id, page_title, cookies, headers, parent_dir="."):
     safe_title = sanitize_filename(page_title)
-    os.makedirs(safe_title, exist_ok=True)
+    page_dir = os.path.join(parent_dir, safe_title)
+    os.makedirs(page_dir, exist_ok=True)
     parsed_url = urlparse(base_url)
     site_root = f"{parsed_url.scheme}://{parsed_url.netloc}"
     pdf_url = urljoin(site_root, f"/spaces/flyingpdf/pdfpageexport.action?pageId={page_id}")
     doc_url = urljoin(site_root, f"/exportword?pageId={page_id}")
     
-    download_export(pdf_url, cookies, headers, os.path.join(safe_title, f"{safe_title}.pdf"))
-    download_export(doc_url, cookies, headers, os.path.join(safe_title, f"{safe_title}.doc"))
+    download_export(pdf_url, cookies, headers, os.path.join(page_dir, f"{safe_title}.pdf"))
+    download_export(doc_url, cookies, headers, os.path.join(page_dir, f"{safe_title}.doc"))
     
     for child_id, child_title in get_child_pages(base_url, cookies, headers, page_id):
-        crawl_and_download(base_url, child_id, child_title, cookies, headers)
+        crawl_and_download(base_url, child_id, child_title, cookies, headers, page_dir)
 
 def extract_page_id(html):
     match = re.search(r'<meta name="ajs-page-id" content="(\d+)">', html)

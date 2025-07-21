@@ -1,3 +1,6 @@
+Q: set folder
+A: link()
+
 Q: ?
 A:
   Encryption with salt and well-known key (for passwords in dfc.properties) 

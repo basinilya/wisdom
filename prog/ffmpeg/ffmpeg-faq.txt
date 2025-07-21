@@ -95,6 +95,9 @@ A:
   ffmpeg -y -v warning -i $1 -i ${palette:-palette.png} -lavfi "[0:v][1:v] paletteuse" $2
   ffmpeg -y -v warning -i $1 -i ${palette:-palette.png} -lavfi "paletteuse" $2
 
+Q: download ffmpeg windows builds
+A: https://github.com/btbn/ffmpeg-builds/releases
+
 Q: grab screen (capture desktop) on Windows
 A: sleep 3 && ffmpeg -y -f gdigrab -framerate 25 -offset_x 100 -offset_y 100 -video_size 640x480 -show_region 1 -i desktop -c:v huffyuv out2.avi
 

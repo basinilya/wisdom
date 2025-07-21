@@ -1,3 +1,10 @@
+Q: check if some branches are shallow
+A: git rev-parse --is-shallow-repository
+
+Q: check if the current HEAD is shallow
+A: git rev-list --max-parents=0 HEAD | grep -Fx -f "$(git rev-parse --git-dir)/shallow" >/dev/null 2>&1 && echo "HEAD is shallow" || echo "HEAD is complete"
+
+
 Q: change author of the most recent commit
 A: git commit --amend --no-edit --reset-author
 

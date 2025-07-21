@@ -1,4 +1,69 @@
 ﻿==== do not remove first line ================================
+Q: rename an app
+A:
+  - Go to sprintr, Settings and click the pencil icon to edit the app name
+  - Rename the mpr file
+
+Q: Use Microflow Debugger over HTTP proxy
+A:
+  In 10.12.11 Debugger uses WinHTTP, env vars are ignored. Go to OS proxy
+  settings and enable http proxy. No need to restart Studio. Every debugging
+  action is a separate HTTP request, do not disable the proxy until the
+  debugging session ends.
+
+Q: Current Working Directory (CWD) when running locally
+A: 
+  Studio: deployment\
+  Eclipse: deployment\
+
+Q: Get constant value in JS (if it's exposed to client)
+A:
+  window.mx.session.sessionData.constants.find(x => x.name === "CiphixDevTools.Enabled")
+
+  {
+      "name": "CiphixDevTools.Enabled",
+      "type": "Boolean",
+      "value": true
+  }
+
+Q:
+  Mendix app 10.18+ deployed in Cloud generates 'Secure' cookies despite being queried by curl http://127.0.0.1:8081
+A:
+  https://docs.mendix.com/releasenotes/studio-pro/10.18/#improvements-6
+  > We now use the ApplicationRootUrl setting to determine if application cookies
+  > should be marked as Secure. Previously, we were only checking
+  > X-Forwarded-Proto and X-Forwarded-Scheme headers.
+
+Q: When "Refresh on Show" is false some tabs in a Tab Container widget are still loaded lazily, but not all
+A: If one of the widgets on a tab "subscribes" to an attribute, e.g. an input widget this makes the whole tab eager 
+
+Q: Is a zero-length JSON string parsed as an empty Integer attribute or does it cause an error?
+A: The app will fail to compile with the error:
+  5	CE6099	Schema data type 'String' is not compatible with attribute 'MyFirstModule.Root.D' of type 'Integer'.	Value mapping element 'D'	Import mapping 'Import_mapping'	MyFirstModule
+
+Q: does a missing node in JSON clear the default value of an attribute when using Import Mapping?
+A:
+  No, if a node is missing the default value is kept.
+  Tested in 9.24.2 and 10.18.3
+
+Q: run js in modern HTMLElement widget (HTML Element)
+A:
+  tag name: div
+  content: HTML
+  HTML:
+    <style onload='this.removeAttribute("onload"); console.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", this);'>
+    </style>
+  Advanced / Sanitization configuration:
+    {"FORCE_BODY": true, "ADD_ATTR": ["onload"]}
+
+  See https://github.com/cure53/DOMPurify/issues/804
+
+  Do not try tag name "style", you can't add "onload" attribute to top-level element regardless of Sanitization configuration.
+
+
+Q: sort by a referenced object in retrieve from db 
+A: you can only use associations where one sort object refers one or many retrieved objects
+
 Q: run a microflow or a nanoflow on attribute change in web UI after it's edited in a 3rd-party snippet
 A: see SubscribeToAttribute.js
 
@@ -414,6 +479,15 @@ A:
 
 Q: App is in maintenance mode. To turn off unset DEBUG_CONTAINER variable
 A: The python server is serving this page if the container was started with debug enabled. You can't stop it without stopping the container. Forward another port to connect to NGinx on port 1234
+
+Q: what does toString($EmptyLong) return?
+A: zero-length string ''
+
+Q: How are empty Integers exported to JSON?
+A: as no propery
+
+Q: How are null Strings exported to JSON?
+A: as no propery
 
 Q: Will this fail? :
     min(empty,1), max(empty,1)
@@ -1059,6 +1133,7 @@ Q: refresh on client from java code
 A: 
   !!! always call both addRefreshClass and addRefreshObjectFeedback
   !!! addRefreshObjectFeedback alone works only for data view but not for grids
+  !!! Upd: addRefreshClass alone works for grid but not for data views
 
     FeedbackHelper.addRefreshClass
     FeedbackHelper.addRefreshObjectFeedback
@@ -1231,12 +1306,13 @@ A:
 
   // https://stackoverflow.com/a/39165137/447503
   function FindReact(dom, traverseUp = 0) {
-debugger;
       const key = Object.keys(dom).find(key=>{
           return key.startsWith("__reactFiber$") // react 17+
               || key.startsWith("__reactInternalInstance$"); // react <17
       });
       const domFiber = dom[key];
+
+      window.aaalastdomfiber = domFiber;
       if (domFiber == null) return null;
   
       // react <16
@@ -1252,17 +1328,20 @@ debugger;
       const GetCompFiber = fiber=>{
           //return fiber._debugOwner; // this also works, but is __DEV__ only
           let parentFiber = fiber.return;
-          while (typeof parentFiber.type == "string") {
+          while (!parentFiber.stateNode?.isReactComponent) {
               parentFiber = parentFiber.return;
           }
           return parentFiber;
       };
+      // debugger;
       let compFiber = GetCompFiber(domFiber);
       for (let i = 0; i < traverseUp; i++) {
           compFiber = GetCompFiber(compFiber);
       }
       return compFiber.stateNode;
   }
+
+aaa = FindReact(temp0)
 
 Q: close all dialog messages
 A:
