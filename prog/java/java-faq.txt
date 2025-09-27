@@ -7,7 +7,7 @@ A:
 Q: OutOfMemoryError: Metaspace
 A: 
 
-Q: log java.net.HttpURLConnection
+Q: http trace log java.net.HttpURLConnection
 A:
   
   HttpURLConnection can log the HTTP headers using JUL with level=FINE and logger=sun.net.www.protocol.http.HttpURLConnection

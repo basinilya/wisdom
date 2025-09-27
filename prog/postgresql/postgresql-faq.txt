@@ -1,3 +1,13 @@
+Q: ???
+A:
+  set join_collapse_limit = 9;
+  set from_collapse_limit = 9;
+
+Q: ???
+A:
+  SHOW idle_in_transaction_session_timeout;
+  ALTER DATABASE xxx SET idle_in_transaction_session_timeout TO '120000';
+
 Q: create schema
 A:
 
@@ -109,11 +119,15 @@ service iptables save
 service postgresql-11 restart
 ..
 psql
+create user prism password 'prism';
+
 create database osm_brandenburg; -- you have created a new database.
 \connect osm_brandenburg
 -- you switched to database osm_brandenburg.
 
-create user prism password 'prism';
+REVOKE CONNECT ON DATABASE osm_brandenburg FROM PUBLIC;
+GRANT CONNECT ON DATABASE osm_brandenburg to prism;
+
 
 Q: current database
 A: \conninfo

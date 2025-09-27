@@ -18,3 +18,26 @@ absolute:
             http-response replace-value Location (https?://domain.com(:[0-9]+)?)?(/.*) __proto__%[capture.req.hdr(0)]\3
             rspirep ^Location:\ __proto__(.*) Location:\ https://\1 if { ssl_fc }
             rspirep ^Location:\ __proto__(.*) Location:\ http://\1 unless { ssl_fc }
+
+Q: advanced nosecure cookies
+A:
+
+  frontend http-in
+      bind *:7998
+      mode http
+  
+      # Add '__Host-' prefix to XASSESSIONID and such in Cookie
+      http-request set-header Cookie %[req.hdr(Cookie),'regsub("(^|;\s*)(XASSESSIONID|SessionTimeZoneOffset|DeviceType|Profile)=","\1__Host-\2=","g")']
+  
+      default_backend servers
+  
+  backend servers
+      mode http
+  
+      server srv1 127.0.0.1:48080
+  
+      # Remove '__Host-' prefix from Set-Cookie: __Host-XASSESSIONID and such
+      http-response replace-header Set-Cookie '^__Host-((XASSESSIONID|SessionTimeZoneOffset|DeviceType|Profile)=.*)' '\1'
+  
+      # Remove 'Secure' flag from all Set-Cookie headers
+      http-response replace-header Set-Cookie '(.*);\s*Secure(;.*|$)' '\1\2'

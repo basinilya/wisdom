@@ -1,4 +1,133 @@
 ﻿==== do not remove first line ================================
+Q:
+  Can't login directly to a cluster node in 10.18+. Forced Secure cookies break
+  microflow debugging in cluster with TLS offload
+A:
+  In 10.18 a change was introduced: "We now use the ApplicationRootUrl setting
+  to determine if application cookies should be marked as Secure. Previously, we
+  were only checking X-Forwarded-Proto and X-Forwarded-Scheme headers.".
+
+  Workaround:
+  Upgrade to 10.24.7+ and install a browser addon that adds X-Forwarded-Proto:http
+  https://chromewebstore.google.com/detail/modheader-modify-http-hea/idgpnmonknjnojddfkpgkljpfnnfcklj
+  https://addons.mozilla.org/en-US/firefox/addon/header-editor/
+  
+  Config:
+  Regex pattern:
+    ^http://[^/]+[.]mycluster[.]local(:[0-9]+)?($|/.*)
+  Header:
+    X-Forwarded-Proto
+    http
+
+  Prior to 10.24.7 a custom forwarding proxy is necessary to unsecure the cookies.
+  Haproxy config snippet:
+
+    frontend http-in
+        bind *:7997
+        mode http    
+        # Add '__Host-' prefix to XASSESSIONID and such in Cookie
+        http-request set-header Cookie %[req.hdr(Cookie),'regsub("(^|;\s*)(XASSESSIONID|SessionTimeZoneOffset|DeviceType|Profile)=","\1__Host-\2=","g")']
+        default_backend servers
+    backend servers
+        mode http
+        server srv1 127.0.0.1:48080
+        # Remove '__Host-' prefix from Set-Cookie: __Host-XASSESSIONID and such
+        http-response replace-header Set-Cookie '^__Host-((XASSESSIONID|SessionTimeZoneOffset|DeviceType|Profile)=.*)' '\1'
+        # Remove 'Secure' flag from all Set-Cookie headers
+        http-response replace-header Set-Cookie '(.*);\s*Secure(;.*|$)' '\1\2'
+
+  In Nginx it will require extra plugins, probably the LUA plugin because the
+  out of the box directives like "map","proxy_cookie_flags","proxy_hide_header",
+  "add_header" are insufficient.
+
+  The third option is to have a local TLS proxy with a custom trusted
+  certificate, then no header manipulation will be necessary.
+
+Q: What value is assigned to createdBy and changedBy in Mendix system context?
+A:
+
+Q: Error occurred while reserving the next 100 object identifiers of entity 1072.
+A: 
+  This happens when changing a successor of System.FileDocument into a non-persistable entity.
+  Duplicate the entity, delete the old one and give the copy the original name.
+
+Q: How do link buttons work?
+A: window.open(i, '_blank', 'noopener')
+
+Q:
+  TypeError: ??? is not a function
+  during instruction processing
+  
+  async executeMicroflow(e, t, n, s = [], c = !1) {
+    let l;
+    try {
+      const n = Object.values(t).some((e => 'xpath' in e)),
+      [
+        i,
+        a
+      ] = n ? (0, o.getAllStateForMicroflow) (this.objectCache) : (0, o.getRequestDataForMicroflow) (
+        this.objectCache,
+        e,
+        (0, r.getGuidsFromRuntimeArguments) (t).concat((0, o.getImplicitMicroflowParameters) ())
+      );
+      l = c ? await(0, o.executeAsync) ((n => (0, f.runtimeOperation) (e, t, i, a, s, n))) : await(0, f.runtimeOperation) (e, t, i, a, s)
+    } catch (e) {
+      throw await(0, p.handleRuntimeError) (this.objectCache, e),
+      e
+    }
+    const u = await(0, p.handleRuntimeSuccess) (this.objectCache, this.lockManager, l, {
+      targetForm: n
+    });
+    try {
+      const e = l.actionResult;
+      if (null == e) return;
+      const {
+        value: t,
+        type: n
+      }
+      = e;
+      return (0, a.ju) (t, n, (e => (0, i.ensure) (this.objectCache.getObject(e))))
+    } finally {
+      u() // <-- TypeError: u is not a function
+    }
+  }
+A:
+  The parameter to function ensure() was undefined. This happens when getByGuid() returns undefined e.g. when user has no access to entity.
+  i.ensure = function s(e) {
+      if (null == e)
+          throw new Error("Did not expect an argument to be undefined");
+      return e
+  }
+
+  case "download_file":
+      const e = await (0,
+      a.getByGuid)(n.args.FileDocumentGuid);
+      t.downloadFile({
+          mxobject: (0,
+          i.ensure)(e),
+
+
+
+Q: does toString(<enum>) return its key or caption in Mendix?
+A: key
+
+Q:
+  ConnectionBus_Queries
+  WARN
+  Query executed in 17 seconds and 447 milliseconds: SELECT "system$processedqueuetask"."id" 
+  FROM "system$processedqueuetask" 
+  WHERE "system$processedqueuetask"."status" = ? AND "system$processedqueuetask"."started" <= ?::timestamp 
+  ORDER BY "system$processedqueuetask"."id" ASC LIMIT ?
+  
+  ConnectionBus_Queries
+  WARN
+  Query executed in 11 seconds and 538 milliseconds: 
+  SELECT  "system$processedqueuetask"."id", "system$processedqueuetask"."sequence", "system$processedqueuetask"."status", "system$processedqueuetask"."queueid", "system$processedqueuetask"."queuename", "system$processedqueuetask"."contexttype", "system$processedqueuetask"."contextdata", "system$processedqueuetask"."microflowname", "system$processedqueuetask"."useractionname", "system$processedqueuetask"."arguments", "system$processedqueuetask"."xasid", "system$processedqueuetask"."threadid", "system$processedqueuetask"."created", "system$processedqueuetask"."startat", "system$processedqueuetask"."started", "system$processedqueuetask"."finished", "system$processedqueuetask"."duration", "system$processedqueuetask"."retried", "system$processedqueuetask"."errormessage", "system$processedqueuetask"."scheduledeventname", "system$processedqueuetask"."system$owner" 
+  FROM "system$processedqueuetask" 
+  WHERE "system$processedqueuetask"."created" >= ?::timestamp 
+  ORDER BY "system$processedqueuetask"."microflowname" ASC, "system$processedqueuetask"."queuename" ASC, "system$processedqueuetask"."sequence" DESC, "system$processedqueuetask"."id" DESC
+A:
+
 Q: rename an app
 A:
   - Go to sprintr, Settings and click the pencil icon to edit the app name
@@ -100,7 +229,7 @@ A:
         allDependencies.doFirst {
                 System.err.println 'allDependencies is executing'
             }
-        allDependencies.setOutputFile new File("C:\\14\\last.report")
+        allDependencies.setOutputFile new File("C:\\temp\\last.report")
     
         tasks.matching({it.name == 'copyDependencies'}).configureEach {
             it.dependsOn allDependencies

@@ -18,8 +18,8 @@
                 // fallback
                 Transformer transformer = TransformerFactory.newInstance().newTransformer();
 
-            trySetProp(xmlTransformer, OutputKeys.INDENT, "yes");
-            trySetProp(xmlTransformer, S_KEY_INDENT_AMOUNT, "4");
+            trySetProp(transformer, OutputKeys.INDENT, "yes");
+            trySetProp(transformer, S_KEY_INDENT_AMOUNT, "4");
 
                 StreamResult output = new StreamResult(outputFile);
                 DOMSource input = new DOMSource(existingDoc);
