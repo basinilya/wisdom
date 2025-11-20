@@ -1,6 +1,24 @@
 ﻿********************************************************************************
 Do not remove 1st line
 ********************************************************************************
+Q: does catching InterruptedException clear the interrupted state of the thread?
+A: yes
+
+Q: parse URL query string
+A: 
+  Spring:
+  !!!This does not URL-decode!!!
+  org.springframework.web.util.UriComponentsBuilder.fromUriString("http://a/?a=b%20c").build(true).getQueryParams()
+  ==
+  a={b%20c}
+  Additionally use:
+  org.springframework.web.util.UriUtils.decode(String, Charset)
+
+
+
+Q: detect os
+A: System.getProperty("os.name").toLowerCase().startsWith("windows")
+
 Q: array of parameterized type
 A:
 
@@ -607,4 +625,28 @@ A:
         } catch (final URISyntaxException x) {
             throw new RuntimeException("Can't happen: " + x, x);
         }
+    }
+
+Q: extract first few characters from a byte array
+A:
+    /** decode UTF-8 bytes to a char sequence of limited length */
+    public static CharSequence abbreviateUtf8Bytes(
+            final byte[] bytes,
+            final int ofs,
+            final int len,
+            final int maxChars) {
+        final Charset charset = StandardCharsets.UTF_8;
+        final boolean fits = len <= maxChars;
+        if (fits) {
+            return new String(bytes, ofs, len, charset);
+        }
+        final CharsetDecoder decoder =
+            charset
+                .newDecoder()
+                .onMalformedInput(CodingErrorAction.REPLACE)
+                .onUnmappableCharacter(CodingErrorAction.REPLACE);
+        final CharBuffer cb = CharBuffer.allocate(maxChars);
+        decoder.decode(ByteBuffer.wrap(bytes), cb, true);
+        cb.flip();
+        return cb;
     }

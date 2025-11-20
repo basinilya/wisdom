@@ -1,4 +1,56 @@
 ﻿==== do not remove first line ================================
+Q: 15	CE6083	Design property Hover is not supported by your theme. Right-click to see more options.	Data grid 2 'dataGrid21'	Page 'ActiveSessions'	Administration
+A: DataWidgets module is required
+
+Q: BUILDPACK_XTRACE=true ineffective while running docker-mendix-buildpack/Dockerfile
+A:
+  scripts/compilation.py has hardcoded level=logging.INFO. Patch Dockerfile so it
+  patches compilation.py before building it with Docker:
+  sed -b -i 's,    ./compilation.py,    sed -b -i "s/level=logging.INFO/level=util.get_buildpack_loglevel()/" ./compilation.py \&\&\\\n&,' "${MDA_DIR:?}/Dockerfile"
+
+Q: docker-mendix-buildpack/Dockerfile freezes for a few minutes after printing INFO: Usage metering is NOT enabled
+A:
+  If you manage to enable python logger DEBUG level you'll see this:
+
+  INFO: Usage metering is NOT enabled
+  DEBUG: Staging database...
+  DEBUG: Creating directory structure for Mendix runtime...
+  DEBUG: Staging the Mendix runtime...
+  DEBUG: Setting executable permissions for [/opt/mendix/build/.local/scripts/on_error.sh]...
+  DEBUG: Setting executable permissions for [/opt/mendix/build/.local/scripts/on_out_of_memory_error.sh]...
+  DEBUG: Resolving dependency [mendix.runtime.mendix]...
+  DEBUG: Looking for [mendix-10.24.8.80126.tar.gz] in [/opt/mendix/buildpack/vendor] and [/tmp/buildcache/bust]...
+  DEBUG: Downloading [https://cdn.mendix.com/runtime/mendix-10.24.8.80126.tar.gz] to [/tmp/buildcache/bust/mendix-10.24.8.80126.tar.gz]...
+  DEBUG: Starting new HTTPS connection (1): cdn.mendix.com:443
+
+
+Q:
+  INFO - Metrics: Started metrics on Micrometer
+  ERROR: Executing start did not succeed: result: 11, message: Security level should be set to CHECKEVERYTHING in order to run in acceptance or production environment.
+  WARNING: Unexpected result while starting app: 11.Please check your configuration for errors
+  ERROR: Starting application failed: Application start failed
+A:
+  Enable Production mode in project security
+
+Q:
+  My custom widget performs an XHR to its mendix app and expects a raw string
+  in the response. I created a published REST service and it was working until
+  I enabled auth: "active session", and assigned the needed role to both PRS and
+  the operation microflow. The GET call fails with 401 unauthorized. The app log
+  is unhelpful:
+  
+  REST Publish    Incoming request from 127.0.0.1: GET http://localhost:8080/aaa/bbb/ccc
+  REST Publish    Executing operation GET aaa/bbb/ccc
+  REST Publish    Login failed: You are not authorized to access this resource
+  
+  The XHR is performed by a 3rd-party JS library to which I pass the service URL. It doesn't know anything about Mendix. This is why I don't call a microflow directly.
+
+A:
+  Have you tried setting the CSRF header?
+  https://docs.mendix.com/refguide/published-rest-service/#32-authentication-methods
+  Thank you, getConfig is not documented, but it really works.
+  I mean, xmlHttp.setRequestHeader("X-Csrf-Token", mx.session.getConfig("csrftoken"));
+
 Q:
   Can't login directly to a cluster node in 10.18+. Forced Secure cookies break
   microflow debugging in cluster with TLS offload
@@ -214,6 +266,84 @@ Q: Git info for Mendix Support
 A:
   (echo 'git version'  & git version & echo 'git status'  &  git status  & echo 'git config --list --show-origin' & git config --list --show-origin  & echo '.gitattributes '  & more .git\.gitattributes & echo '.git\config'  & more .git\config  & echo 'git log -n 20 '  & git log -20 & echo 'git log -20 --notes=refs/notes/mx_metadata '  & git log -20 --notes=refs/notes/mx_metadata  & echo 'graph log 100' & git log --graph -n 100  ) >  supportgit.log 2> nul
 
+Q: Where are Mendix 'changes in model' stored?
+A:
+  git notes --ref=mx_metadata show
+  git notes --ref=mx_metadata show HEAD
+  git notes --ref=mx_metadata show yyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  git notes --ref=mx_metadata list
+
+  # fanout directories enabled (large repos after automatic maintenance)
+  git log notes/mx_metadata -- yy/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+  # fanout directories not enabled (young repos)
+  git log notes/mx_metadata -- yyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+  git log -p notes/mx_metadata
+
+  git fetch --verbose --prune --no-auto-gc origin '+refs/heads/*:refs/remotes/origin/*' +refs/notes/mx_metadata:refs/notes/mx_metadata
+  git push --quiet origin refs/heads/main:refs/heads/main refs/notes/mx_metadata:refs/notes/mx_metadata
+ 
+
+  Example:
+    
+    $ git notes --ref=mx_metadata show HEAD~2| jq
+    {
+      "BranchName": "",
+      "ModelerVersion": "10.24.6.78836",
+      "ModelChanges": [
+        {
+          "Status": "Added",
+          "UnitID": "bcd427c5-4bfa-4799-90ff-85b221b12b19",
+          "UnitType": "Projects$ModuleImpl",
+          "UnitName": "CommunityCommons",
+          "Module": "CommunityCommons"
+        },
+        {
+          "Status": "Added",
+          "UnitID": "d5ffb493-e411-4a94-bc31-83bed75e8ade",
+          "UnitType": "Projects$Folder",
+          "UnitName": "StringUtils",
+          "Module": "CommunityCommons"
+        },
+        {
+          "Status": "Deleted",
+          "UnitID": "4d3b3e39-c27f-4a6a-9571-ff2d2d26c50a",
+          "UnitType": "Projects$ModuleImpl",
+          "UnitName": "CommunityCommons",
+          "Module": "CommunityCommons"
+        }
+      ],
+      "RelatedStories": [],
+      "SolutionVersion": "",
+      "MPRFormatVersion": "Version2",
+      "HasModelerVersion": true
+    }
+
+Q: Fill 'changes in model' using the command line
+A:
+  `git rebase` and `git cherry-pick` automatically copy "git notes" to the new
+  commits, however, Studio will discard that on next auto-fetch unless you
+  quickly push it to the server:
+  
+      git push origin refs/notes/mx_metadata:refs/notes/mx_metadata
+
+  It's better to have Studio closed during this time.
+  
+  If for some reason the notes were not copied automatically, they can be copied
+  with this command:
+  
+      git notes --ref=mx_metadata copy SRC-REV DST-REV
+
+Q: merge from command line
+A:
+  mx.exe can merge MPRv1 format
+  Make sure that the mx.exe version exactly matches the project version
+  
+  echo $'*.mpr merge=studiopro2\n' >>.git/info/attributes
+  #echo $'*.mpr merge=studiopro2\n*.mxunit merge=studiopro2' >>.git/info/attributes
+  git config merge.studiopro2.driver '"/C/Program Files/Mendix/10.18.3.58900/modeler/mx.exe" merge %O %A %B'
+
 Q: ???
 A: studiopro.exe --log-level=debug
 
@@ -343,7 +473,7 @@ A:
   
   See also https://docs.mendix.com/developerportal/general/team-server/
 
-Q: troubleshoot/log garbage collection on client
+Q: troubleshoot/log garbage collection on client gc
 A: 
   You can also enable a special setting to see which objects are removed when garbage collections occur.
 

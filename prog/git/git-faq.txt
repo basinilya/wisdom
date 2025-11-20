@@ -1,3 +1,43 @@
+Q: push to multiple repos
+A:
+
+  git remote set-url --add --push origin [existing_origin_url]
+  git remote set-url --add --push origin [second_repo_url]
+  
+  [remote "origin"]
+          url = url1
+          fetch = +refs/heads/*:refs/remotes/origin/*
+          pushurl = url2
+          pushurl = url1
+
+Q: Git for Windows add trusted openssl CA certificate
+A:
+  # Open elevated Git Bash
+  
+  # Make sure that the Git backend is really openssl
+  git config http.sslBackend
+  
+  # -inform DER was needed in older openssl versions
+  #IN_FORM_ARG="-inform DER"
+  
+  mkdir -p /mingw64/share/pki/ca-trust-source/anchors
+  openssl x509 $IN_FORM_ARG -in Zscaler-Root-CA.cer > /mingw64/share/pki/ca-trust-source/anchors/Zscaler-Root-CA.crt
+  
+  # Append the same symlink logic as in /usr/bin/update-ca-trust
+  grep cert.pem /mingw64/bin/update-ca-trust >/dev/null || (
+cat <<-'EOF'
+# The usual symbolic links are not present to keep these file in sync in MSYS2, so copying is necessary
+mkdir -p /mingw64/etc/ssl/certs
+cp -f $DEST/pem/tls-ca-bundle.pem /mingw64/etc/ssl/certs/ca-bundle.crt
+cp -f $DEST/pem/tls-ca-bundle.pem /mingw64/etc/ssl/cert.pem
+cp -f $DEST/openssl/ca-bundle.trust.crt /mingw64/etc/ssl/certs/ca-bundle.trust.crt
+EOF
+)
+
+  # Update the trust DB
+  # MSYS arg conv must be default for it to work 
+  MSYS2_ARG_CONV_EXCL= /mingw64/bin/update-ca-trust
+
 Q: check if some branches are shallow
 A: git rev-parse --is-shallow-repository
 

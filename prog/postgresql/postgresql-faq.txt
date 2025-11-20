@@ -8,6 +8,9 @@ A:
   SHOW idle_in_transaction_session_timeout;
   ALTER DATABASE xxx SET idle_in_transaction_session_timeout TO '120000';
 
+Q: psql list databases
+A: \l
+
 Q: create schema
 A:
 
@@ -104,6 +107,12 @@ A: %APPDATA%\postgresql\pgpass.conf
 Q: escape unicode characters
 A: e'Telefon\u00ED kontakty'
 
+Q: docker
+A:
+  docker container create --name postgres -p 5432:5432 -m 2g -e "POSTGRES_PASSWORD=$(dd status=none bs=1 count=16 if=/dev/urandom | base64)" postgres
+  docker start postgres
+  docker exec -it -u postgres postgres psql
+
 Q: minimal install
 A:
 # Archlinux:
@@ -128,6 +137,8 @@ create database osm_brandenburg; -- you have created a new database.
 REVOKE CONNECT ON DATABASE osm_brandenburg FROM PUBLIC;
 GRANT CONNECT ON DATABASE osm_brandenburg to prism;
 
+-- grant ALL on database MY_DB to group prism;
+grant all privileges on schema public to group prism;
 
 Q: current database
 A: \conninfo
