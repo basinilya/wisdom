@@ -15,9 +15,18 @@ A:
       </repository>
   </repositories>
 
+Q: Surefire trims the most important part of stacktrace
+A: -DtrimStackTrace=false
+
+Q: Run a single test method
+A: mvn test -Dtest=TestCircle#xyz
+  where TestCircle is the test class name and xyz is the test method.
 
 Q: Run a single test in a multi-module project
 A: mvn test -am -DfailIfNoTests=false -Dtest=TestName
+
+Q: remote debug a maven test
+A: mvn test -Dmaven.surefire.debug
 
 Q: "An internal error occurred during: Updating Maven Project" "Path must include project and resource name"
 A: m2e can't into project build directory outside of project folder
@@ -57,6 +66,12 @@ A: settings.xml:
   		<activeProfile>default-repos</activeProfile>
   	</activeProfiles>
   </settings>
+
+Q: Merge settings
+A:
+  If you need to include a custom settings file that is not in the default locations, you can use the -s (or --settings) flag: 
+  mvn clean install -s /path/to/custom-settings.xml
+  Using this flag will merge your custom file with the global settings, but it will typically replace the default user settings (~/.m2/settings.xml) for that specific execution.
 
 Q: clean rebuild a submodule while resolving the uninstalled dependencies in the reactor
 A: ?

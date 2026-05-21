@@ -1,3 +1,28 @@
+Q: EclEmma is installed but no launch button or Code Coverage in preferences
+A: ???
+
+Q:
+  Eclipse sometimes ignores Class-Path entry in MANIFEST.MF of a referenced
+  library and doesn't add transitive dependencies to classpath. Nothing is
+  in the Error Log tab.
+A:
+  If you're certain that the manifest is valid then modify the jar file and
+  refresh the Eclipse project. It's unclear whether MANIFEST.MF itself should be
+  replaced or any other zip entry. The transient referenced libraries should
+  appear with the comment: "(from Class-Path of xxx.jar)". After that you can
+  revert the jar file and refresh the project again.  
+
+Q: 
+  gradle project nature disappears, adding it manually does not fix it:
+  refresh gradle project fails silently and instantly and there's problem marker:
+    Invalid Gradle project configuration file: .settings/org.eclipse.buildship.core.prefs
+A:
+  After adding the gradle project nature edit:
+    .settings/org.eclipse.buildship.core.prefs
+  and add the missing line:
+    connection.project.dir=
+  If that doesn't help compare workspace metadata before and after re-importing the existing gradle project
+
 Q:
     org.gradle.tooling.BuildActionFailureException: The supplied phased action failed with an exception.
     ...

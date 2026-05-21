@@ -1,3 +1,17 @@
+Q: sed command to Thread Id: 0x4244
+A:
+sed -b -i 's,\(Thread Id: 0x\)[^ ]*,\1,g' */*.log
+
+Q:
+  Оценка состояния: Не удалось установить подключение из-за низкой скорости передачи данных в сети или другой проблемы с сетью. Повторите попытку подключения.
+  Cannot establish connection due to low speed or another network problem
+
+A:
+  [Thu Dec 04 15:29:09.538 2025][cscan]Function: ssl_fingerprint_verify_callback Thread Id: 0x3610 File: c:\temp\build\thehoff\phoenix_mr40.559393670858\phoenix_mr4\posture\common\libhstransport\hs_transport_curl.c Line: 1957 Level: debug :certinfo[SerialNumber=(ffffffff) IssuerCN=(AAA) subjectCN=(*.acme.com)]
+  [Thu Dec 04 15:29:32.632 2025][libcsd]Function: ssl_fingerprint_verify_callback Thread Id: 0x3990 File: c:\temp\build\thehoff\phoenix_mr40.559393670858\phoenix_mr4\posture\common\libhstransport\hs_transport_curl.c Line: 1957 Level: debug :certinfo[SerialNumber=(ffffffff) IssuerCN=(BBB) subjectCN=(*.acme.com)]
+  Level: debug :Fingerprints do not match: Given(AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA) != Computed(BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB)
+  [Thu Dec 04 15:29:33.288 2025][cscan]Function: hs_transport_curl_probe Thread Id: 0x39C0 File: c:\temp\build\thehoff\phoenix_mr40.559393670858\phoenix_mr4\posture\common\libhstransport\hs_transport_curl.c Line: 3461 Level: warn :libcurl error: 35 SSL connect error
+
 Q:
   nested VPN big packet loss
   connection was reset 

@@ -1,3 +1,6 @@
+Q: package manager
+A: cpan
+
 Q: negation
 A: (!(cond))
 

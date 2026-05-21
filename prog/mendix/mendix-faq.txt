@@ -1,4 +1,44 @@
 ﻿==== do not remove first line ================================
+Q: The dropdown filter is not compatible with string data type.
+A: Change filter widget datasource filte by to association
+
+Q: Action Stack of the Latest Error is missing in error handler of a Custom Java Action 
+A:
+  The Error Action Stack is only populated in error flows of Microflow Calls. Failed Java Action Calls don't populate it.
+  As a workaround, create a wrapper microflow for your java action if you want to handle its errors.
+
+Q: com.mendix.thirdparty.org.json parse unknown JSON type (object, array, primitive)
+A:
+    private static void processJson(final String input) {
+        final Object parsed = new JSONTokener(input).nextValue();
+        if (parsed instanceof JSONArray) {
+            final JSONArray root = (JSONArray) parsed;
+            // ...
+        } else if (parsed instanceof JSONObject) {
+            final JSONObject root = (JSONObject) parsed;
+            // ...
+        } else {
+            //
+        }
+    }
+    
+Q: in Call REST activity if on Response tab Response handling is set to "Do not store in a variable" will the body be saved in $latestHttpResponse/Content?
+A:
+
+Q: Create Object button in Data Grid 2 with Data Source "Association" does not initialize the association
+A:
+
+Q: Will cascade delete trigger if you first clear the reference but don't commit?
+A: It will not trigger
+
+Q: Will cascade delete trigger deletion of a newly referenced object if you first set the reference but don't commit?
+A: It will trigger
+
+Q: Does audittrail module log the original or updated attribute values when deleting?
+A:
+  In the audit record the old and the new value will contain the original and the assigned value respectively.
+  In case of references, "reference added" or "reference removed" records will be created.
+
 Q: 15	CE6083	Design property Hover is not supported by your theme. Right-click to see more options.	Data grid 2 'dataGrid21'	Page 'ActiveSessions'	Administration
 A: DataWidgets module is required
 
@@ -1815,11 +1855,19 @@ A:
 Q: Where's the mx javascript API documented? mx.ui.showLogin(), mx.data.action() and such.
 A: https://apidocs.rnd.mendix.com/9/client/mx.ui.html
 
+Q: get enum values in js
+A: 
+  Only enums used as attribute type are known by client.
+  There's no documented API to get enum values, but it's possible to use
+  a wrong MetaObject to get options belonging to a different MetaObject:
+  mx.meta.getEntity("System.HttpMessage").getEnumMap.apply({ isEnum: () => true, getEnumeration: () => 'System.WorkflowUserTaskState' }, [])
+
 Q: call microflow with multiple parameters from javascript
 A: 
 
   mx.data.action allows for at most 1 non-list object of each entity type
-  plust one list. This limitation comes from the JSON format of the
+  plus one list of PERSISTABLE entities that can be retrieved by xpath.
+  This limitation comes from the JSON format of the
   "executeaction" action: all the non-list parameters are passed in the
   "context" array of guids and the parameter names are just unsupported.
   If you pass more than one GUID of the same entity type then on the server side
@@ -1833,10 +1881,6 @@ A:
   "runtimeOperation" and "executeaction" is also inaccessible.
 
   The public property mx.onlineData was removed somewhere in 2020.
-
-  Finally, there's no way to directly call "runtimeOperation" using
-  window.fetch() because the value of X-Csrf-Token received during login is also
-  inaccessible. 
 
   Resolution: you probably can wrap window.fetch() and convert "executeaction"
   JSON into "runtimeOperation" JSON when necessary. The JSON format of

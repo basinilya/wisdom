@@ -1,6 +1,12 @@
 ﻿********************************************************************************
 Do not remove 1st line
 ********************************************************************************
+Q: zero-pad integer
+A:  StringUtils.leftPad(String.valueOf(number), size, padChar)
+
+Q: truish
+A: org.apache.commons.lang3.BooleanUtils.toBoolean(String)
+
 Q: does catching InterruptedException clear the interrupted state of the thread?
 A: yes
 
@@ -316,29 +322,52 @@ A: hsqldb
 
 Q: xml to DOM
 A:
-    final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    final DocumentBuilder builder = factory.newDocumentBuilder();
 
-            // suppress parsing errors to stderr
-            builder.setErrorHandler(new ErrorHandler() {
+    private static Document parseXml(final String xml)
+                                                       throws ParserConfigurationException,
+                                                           SAXException,
+                                                           IOException {
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
-                @Override
-                public void warning(final SAXParseException e) throws SAXException {
-                    ;
-                }
+        // I'm not sure what it does, but extra options are still needed, see below
+        dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 
-                @Override
-                public void fatalError(final SAXParseException e) throws SAXException {
-                    throw e;
-                }
+        // The following let us preserve <!DOCTYPE ... PUBLIC ... .dtd> in the
+        // loaded DOM, but we don't want to actually download this dtd
 
-                @Override
-                public void error(final SAXParseException e) throws SAXException {
-                    throw e;
-                }
-            });
+        String EXTERNAL_GENERAL_ENTITIES = "http://xml.org/sax/features/external-general-entities";
+        dbf.setFeature(EXTERNAL_GENERAL_ENTITIES, false);
 
-    final Document doc = builder.parse(sUrl);
+        String EXTERNAL_PARAMETER_ENTITIES =
+            "http://xml.org/sax/features/external-parameter-entities";
+        dbf.setFeature(EXTERNAL_PARAMETER_ENTITIES, false);
+
+        String LOAD_EXTERNAL_DTD = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
+        dbf.setFeature(LOAD_EXTERNAL_DTD, false);
+
+        final DocumentBuilder builder = dbf.newDocumentBuilder();
+
+        // Do not print warnings and errors to System.err
+        builder.setErrorHandler(new ErrorHandler() {
+
+            @Override
+            public void warning(SAXParseException e) throws SAXException {
+                ;
+            }
+
+            @Override
+            public void fatalError(SAXParseException e) throws SAXException {
+                throw e;
+            }
+
+            @Override
+            public void error(SAXParseException e) throws SAXException {
+                throw e;
+            }
+        });
+        final InputSource inputSource = new InputSource(new StringReader(xml));
+        return builder.parse(inputSource);
+    }
 
 Q: DOM to xml
 A:
@@ -358,6 +387,8 @@ A:
     } else {
         // fallback
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        // transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        // transformer.setOutputProperty("{http://xml.apache.org/xalan}indent-amount", "4");
         StreamResult output = new StreamResult(outputFile);
         DOMSource input = new DOMSource(existingDoc);
         transformer.transform(input, output);
@@ -396,16 +427,27 @@ A: javax.swing.text.html.HTMLEditorKit.getParser()
   Warning: unknown HTML tags like <tbody> are skipped.
 
 Q: base64
-A: java.util.Base64 
+A: 
+  java.util.Base64
+    getEncoder
+    getUrlEncoder
+
   javax.xml.bind.DatatypeConverter.parseBase64Binary
     (hidden since java 9)
-    
-  
 
 Q: hex string
 A: javax.xml.bind.DatatypeConverter.printHexBinary
     (hidden since java 9)
   org.apache.commons.codec.binary.Hex.encodeHexString()
+
+  Java 17+:
+  HexFormat.of().withUpperCase().formatHex(bytes);
+
+  Quick and dirty:
+  zero-padded:
+  String.format("%032x", new BigInteger(1, hash))
+  unpadded, odd number of digits:
+  new BigInteger(1, hash).toString(16)
 
 Q: md5
 A:
@@ -454,6 +496,11 @@ A:
 -DsocksProxyHost=proxy -DsocksProxyPort=1080
 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=3128
 ********************************************************************************
+Q: socksProxyHost is ignored by java.net.http
+A:
+  It only supports http/https proxy, see https://bugs.openjdk.org/browse/JDK-8214516
+  Basically jdk.internal.net.http.HttpClientImpl.proxySelector.select() should return a proxy with type == HTTP, otherwise it will use a direct connection.
+********************************************************************************
 Q: 
 A: -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog -Dorg.apache.commons.logging.simplelog.log.com.company=all
 ********************************************************************************
@@ -481,6 +528,15 @@ javap -v -classpath . ClassFileWithoutExtension | grep "major version"
     14 	58
     15 	59
     16 	60
+    17 	61
+    18 	62
+    19 	63
+    20 	64
+    21 	65
+    22 	66
+    23 	67
+    24 	68
+    25 	69
 
 ********************************************************************************
 Q: WARNING: Unable to find required classes (javax.activation.DataHandler and javax.mail.internet.MimeMultipart). Attachment support is disabled.

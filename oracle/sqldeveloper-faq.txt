@@ -1,3 +1,13 @@
+Q: SOCKS proxy (-DsocksProxyHost=127.0.0.1 in sqldeveloper.conf has no effect)
+A:
+  The JVM arg socksProxyHost will be ignored by the driver. Use connection property oracle.net.socksProxyHost
+  https://docs.oracle.com/en/database/oracle/oracle-database/21/jajdb/oracle/jdbc/OracleConnection.html#CONNECTION_PROPERTY_SOCKS_PROXY_HOST
+
+  Connection properties, "Advanced"
+  oracle.net.socksProxyHost 127.0.0.1
+  oracle.net.socksProxyPort 1080
+  oracle.net.socksRemoteDNS true
+
 Q: import csv
 A:
   don't try to import CSV with Oracle SQL Developer 20.x or below:
